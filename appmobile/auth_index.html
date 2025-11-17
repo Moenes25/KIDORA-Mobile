@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Auth Test Panel</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+        }
+
+        h2 {
+            margin-bottom: 5px;
+        }
+
+        .card {
+            background: #fff;
+            width: 380px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        input {
+            width: 92%;
+            padding: 10px;
+            margin: 6px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 12px 15px;
+            width: 100%;
+            font-size: 16px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        button:hover {
+            background: #005fcc;
+        }
+
+        pre {
+            background: #222;
+            color: #0f0;
+            padding: 12px;
+            overflow-x: auto;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🔐 Register</h2>
+    <div class="card">
+        <input id="firstname" type="text" placeholder="First Name">
+        <input id="lastname" type="text" placeholder="Last Name">
+        <input id="email" type="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <button onclick="register()">Register</button>
+
+        <pre id="reg-result">{ }</pre>
+    </div>
+
+
+    <h2>🔑 Login</h2>
+    <div class="card">
+        <input id="log_email" type="email" placeholder="Email">
+        <input id="log_password" type="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+
+        <pre id="log-result">{ }</pre>
+    </div>
+
+<script>
+const API = "http://localhost:5000/api/auth"; // Change if needed 
+
+// REGISTER
+function register() {
+    const firstname = document.getElementById("firstname").value;
+    const lastname  = document.getElementById("lastname").value;
+    const email     = document.getElementById("email").value;
+    const password  = document.getElementById("password").value;
+
+    fetch(API + "/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstname, lastname, email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("reg-result").textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(err => {
+        document.getElementById("reg-result").textContent = "ERROR:\n" + err;
+    });
+}
+
+
+// LOGIN
+function login() {
+    const email    = document.getElementById("log_email").value;
+    const password = document.getElementById("log_password").value;
+
+    fetch(API + "/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("log-result").textContent = JSON.stringify(data, null, 2);
+
+        if (data.token) {
+            localStorage.setItem("auth_token", data.token);
+        }
+    })
+    .catch(err => {
+        document.getElementById("log-result").textContent = "ERROR:\n" + err;
+    });
+}
+</script>
+
+</body>
+</html>
