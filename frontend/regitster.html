@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Account</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script defer src="./js/register.js"></script>
+</head>
+
+<body class="min-h-screen bg-gray-100 flex items-center justify-center">
+
+  <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-md">
+
+    <h2 class="text-3xl font-bold text-center text-blue-600 mb-6">
+      Create your Account
+    </h2>
+
+    <div class="space-y-3">
+      <input id="name" type="text"
+        class="w-full border rounded-lg p-3"
+        placeholder="Full Name">
+
+      <input id="email" type="email"
+        class="w-full border rounded-lg p-3"
+        placeholder="Email Address">
+
+      <input id="password" type="password"
+        class="w-full border rounded-lg p-3"
+        placeholder="Password">
+
+      <select id="role"
+        class="w-full border rounded-lg p-3 bg-white">
+        <option value="parent">Parent</option>
+        <option value="educator">Éducateur</option>
+      </select>
+    </div>
+
+    <button onclick="register()"
+      class="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-semibold">
+      Create Account
+    </button>
+
+    <p class="mt-4 text-center text-gray-600">
+      Already have an account?
+      <a href="login.html" class="text-blue-600 font-bold">Login</a>
+    </p>
+
+    <p id="msg" class="mt-3 text-center font-semibold"></p>
+  </div>
+
+</body>
+</html>

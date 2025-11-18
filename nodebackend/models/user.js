@@ -31,6 +31,8 @@ const userSchema = mongoose.Schema({
         }
 
     },
+     role: { type: String, enum: ["parent", "educator", "admin"], default: "parent" },
+  childId: { type: mongoose.Schema.Types.ObjectId, ref: "Child" },
     address : {
         type : String,
         default : '',
