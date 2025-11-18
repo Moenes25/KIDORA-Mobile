@@ -1,53 +1,35 @@
-// Dependencies
-import dotenv from "dotenv";
 import express from "express";
-import mongoose from "mongoose";
-// Security
-import helmet from "helmet";
 import cors from "cors";
-// Routes
-import auth_router from "./routes/auth_router.js";
-import user_router from "./routes/user_routes.js";
-import post_router from "./routes/post_router.js";
-import upload_router from "./routes/upload_router.js"
+import helmet from "helmet";
+import dotenv from "dotenv";
+import { connectDB } from "./config/db.js";
 
-//? App initialization
+import authRoutes from "./routes/authRoutes.js";
+import childRoutes from "./routes/childRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import profilesRouter from "./routes/profiles.js";
+import blogRouter from "./routes/blog.js";
+
+
+
 dotenv.config();
-const app = express();
-const PORT = process.env.PORT || 5000;
-/* app.get("/", (req, res) => {
-      res.status(200).json({ message: "API is running" }); // Test
-});
- */
+connectDB();
 
-//? Middleware
-app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
+const app = express();
 app.use(cors());
+app.use(helmet());
 app.use(express.json());
 
-// Serve images
-app.use(express.static("public"));
-app.use("/images", express.static("images"));
-//app.use("/api", require("./routes/upload"));
+app.use("/api/auth", authRoutes);
+app.use("/api/children", childRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/profiles", profilesRouter);
+app.use("/api/blog", blogRouter);
 
-//? Routes
-app.use("/api/auth", auth_router);
-app.use("/api/users", user_router);
-app.use("/api/posts", post_router);
-app.use("/api/upload", upload_router)
-
-//? Server launch
-const connectDB = (uri) => {
-   return mongoose.connect(uri);
-};
-const start = async () => {
-   try {
-      await connectDB(process.env.MONGO_URI);
-      app.listen(PORT, () =>
-         console.log(`Server is listening on port ${PORT}`)
-      );
-   } catch (error) {
-      console.log({ message: error.message });
-   }
-};
-start();
+app.listen(5000, () => console.log("Server running on port 5000"));
