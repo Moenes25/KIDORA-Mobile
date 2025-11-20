@@ -4,7 +4,7 @@ export default mongoose.model(
   "user",
   new mongoose.Schema({
     type: { type: String, required: true, enum: ["admin", "student", "teacher", "parent", "other"], default: "other", },
-    mobileNo: { type: String, trim: true, unique: true, required: true, regex: /^[0-9]{10}$/, },
+    mobileNo: { type: String, trim: true, unique: true, required: true, regex: /^[0-9]{8}$/, },
 
     password: { type: String, trim: true, required: true, },
     name: { type: String, trim: true, required: true, regex: /^[a-zA-Z ]+$/, },
