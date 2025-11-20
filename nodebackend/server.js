@@ -12,7 +12,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import profilesRouter from "./routes/profiles.js";
 import blogRouter from "./routes/blog.js";
-
+import profileRoutes from "./routes/profileRoutes.js";
 
 
 dotenv.config();
@@ -22,6 +22,8 @@ const app = express();
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
+//app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // <-- Optional
 
 app.use("/api/auth", authRoutes);
 app.use("/api/children", childRoutes);
@@ -31,5 +33,6 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/profiles", profilesRouter);
 app.use("/api/blog", blogRouter);
+app.use("/api/profile", profileRoutes);
 
 app.listen(5000, () => console.log("Server running on port 5000"));
