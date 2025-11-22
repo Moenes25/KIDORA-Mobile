@@ -4,9 +4,9 @@ import api from "../api/api";
 
 export default function ProfileEdit({ route }) {
   const { user } = route.params;
-
+  const _username = user.email.split("@")[0];
   const [profile, setProfile] = useState({
-    username: user.email.split("@")[0],
+    username: _username,
     email : user.email ,
     name: "",
     profession: "",
@@ -17,10 +17,10 @@ export default function ProfileEdit({ route }) {
 
   const saveProfile = async () => {
     try {
-      await api.put(`/profile/${username}`, profile);
+      await api.put(`/profile/${_username}`, profile);
       alert("Profile updated");
     } catch (err) {
-      alert(err.response.data.msg);
+      alert(err);
     }
   };
 

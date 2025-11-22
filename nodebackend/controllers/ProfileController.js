@@ -49,7 +49,7 @@ export const createProfile = async (req, res) => {
 // GET PROFILE BY USERNAME
 export const getProfile = async (req, res) => {
   try {
-    const p = await Profile.findOne({ email: req.params.email });
+    const p = await Profile.findOne({ username: req.params.username });
     if (!p) return res.status(404).json({ msg: "Profile not found" });
     res.json(p);
   } catch (err) {
@@ -61,7 +61,7 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const update = await Profile.findOneAndUpdate(
-      { email: req.params.email },
+      { username: req.params.username },
       req.body,
       { new: true }
     );
