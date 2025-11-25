@@ -1,38 +1,43 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Sidebar({ visible, onClose }) {
   if (!visible) return null;
 
   return (
     <View style={styles.overlay}>
-      <View style={styles.sidebar}>
-        {/* Close Icon */}
-        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Feather name="x" size={28} color="#6F42C1" />
-        </TouchableOpacity>
+      <LinearGradient
+        colors={['#6F42C1', '#9b59b6']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.sidebar}
+      >
+        {/* Header with text and close button */}
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Parental Portal</Text>
+          <TouchableOpacity onPress={onClose}>
+            <Feather name="x" size={28} color="white" />
+          </TouchableOpacity>
+        </View>
 
         {/* Sidebar Items */}
         <View style={styles.items}>
           <View style={styles.item}>
-            <Feather name="user" size={24} color="#6F42C1" />
-            <Text style={styles.itemText}>Profile</Text>
+            <Feather name="message-circle" size={24} color="white" />
+            <Text style={styles.itemText}>Chat</Text>
           </View>
           <View style={styles.item}>
-            <Feather name="settings" size={24} color="#6F42C1" />
-            <Text style={styles.itemText}>Settings</Text>
+            <Feather name="calendar" size={24} color="white" />
+            <Text style={styles.itemText}>Calendar</Text>
           </View>
           <View style={styles.item}>
-            <Feather name="activity" size={24} color="#6F42C1" />
-            <Text style={styles.itemText}>Activities</Text>
-          </View>
-          <View style={styles.item}>
-            <Feather name="calendar" size={24} color="#6F42C1" />
-            <Text style={styles.itemText}>Events</Text>
+            <Feather name="log-out" size={24} color="white" />
+            <Text style={styles.itemText}>Logout</Text>
           </View>
         </View>
-      </View>
+      </LinearGradient>
 
       {/* Touchable overlay to close sidebar if clicked outside */}
       <TouchableOpacity style={styles.overlayTouchable} onPress={onClose} />
@@ -52,21 +57,26 @@ const styles = StyleSheet.create({
   },
   sidebar: {
     width: 250,
-    backgroundColor: "white", // semi-visible purple shade
-    paddingTop: 50,
+    paddingTop: 20,
     paddingHorizontal: 20,
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 10,
   },
-  closeBtn: {
-    position: "absolute",
-    top: 10,
-    right: 10,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
   },
   items: {
-    marginTop: 40,
+    marginTop: 10,
   },
   item: {
     flexDirection: "row",
@@ -76,6 +86,6 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 18,
     marginLeft: 15,
-    color: "#6F42C1",
+    color: "white",
   },
 });
