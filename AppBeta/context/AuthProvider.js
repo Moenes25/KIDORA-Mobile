@@ -20,6 +20,7 @@ export function AuthProvider({ children , navigation}) {
   const register = async (data) => {
     const res = await api.post('/auth/register', data);
     if (res?.token) {
+      
       await AsyncStorage.setItem('token', res.token);
       setUser(res.user);
     }
