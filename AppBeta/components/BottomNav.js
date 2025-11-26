@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#fbf7ff",
     borderTopWidth: 1,
     borderTopColor: "#eee",
     elevation: 10,
