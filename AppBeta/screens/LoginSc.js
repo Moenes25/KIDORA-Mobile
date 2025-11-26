@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Animated, A
 import api from "../api/api";
 import { Feather } from "@expo/vector-icons";
 
-export default function Login({ navigation }) {
+export default function LoginSc({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -63,8 +63,10 @@ export default function Login({ navigation }) {
         about: "",
         img: "",
       });
-
-      navigation.navigate("Home", { user });
+      localStorage.setItem("user"  , JSON.stringify(user));
+     //navigation.replace("Main");
+      //navigation.replace("MainApp");
+      navigation.navigate("home",{user});
     } catch (err) {
       alert("Error: " + err.response?.data?.msg);
     }

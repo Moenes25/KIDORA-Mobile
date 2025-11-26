@@ -1,8 +1,9 @@
+// components/BottomNav.js
 import React, { useState, useRef } from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function BottomNav({ onNavigate }) {
+export default function BottomNavApp({ onNavigate = () => {} }) {
   const [active, setActive] = useState("home");
 
   const animations = {
@@ -16,43 +17,18 @@ export default function BottomNav({ onNavigate }) {
     setActive(key);
     onNavigate(key);
 
-    Animated.spring(animations[key], {
-      toValue: 1.2,
-      useNativeDriver: true,
-    }).start();
-
-    Object.keys(animations).forEach((k) => {
-      if (k !== key) {
-        Animated.spring(animations[k], {
-          toValue: 1,
-          useNativeDriver: true,
-        }).start();
-      }
+    Animated.spring(animations[key], { toValue: 1.2, useNativeDriver: true }).start();
+    Object.keys(animations).forEach(k => {
+      if (k !== key) Animated.spring(animations[k], { toValue: 1, useNativeDriver: true }).start();
     });
   };
 
   const renderIcon = (key, iconName) => {
     const isActive = active === key;
-
     return (
       <TouchableOpacity onPress={() => handlePress(key)} activeOpacity={0.8}>
-        <Animated.View
-          style={[
-            styles.iconWrapper,
-            isActive && styles.activeIconWrapper,
-            {
-              transform: [
-                { scale: animations[key] },
-                { translateY: isActive ? -8 : 0 },
-              ],
-            },
-          ]}
-        >
-          <Ionicons
-            name={iconName}
-            size={isActive ? 28 : 24}
-            color={isActive ? "white" : "#6F42C1"}
-          />
+        <Animated.View style={[styles.iconWrapper, isActive && styles.activeIconWrapper, { transform: [{ scale: animations[key] }, { translateY: isActive ? -8 : 0 }] }]}>
+          <Ionicons name={iconName} size={isActive ? 28 : 24} color={isActive ? "white" : "#6F42C1"} />
         </Animated.View>
       </TouchableOpacity>
     );

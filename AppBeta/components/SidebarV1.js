@@ -1,18 +1,10 @@
-// components/Sidebar.js  (enhanced)
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
 
-export default function Sidebar({ visible, onClose }) {
-  const navigation = useNavigation();
+export default function SidebarV1({ visible, onClose }) {
   if (!visible) return null;
-
-  const goTo = (route) => {
-    onClose();
-    navigation.navigate(route);
-  };
 
   return (
     <View style={styles.overlay}>
@@ -22,6 +14,7 @@ export default function Sidebar({ visible, onClose }) {
         end={{ x: 1, y: 0 }}
         style={styles.sidebar}
       >
+        {/* Header with text and close button */}
         <View style={styles.header}>
           <Text style={styles.headerText}>Parental Portal</Text>
           <TouchableOpacity onPress={onClose}>
@@ -29,28 +22,24 @@ export default function Sidebar({ visible, onClose }) {
           </TouchableOpacity>
         </View>
 
+        {/* Sidebar Items */}
         <View style={styles.items}>
-          <TouchableOpacity style={styles.item} onPress={() => goTo("Chat")}>
+          <View style={styles.item}>
             <Feather name="message-circle" size={24} color="white" />
             <Text style={styles.itemText}>Chat</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.item} onPress={() => goTo("Calendar")}>
+          </View>
+          <View style={styles.item}>
             <Feather name="calendar" size={24} color="white" />
             <Text style={styles.itemText}>Calendar</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.item} onPress={() => {
-            // placeholder logout action
-            onClose();
-            // add your logout logic here (e.g., clear tokens + navigate to Auth)
-          }}>
+          </View>
+          <View style={styles.item}>
             <Feather name="log-out" size={24} color="white" />
             <Text style={styles.itemText}>Logout</Text>
-          </TouchableOpacity>
+          </View>
         </View>
       </LinearGradient>
 
+      {/* Touchable overlay to close sidebar if clicked outside */}
       <TouchableOpacity style={styles.overlayTouchable} onPress={onClose} />
     </View>
   );

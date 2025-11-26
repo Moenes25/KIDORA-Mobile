@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { View, StyleSheet, TouchableOpacity, Image, Text, Animated } from "react-native";
-import Sidebar from "../components/Sidebar";
-import BottomNav from "../components/BottomNav";
+import SidebarApp from "../components/SideBarApp";
+import BottomNavApp from "../components/BottomNavApp";
 import LanguageSelector from "../components/LanguageSelector";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -23,7 +23,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
+      <SidebarApp visible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
 
       {/* Top Bar */}
       <LinearGradient
@@ -66,7 +66,7 @@ export default function HomeScreen() {
         <Text style={styles.title}>Home Page</Text>
       </View>
 
-      <BottomNav />
+      <BottomNavApp />
     </View>
   );
 }

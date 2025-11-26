@@ -1,17 +1,15 @@
-// components/Sidebar.js  (enhanced)
+// components/Sidebar.js
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
 
-export default function Sidebar({ visible, onClose }) {
-  const navigation = useNavigation();
+export default function SidebarApp({ visible, onClose, onNavigate = () => {} }) {
   if (!visible) return null;
 
   const goTo = (route) => {
+    onNavigate(route);
     onClose();
-    navigation.navigate(route);
   };
 
   return (
@@ -30,23 +28,24 @@ export default function Sidebar({ visible, onClose }) {
         </View>
 
         <View style={styles.items}>
-          <TouchableOpacity style={styles.item} onPress={() => goTo("Chat")}>
+          <TouchableOpacity style={styles.row} onPress={() => goTo("chat")}>
             <Feather name="message-circle" size={24} color="white" />
             <Text style={styles.itemText}>Chat</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.item} onPress={() => goTo("Calendar")}>
+          <TouchableOpacity style={styles.row} onPress={() => goTo("calendar")}>
             <Feather name="calendar" size={24} color="white" />
             <Text style={styles.itemText}>Calendar</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.item} onPress={() => {
-            // placeholder logout action
-            onClose();
-            // add your logout logic here (e.g., clear tokens + navigate to Auth)
-          }}>
-            <Feather name="log-out" size={24} color="white" />
-            <Text style={styles.itemText}>Logout</Text>
+          <TouchableOpacity style={styles.row} onPress={() => goTo("daily")}>
+            <Feather name="bar-chart" size={24} color="white" />
+            <Text style={styles.itemText}>Daily Record</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.row} onPress={() => goTo("profile")}>
+            <Feather name="user" size={24} color="white" />
+            <Text style={styles.itemText}>Profile</Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -89,10 +88,10 @@ const styles = StyleSheet.create({
   items: {
     marginTop: 10,
   },
-  item: {
+  row: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 15,
+    marginVertical: 14,
   },
   itemText: {
     fontSize: 18,
