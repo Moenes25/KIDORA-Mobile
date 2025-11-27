@@ -1,45 +1,58 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Sidebar({ visible, onClose }) {
   if (!visible) return null;
 
   return (
     <View style={styles.overlay}>
-      <LinearGradient
-        colors={['#6F42C1', '#9b59b6']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.sidebar}
-      >
-        {/* Header with text and close button */}
+      <View style={styles.sidebar}>
+        
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerText}>Parental Portal</Text>
+          <View style={styles.headerLeft}>
+            <Image
+              source={require("../assets/kidora.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.headerText}>ParentPortal</Text>
+          </View>
           <TouchableOpacity onPress={onClose}>
-            <Feather name="x" size={28} color="white" />
+            <MaterialCommunityIcons name="close-circle" size={32} color="#6F42C1" />
           </TouchableOpacity>
         </View>
 
-        {/* Sidebar Items */}
+        {/* Main Sidebar Items */}
         <View style={styles.items}>
           <View style={styles.item}>
-            <Feather name="message-circle" size={24} color="white" />
+            <MaterialCommunityIcons name="message" size={26} color="#6F42C1" />
             <Text style={styles.itemText}>Chat</Text>
           </View>
+
           <View style={styles.item}>
-            <Feather name="calendar" size={24} color="white" />
+            <MaterialCommunityIcons name="calendar" size={26} color="#6F42C1" />
             <Text style={styles.itemText}>Calendar</Text>
           </View>
+
           <View style={styles.item}>
-            <Feather name="log-out" size={24} color="white" />
+            <MaterialCommunityIcons name="credit-card" size={26} color="#6F42C1" />
+            <Text style={styles.itemText}>Payments</Text>
+          </View>
+
+          {/* Spacer to push Logout to bottom */}
+          <View style={{ flex: 1 }} />
+
+          {/* Logout at the bottom */}
+          <View style={styles.item}>
+            <MaterialCommunityIcons name="logout" size={26} color="#6F42C1" />
             <Text style={styles.itemText}>Logout</Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
-      {/* Touchable overlay to close sidebar if clicked outside */}
+      {/* Close on outside press */}
       <TouchableOpacity style={styles.overlayTouchable} onPress={onClose} />
     </View>
   );
@@ -59,10 +72,11 @@ const styles = StyleSheet.create({
     width: 250,
     paddingTop: 20,
     paddingHorizontal: 20,
+    backgroundColor: "#fbf7ff",
     shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   header: {
     flexDirection: "row",
@@ -70,13 +84,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 30,
   },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: -8, // move logo closer to the left edge
+    gap: 8, // space between logo and text
+  },
+  logo: {
+    width: 50,  // bigger logo
+    height: 50,
+  },
   headerText: {
-    fontSize: 20,
+    fontSize: 20, // slightly smaller text
     fontWeight: "bold",
-    color: "white",
+    color: "#6F42C1",
   },
   items: {
     marginTop: 10,
+    flex: 1, // fill space to allow Logout to be at bottom
   },
   item: {
     flexDirection: "row",
@@ -86,6 +111,6 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 18,
     marginLeft: 15,
-    color: "white",
+    color: "#6F42C1",
   },
 });

@@ -69,7 +69,7 @@ export default function BottomNav() {
     <View style={styles.container}>
       {renderIcon("home", "home")}
       {renderIcon("people", "people")}
-      {renderIcon("clipboard", "clipboard")}
+      {renderIcon("game-controller", "game-controller")}
       {renderIcon("person", "person")}
     </View>
   );
