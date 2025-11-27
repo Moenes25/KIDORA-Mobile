@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 export default function HomeScreen({ navigation }) {
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [expandedCard, setExpandedCard] = useState(null); // Track which card is expanded
 
   const notifScale = useRef(new Animated.Value(1)).current;
   const animateNotif = (toValue) => {
@@ -19,7 +20,6 @@ export default function HomeScreen({ navigation }) {
     }).start();
   };
 
-  // Example data for 3 children
   const children = [
     {
       id: 1,
@@ -56,34 +56,39 @@ export default function HomeScreen({ navigation }) {
     },
   ];
 
+  // Function to calculate top position dynamically
+  const getTopPosition = (index) => {
+    let baseTop = index * 70; // default stacked offset
+    if (expandedCard !== null && index > expandedCard) {
+      const expandedHeight = 180; // estimated expanded height of a card
+      return baseTop + expandedHeight - 70; // push down the cards below
+    }
+    return baseTop;
+  };
+
   return (
     <View style={styles.container}>
       <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
 
       {/* Top Bar */}
-      <LinearGradient
-        colors={["#6F42C1", "#9b59b6"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.topBar}
-      >
+      <View style={styles.topBar}>
         <TouchableOpacity onPress={() => setSidebarVisible(true)} style={styles.logoContainer}>
           <Image source={require("../assets/kidora.png")} style={styles.logo} resizeMode="contain" />
         </TouchableOpacity>
 
         <View style={styles.rightSection}>
-          <Animated.View style={[styles.notifWrapper, { transform: [{ scale: notifScale }] }]}>
+          <Animated.View style={{ transform: [{ scale: notifScale }] }}>
             <TouchableOpacity
               onPressIn={() => animateNotif(1.1)}
               onPressOut={() => animateNotif(1)}
               activeOpacity={0.8}
             >
-              <Feather name="bell" size={22} color="#6F42C1" />
+               <MaterialCommunityIcons name="bell" size={24} color="#6F42C1" />
             </TouchableOpacity>
           </Animated.View>
           <LanguageSelector />
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView contentContainerStyle={styles.mainScroll}>
         {/* Welcome Card */}
@@ -135,20 +140,36 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Child Cards */}
-        <View style={styles.childContainer}>
-          {children.map((child) => {
-            let gradientColors = ["#6FCF97", "#27AE60"]; // green for good performance
-            if (child.performance >= 45 && child.performance < 75) gradientColors = ["#F2C94C", "#F2994A"]; // yellow for medium
-            if (child.performance < 45) gradientColors = ["#EB5757", "#E53935"]; // red for low
+        {/* Stacked Child Cards */}
+        <View style={styles.childStackContainer}>
+          {children.map((child, index) => {
+            let gradientColors = ["#6FCF97", "#27AE60"];
+            if (child.performance >= 45 && child.performance < 75) gradientColors = ["#F2C94C", "#F2994A"];
+            if (child.performance < 45) gradientColors = ["#EB5757", "#E53935"];
+
+            const isLastCard = index === children.length - 1;
 
             return (
               <TouchableOpacity
                 key={child.id}
-                style={styles.childCardWrapper}
-                onPress={() => navigation.navigate("ChildDetail", { child })}
+                style={[
+                  styles.childCardWrapper,
+                  { top: getTopPosition(index), zIndex: index },
+                ]}
+                activeOpacity={0.9}
+                onPress={() => {
+                  if (!isLastCard) {
+                    setExpandedCard(expandedCard === index ? null : index);
+                  }
+                }}
               >
-                <LinearGradient colors={gradientColors} style={styles.childCard}>
+                <LinearGradient
+                  colors={gradientColors}
+                  style={[
+                    styles.childCard,
+                    { height: isLastCard ? 130 : (expandedCard === index ? 180 : 130) },
+                  ]}
+                >
                   <View style={styles.childHeader}>
                     <Image source={child.avatar} style={styles.childAvatar} />
                     <View style={{ flex: 1 }}>
@@ -157,17 +178,11 @@ export default function HomeScreen({ navigation }) {
                         <Text style={styles.childInfo}>
                           Age: {child.age} | Grade: {child.grade} | {child.present ? "Present" : "Absent"}
                         </Text>
-                        <Feather
-                          name={child.present ? "check" : "x"}
-                          size={16}
-                          color="#fff"
-                          style={{ marginLeft: 4 }}
-                        />
+                        <Feather name={child.present ? "check" : "x"} size={16} color="#fff" style={{ marginLeft: 4 }} />
                       </View>
                     </View>
                   </View>
 
-                  {/* Completed Tasks Bar */}
                   <View style={[styles.taskRow, { alignItems: "center" }]}>
                     <Feather name="clipboard" size={16} color="#fff" style={{ marginRight: 6 }} />
                     <Text style={styles.taskText}>Tasks:</Text>
@@ -204,6 +219,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fbf7ff" },
 
   topBar: {
+    backgroundColor: "#fbf7ff",
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -216,15 +232,6 @@ const styles = StyleSheet.create({
   logoContainer: { flexDirection: "row", alignItems: "center" },
   logo: { width: 90, height: 80 },
   rightSection: { flexDirection: "row", alignItems: "center", gap: 10 },
-  notifWrapper: {
-    backgroundColor: "#e0c3fc",
-    width: 36,
-    height: 36,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 8,
-  },
 
   mainScroll: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 90 },
 
@@ -248,9 +255,24 @@ const styles = StyleSheet.create({
   metricNumber: { color: "white", fontSize: 24, fontWeight: "700" },
   metricText: { color: "white", fontSize: 16, opacity: 0.95 },
 
-  childContainer: { marginTop: 16 },
-  childCardWrapper: { marginBottom: 12 },
-  childCard: { borderRadius: 14, padding: 16 },
+  childStackContainer: {
+    position: "relative",
+    height: 500,
+    marginTop: 20,
+  },
+  childCardWrapper: {
+    position: "absolute",
+    width: "100%",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  childCard: {
+    borderRadius: 20,
+    padding: 16,
+  },
   childHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   childAvatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
   childName: { fontSize: 16, fontWeight: "700", marginBottom: 2, color: "#fff" },

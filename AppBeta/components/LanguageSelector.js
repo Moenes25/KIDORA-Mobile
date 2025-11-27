@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Image, TouchableOpacity, StyleSheet, Modal, Text } from "react-native";
+import { View, Image, TouchableOpacity, StyleSheet, Modal } from "react-native";
 
 export default function LanguageSelector() {
   const [open, setOpen] = useState(false);
@@ -13,6 +13,9 @@ export default function LanguageSelector() {
     { code: "fr", flag: require("../assets/fr.png") },
     { code: "ar", flag: require("../assets/arab.png") },
   ];
+
+  // Filter out the currently selected language
+  const availableLanguages = languages.filter((lang) => lang.code !== language.code);
 
   return (
     <View>
@@ -30,10 +33,11 @@ export default function LanguageSelector() {
       >
         <TouchableOpacity
           style={styles.modalOverlay}
+          activeOpacity={1}
           onPress={() => setOpen(false)}
         >
           <View style={styles.dropdown}>
-            {languages.map((lang) => (
+            {availableLanguages.map((lang) => (
               <TouchableOpacity
                 key={lang.code}
                 style={styles.option}
@@ -56,7 +60,7 @@ const styles = StyleSheet.create({
   selected: {
     padding: 4,
     borderRadius: 6,
-    backgroundColor: "#e0c3fc",
+    backgroundColor: "#fbf7ff",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -70,13 +74,18 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.1)",
     justifyContent: "flex-start",
     alignItems: "flex-end",
-    paddingTop: 70,
-    paddingRight: 20,
+    paddingTop: 50, // reduced from 70 to bring dropdown closer
+    paddingRight: 15,
   },
   dropdown: {
-    backgroundColor: "#e0c3fc",
+    backgroundColor: "#fbf7ff",
     borderRadius: 8,
     padding: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 5,
   },
   option: {
     paddingVertical: 6,
