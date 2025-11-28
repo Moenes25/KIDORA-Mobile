@@ -22,13 +22,11 @@ export default function HomeScreen({ navigation, route }) {
     }).start();
   };
 
-  // Animated heights for children
   const [animatedHeights, setAnimatedHeights] = useState({});
 
-  // Get logged-in user from route params
   const user = route.params?.user;
   const userName = user?.name || "Parent";
-  const userAvatar = user?.avatar || require("../assets/default_avatar.jpg"); // placeholder
+  const userAvatar = user?.avatar || require("../assets/default_avatar.jpg");
 
   const children = [
     {
@@ -74,7 +72,6 @@ export default function HomeScreen({ navigation, route }) {
     return index * 70;
   };
 
-  // Calendar logic
   const today = new Date();
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const scrollRef = useRef(null);
@@ -185,62 +182,62 @@ export default function HomeScreen({ navigation, route }) {
           end={{ x: 1, y: 0 }}
           style={styles.metricBigCard}
         >
+          {/* Metric Cards (all 3 fit without scroll) */}
+          <View style={[styles.metricContainer, { marginBottom: 12 }]}>
+            <View style={[styles.metricCard, { backgroundColor: "rgba(110, 190, 252, 0.7)" }]}>
+              <View style={styles.metricTop}>
+                <MaterialCommunityIcons name="account-group-outline" size={22} color="white" style={{ marginRight: 8 }} />
+                <Text style={styles.metricNumber}>3</Text>
+              </View>
+              <Text style={styles.metricText}>Children</Text>
+            </View>
+            <View style={[styles.metricCard, { backgroundColor: "rgba(55, 224, 178, 0.7)" }]}>
+              <View style={styles.metricTop}>
+                <Feather name="check-circle" size={22} color="white" style={{ marginRight: 8 }} />
+                <Text style={styles.metricNumber}>15</Text>
+              </View>
+              <Text style={styles.metricText}>Completed Tasks</Text>
+            </View>
+            <View style={[styles.metricCard, { backgroundColor: "rgba(255, 140, 97, 0.7)" }]}>
+              <View style={styles.metricTop}>
+                <Feather name="bar-chart-2" size={22} color="white" style={{ marginRight: 8 }} />
+                <Text style={styles.metricNumber}>82%</Text>
+              </View>
+              <Text style={styles.metricText}>Average performance</Text>
+            </View>
+          </View>
+
+          {/* Calendar */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             ref={scrollRef}
             contentContainerStyle={{ paddingHorizontal: 8 }}
           >
-            <View style={{ flexDirection: "column" }}>
-              <View style={[styles.metricContainer, { marginBottom: 12 }]}>
-                <View style={[styles.metricCard, { backgroundColor: "rgba(110, 190, 252, 0.7)" }]}>
-                  <View style={styles.metricTop}>
-                    <MaterialCommunityIcons name="account-group-outline" size={28} color="white" style={{ marginRight: 10 }} />
-                    <Text style={styles.metricNumber}>3</Text>
+            <View style={{ flexDirection: "row" }}>
+              {weekDays.map((day, index) => {
+                const isToday = index === currentDayIndex;
+                return (
+                  <View
+                    key={index}
+                    style={{
+                      backgroundColor: isToday ? "white" : "rgba(255,255,255,0.2)",
+                      paddingVertical: 6,
+                      paddingHorizontal: 10,
+                      borderRadius: 8,
+                      marginRight: 8,
+                    }}
+                  >
+                    <Text style={{
+                      color: isToday ? "#6F42C1" : "white",
+                      fontWeight: isToday ? "700" : "500",
+                      fontSize: 14,
+                    }}>
+                      {day.name} {day.date}
+                    </Text>
                   </View>
-                  <Text style={styles.metricText}>Children</Text>
-                </View>
-                <View style={[styles.metricCard, { backgroundColor: "rgba(55, 224, 178, 0.7)" }]}>
-                  <View style={styles.metricTop}>
-                    <Feather name="check-circle" size={28} color="white" style={{ marginRight: 10 }} />
-                    <Text style={styles.metricNumber}>15</Text>
-                  </View>
-                  <Text style={styles.metricText}>Completed Tasks</Text>
-                </View>
-                <View style={[styles.metricCard, { backgroundColor: "rgba(255, 140, 97, 0.7)" }]}>
-                  <View style={styles.metricTop}>
-                    <Feather name="bar-chart-2" size={28} color="white" style={{ marginRight: 10 }} />
-                    <Text style={styles.metricNumber}>82%</Text>
-                  </View>
-                  <Text style={styles.metricText}>Average performance</Text>
-                </View>
-              </View>
-
-              <View style={{ flexDirection: "row" }}>
-                {weekDays.map((day, index) => {
-                  const isToday = index === currentDayIndex;
-                  return (
-                    <View
-                      key={index}
-                      style={{
-                        backgroundColor: isToday ? "white" : "rgba(255,255,255,0.2)",
-                        paddingVertical: 6,
-                        paddingHorizontal: 10,
-                        borderRadius: 8,
-                        marginRight: 8,
-                      }}
-                    >
-                      <Text style={{
-                        color: isToday ? "#6F42C1" : "white",
-                        fontWeight: isToday ? "700" : "500",
-                        fontSize: 14,
-                      }}>
-                        {day.name} {day.date}
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
+                );
+              })}
             </View>
           </ScrollView>
         </LinearGradient>
@@ -316,11 +313,11 @@ const styles = StyleSheet.create({
   welcomeSubtitle: { color: "white", fontSize: 14, opacity: 0.95 },
   famGif: { width: 80, height: 80, marginLeft: 12 },
   metricBigCard: { borderRadius: 16, paddingVertical: 16, paddingHorizontal: 10, marginBottom: 16 },
-  metricContainer: { flexDirection: "row", gap: 6, paddingHorizontal: 4 },
-  metricCard: { width: 130, borderRadius: 12, padding: 18, marginRight: 10 },
-  metricTop: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  metricNumber: { color: "white", fontSize: 24, fontWeight: "700" },
-  metricText: { color: "white", fontSize: 16, opacity: 0.95 },
+  metricContainer: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 0 },
+  metricCard: { width: 100, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 10 },
+  metricTop: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
+  metricNumber: { color: "white", fontSize: 18, fontWeight: "700" },
+  metricText: { color: "white", fontSize: 14, opacity: 0.95 },
   childStackContainer: { position: "relative", height: 500, marginTop: 20 },
   childCardWrapper: { position: "absolute", width: "100%", shadowColor: "#000", shadowOpacity: 0.15, shadowRadius: 6, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   childCard: { borderRadius: 20, padding: 16 },

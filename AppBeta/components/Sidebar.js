@@ -20,7 +20,7 @@ export default function Sidebar({ visible, onClose }) {
             <Text style={styles.headerText}>ParentPortal</Text>
           </View>
           <TouchableOpacity onPress={onClose}>
-            <MaterialCommunityIcons name="close-circle" size={32} color="#6F42C1" />
+            <MaterialCommunityIcons name="close-circle" size={27} color="#6F42C1" />
           </TouchableOpacity>
         </View>
 
@@ -39,6 +39,12 @@ export default function Sidebar({ visible, onClose }) {
           <View style={styles.item}>
             <MaterialCommunityIcons name="credit-card" size={26} color="#6F42C1" />
             <Text style={styles.itemText}>Payments</Text>
+          </View>
+
+          {/* New Gallery Item */}
+          <View style={styles.item}>
+            <MaterialCommunityIcons name="image-multiple" size={26} color="#6F42C1" />
+            <Text style={styles.itemText}>Gallery</Text>
           </View>
 
           {/* Spacer to push Logout to bottom */}
@@ -69,7 +75,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   sidebar: {
-    width: 250,
+    width: 180,
     paddingTop: 20,
     paddingHorizontal: 20,
     backgroundColor: "#fbf7ff",
@@ -87,21 +93,21 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: -8, // move logo closer to the left edge
-    gap: 8, // space between logo and text
+    marginLeft: -17, // move logo closer to the left edge
+    gap: 4, // space between logo and text
   },
   logo: {
-    width: 50,  // bigger logo
-    height: 50,
+    width: 40,
+    height: 40,
   },
   headerText: {
-    fontSize: 20, // slightly smaller text
+    fontSize: 17,
     fontWeight: "bold",
     color: "#6F42C1",
   },
   items: {
     marginTop: 10,
-    flex: 1, // fill space to allow Logout to be at bottom
+    flex: 1,
   },
   item: {
     flexDirection: "row",
