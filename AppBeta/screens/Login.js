@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Animated, ActivityIndicator } from "react-native";
 import api from "../api/api";
-import { Feather } from "@expo/vector-icons";
-
+import { Feather, Ionicons } from "@expo/vector-icons";
 
 export default function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Animation refs
   const spinnerOpacity = useRef(new Animated.Value(1)).current;
@@ -16,8 +16,6 @@ export default function Login({ navigation }) {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    // Phase 1: Show spinner
-    // Phase 2: Fade out spinner, fade in logo
     setTimeout(() => {
       Animated.parallel([
         Animated.timing(spinnerOpacity, {
@@ -31,11 +29,10 @@ export default function Login({ navigation }) {
           useNativeDriver: true,
         }),
       ]).start(() => {
-        // Phase 3: Move logo higher and slide card up
         setShowForm(true);
         Animated.parallel([
           Animated.timing(logoY, {
-            toValue: -250, // move logo higher than center
+            toValue: -250,
             duration: 800,
             useNativeDriver: true,
           }),
@@ -46,7 +43,7 @@ export default function Login({ navigation }) {
           }),
         ]).start();
       });
-    }, 500); // 0.5s delay
+    }, 500);
   }, []);
 
   const onLogin = async () => {
@@ -104,10 +101,18 @@ export default function Login({ navigation }) {
               <TextInput
                 placeholder="Enter your password"
                 placeholderTextColor="#777"
-                secureTextEntry
+                secureTextEntry={!showPassword}
                 onChangeText={setPassword}
                 style={{ flex: 1, paddingVertical: 12 }}
               />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={22}
+                  color="#6F42C1"
+                  style={{ marginLeft: 10 }}
+                />
+              </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.btn} onPress={onLogin}>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
@@ -127,7 +132,7 @@ export default function Login({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#6F42C1", justifyContent: "flex-end", alignItems: "center" },
-  centered: { position: "absolute", top: "50%", left: "50%", transform: [{ translateX: -25 }, { translateY: -25 }] }, // center spinner
+  centered: { position: "absolute", top: "50%", left: "50%", transform: [{ translateX: -25 }, { translateY: -25 }] },
   logo: { width: 140, height: 140, position: "absolute", top: "40%" },
   card: {
     width: "100%",
