@@ -1,12 +1,15 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
-import BottomNav from "../components/BottomNav";
+import React, { useRef, useState } from "react";
+import { View, TouchableOpacity, Text, Image, Animated, StyleSheet } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import LanguageSelector from "../components/LanguageSelector";
-import { Animated, Image, TouchableOpacity } from "react-native";
+import LanguageSelector from "./LanguageSelector";
+import Sidebar from "./Sidebar";
 
-export default function ScreenLayout({ children, navigation, user, activeScreen }) {
-  const notifScale = new Animated.Value(1);
+  
+
+export default function TopNav({ user }) {
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const notifScale = useRef(new Animated.Value(1)).current;
+
   const animateNotif = (toValue) => {
     Animated.spring(notifScale, {
       toValue,
@@ -20,18 +23,21 @@ export default function ScreenLayout({ children, navigation, user, activeScreen 
   const userAvatar = user?.avatar || require("../assets/default_avatar.jpg");
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fbf7ff" }}>
-      {/* Top Bar */}
+    <>
+      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
+
       <View style={styles.topBar}>
         <View style={styles.leftSection}>
-          <TouchableOpacity onPress={() => navigation.openDrawer?.()} style={styles.menuIconContainer}>
+          <TouchableOpacity onPress={() => setSidebarVisible(true)} style={styles.menuIconContainer}>
             <Feather name="menu" size={28} color="#6F42C1" />
           </TouchableOpacity>
+
           <View style={styles.userInfo}>
             <Image source={userAvatar} style={styles.userAvatar} />
-            <Animated.Text style={styles.userName}>Welcome {userName}</Animated.Text>
+            <Text style={styles.userName}>Welcome {userName}</Text>
           </View>
         </View>
+
         <View style={styles.rightSection}>
           <Animated.View style={{ transform: [{ scale: notifScale }] }}>
             <TouchableOpacity
@@ -45,13 +51,7 @@ export default function ScreenLayout({ children, navigation, user, activeScreen 
           <LanguageSelector />
         </View>
       </View>
-
-      {/* Main Content */}
-      <View style={{ flex: 1 }}>{children}</View>
-
-      {/* Bottom Navigation */}
-      <BottomNav navigation={navigation} activeScreen={activeScreen} />
-    </View>
+    </>
   );
 }
 

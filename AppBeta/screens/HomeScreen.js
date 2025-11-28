@@ -1,32 +1,18 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, StyleSheet, TouchableOpacity, Image, Text, Animated, ScrollView, Dimensions } from "react-native";
-import Sidebar from "../components/Sidebar";
-import BottomNav from "../components/BottomNav";
-import LanguageSelector from "../components/LanguageSelector";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+
+import TopNav from "../components/TopNav";
+import BottomNav from "../components/BottomNav";
 
 const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen({ navigation, route }) {
-  const [sidebarVisible, setSidebarVisible] = useState(false);
   const [expandedCard, setExpandedCard] = useState(null);
-
-  const notifScale = useRef(new Animated.Value(1)).current;
-  const animateNotif = (toValue) => {
-    Animated.spring(notifScale, {
-      toValue,
-      useNativeDriver: true,
-      speed: 20,
-      bounciness: 6,
-    }).start();
-  };
-
   const [animatedHeights, setAnimatedHeights] = useState({});
 
   const user = route.params?.user;
-  const userName = user?.name || "Parent";
-  const userAvatar = user?.avatar || require("../assets/default_avatar.jpg");
 
   const children = [
     {
@@ -75,7 +61,6 @@ export default function HomeScreen({ navigation, route }) {
   const today = new Date();
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const scrollRef = useRef(null);
-
   const currentDayIndex = (today.getDay() + 6) % 7;
   const weekDays = dayNames.map((day, index) => {
     const d = new Date(today);
@@ -123,34 +108,8 @@ export default function HomeScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
-
-      {/* Top Bar */}
-      <View style={styles.topBar}>
-        <View style={styles.leftSection}>
-          <TouchableOpacity onPress={() => setSidebarVisible(true)} style={styles.menuIconContainer}>
-            <Feather name="menu" size={28} color="#6F42C1" />
-          </TouchableOpacity>
-
-          <View style={styles.userInfo}>
-            <Image source={userAvatar} style={styles.userAvatar} />
-            <Text style={styles.userName}>Welcome {userName}</Text>
-          </View>
-        </View>
-
-        <View style={styles.rightSection}>
-          <Animated.View style={{ transform: [{ scale: notifScale }] }}>
-            <TouchableOpacity
-              onPressIn={() => animateNotif(1.1)}
-              onPressOut={() => animateNotif(1)}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons name="bell" size={24} color="#6F42C1" />
-            </TouchableOpacity>
-          </Animated.View>
-          <LanguageSelector />
-        </View>
-      </View>
+      {/* Top Navigation */}
+      <TopNav user={user} />
 
       <ScrollView contentContainerStyle={styles.mainScroll}>
         {/* Welcome Card */}
@@ -182,11 +141,10 @@ export default function HomeScreen({ navigation, route }) {
           end={{ x: 1, y: 0 }}
           style={styles.metricBigCard}
         >
-          {/* Metric Cards (all 3 fit without scroll) */}
           <View style={[styles.metricContainer, { marginBottom: 12 }]}>
             <View style={[styles.metricCard, { backgroundColor: "rgba(110, 190, 252, 0.7)" }]}>
               <View style={styles.metricTop}>
-                <MaterialCommunityIcons name="account-group-outline" size={22} color="white" style={{ marginRight: 8 }} />
+                <Feather name="users" size={22} color="white" style={{ marginRight: 8 }} />
                 <Text style={styles.metricNumber}>3</Text>
               </View>
               <Text style={styles.metricText}>Children</Text>
@@ -292,20 +250,14 @@ export default function HomeScreen({ navigation, route }) {
         </View>
       </ScrollView>
 
-      <BottomNav />
+      {/* Bottom Navigation */}
+      <BottomNav navigation={navigation} activeScreen="home"/>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fbf7ff" },
-  topBar: { backgroundColor: "#fbf7ff", flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingTop: 5, paddingBottom: 5, height: 70 },
-  leftSection: { flexDirection: "row", alignItems: "center", gap: 10 },
-  menuIconContainer: { paddingRight: 10 },
-  userInfo: { flexDirection: "row", alignItems: "center", gap: 6 },
-  userAvatar: { width: 40, height: 40, borderRadius: 20 },
-  userName: { fontSize: 18, fontWeight: "600", color: "#6F42C1" },
-  rightSection: { flexDirection: "row", alignItems: "center", gap: 10 },
   mainScroll: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 90 },
   welcomeCard: { borderRadius: 16, padding: 18, shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 8, elevation: 4, marginBottom: 16 },
   welcomeContent: { flexDirection: "row", alignItems: "center" },

@@ -1,9 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function BottomNav() {
-  const [active, setActive] = useState("home");
+export default function BottomNav({ navigation, activeScreen = "home" }) {
+  const [active, setActive] = useState(activeScreen);
 
   // Animated values for each icon
   const animations = {
@@ -12,6 +12,16 @@ export default function BottomNav() {
     clipboard: useRef(new Animated.Value(1)).current,
     person: useRef(new Animated.Value(1)).current,
   };
+
+  // Animate the active icon on mount
+  useEffect(() => {
+    Animated.spring(animations[active], {
+      toValue: 1.2,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 6,
+    }).start();
+  }, []);
 
   const handlePress = (key) => {
     setActive(key);
@@ -35,6 +45,24 @@ export default function BottomNav() {
         }).start();
       }
     });
+
+    // navigate to the screen
+    switch (key) {
+      case "home":
+        navigation.navigate("HomeScreen");
+        break;
+      case "people":
+        navigation.navigate("SomeOtherScreen"); // replace with your screen if needed
+        break;
+      case "clipboard":
+        navigation.navigate("TasksScreen"); // replace with your screen
+        break;
+      case "person":
+        navigation.navigate("ProfileScreen");
+        break;
+      default:
+        break;
+    }
   };
 
   // Render helper
@@ -42,7 +70,7 @@ export default function BottomNav() {
     const isActive = active === key;
 
     return (
-      <TouchableOpacity onPress={() => handlePress(key)} activeOpacity={0.8}>
+      <TouchableOpacity key={key} onPress={() => handlePress(key)} activeOpacity={0.8}>
         <Animated.View
           style={[
             styles.iconWrapper,
@@ -69,7 +97,7 @@ export default function BottomNav() {
     <View style={styles.container}>
       {renderIcon("home", "home")}
       {renderIcon("people", "people")}
-      {renderIcon("game-controller", "game-controller")}
+      {renderIcon("clipboard", "game-controller")}
       {renderIcon("person", "person")}
     </View>
   );
