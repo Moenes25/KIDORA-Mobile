@@ -52,7 +52,7 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
         navigation.navigate("HomeScreen");
         break;
       case "people":
-        navigation.navigate("SomeOtherScreen"); // replace with your screen if needed
+        navigation.navigate("ChildrenListScreen"); // replace with your screen if needed
         break;
       case "clipboard":
         navigation.navigate("TasksScreen"); // replace with your screen

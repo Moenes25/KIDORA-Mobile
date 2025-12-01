@@ -7,9 +7,12 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  StatusBar,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function EditProfileScreen({ navigation, route }) {
   const user = route.params?.user || {};
@@ -44,27 +47,35 @@ export default function EditProfileScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      {/* Transparent StatusBar */}
+      <StatusBar
+        barStyle="light-content"
+        translucent={true}
+        backgroundColor="transparent"
+      />
+
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Header */}
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={28} color="#6F42C1" />
-          </TouchableOpacity>
-          <Text style={styles.title}>Edit Profile</Text>
-          <View style={{ width: 28 }} /> {/* Placeholder to center title */}
-        </View>
+        {/* Gradient Header */}
+        <LinearGradient colors={["#6F42C1", "#9b59b6"]} style={styles.header}>
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Ionicons name="chevron-back" size={28} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Edit Profile</Text>
+            <View style={{ width: 28 }} /> {/* Placeholder for centering */}
+          </View>
 
-        {/* Avatar */}
-        <View style={styles.avatarContainer}>
-          <Image source={avatar} style={styles.avatar} />
-          <TouchableOpacity style={styles.addAvatarBtn} onPress={pickImage}>
-            <Ionicons name="add" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
+          <View style={styles.avatarContainer}>
+            <Image source={avatar} style={styles.avatar} />
+            <TouchableOpacity style={styles.addAvatarBtn} onPress={pickImage}>
+              <Ionicons name="add" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
 
-        {/* Fields */}
+        {/* Form Fields */}
         {[
-          { label: "Full Name", key: "fullname", icon: "pencil-outline" },
+          { label: "Full Name", key: "fullname", icon: "person-outline" },
           { label: "Email", key: "email", icon: "mail-outline" },
           { label: "Phone", key: "phone", icon: "call-outline" },
           { label: "Address", key: "address", icon: "location-outline" },
@@ -102,7 +113,10 @@ export default function EditProfileScreen({ navigation, route }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.btn, { backgroundColor: "#ccc", flexDirection: "row", justifyContent: "center" }]}
+            style={[
+              styles.btn,
+              { backgroundColor: "#ccc", flexDirection: "row", justifyContent: "center" },
+            ]}
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="close-outline" size={20} color="#333" />
@@ -116,16 +130,31 @@ export default function EditProfileScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fbf7ff" },
-  content: { padding: 20, alignItems: "center" },
+  content: { paddingBottom: 20, alignItems: "center" },
 
+  header: {
+    width: "100%",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 20 : 40,
+    paddingBottom: 20,
+    alignItems: "center",
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
+    marginBottom: 20,
+  },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    marginBottom: 20,
     justifyContent: "space-between",
+    marginBottom: 15,
+    paddingHorizontal: 20,
   },
-  title: { fontSize: 22, fontWeight: "700", color: "#6F42C1" },
+  headerTitle: { fontSize: 22, fontWeight: "700", color: "white" },
 
   avatarContainer: { alignItems: "center", marginBottom: 20, position: "relative" },
   avatar: { width: 110, height: 110, borderRadius: 55 },
@@ -143,7 +172,7 @@ const styles = StyleSheet.create({
     borderColor: "white",
   },
 
-  inputContainer: { width: "100%", marginBottom: 12 },
+  inputContainer: { width: "90%", marginBottom: 12 },
   inputLabel: { fontSize: 14, color: "#6F42C1", fontWeight: "600", marginBottom: 4 },
   inputRow: {
     flexDirection: "row",
@@ -164,7 +193,7 @@ const styles = StyleSheet.create({
   buttonsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
+    width: "90%",
     marginTop: 20,
   },
   btn: {

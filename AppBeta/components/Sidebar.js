@@ -17,7 +17,7 @@ export default function Sidebar({ visible, onClose }) {
               style={styles.logo}
               resizeMode="contain"
             />
-            <Text style={styles.headerText}>ParentPortal</Text>
+            <Text style={styles.headerText}>Parent Portal</Text>
           </View>
           <TouchableOpacity onPress={onClose}>
             <MaterialCommunityIcons name="close-circle" size={27} color="#6F42C1" />
@@ -93,15 +93,15 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    marginLeft: -17, // move logo closer to the left edge
-    gap: 4, // space between logo and text
+    marginLeft: -15, // move logo closer to the left edge
+    gap: 2, // space between logo and text
   },
   logo: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
   },
   headerText: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#6F42C1",
   },

@@ -8,6 +8,8 @@ import HomeScreen from "./screens/HomeScreen";
 import ProfileScreen from "./screens/ProfileScreen"; 
 import EditProfileScreen from "./screens/EditProfileScreen";
 import ChangePwdScreen from "./screens/ChangePwdScreen";
+import ChildrenListScreen from "./screens/ChildrenListScreen";
+import ChildDetailScreen from "./screens/ChildDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +25,8 @@ export default function App() {
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
         <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
         <Stack.Screen name="ChangePwdScreen" component={ChangePwdScreen} />
+        <Stack.Screen name="ChildrenListScreen" component={ChildrenListScreen} />
+        <Stack.Screen name="ChildDetailScreen" component={ChildDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
