@@ -66,9 +66,9 @@ export default function ProfileScreen({ navigation, route }) {
             style={styles.card} 
             onPress={card.onPress}
           >
-            <Ionicons name={card.icon} size={26} color="#6F42C1" style={{ marginRight: 15 }} />
+            <Ionicons name={card.icon} size={25} color="#6F42C1" style={{ marginRight: 15 }} />
             <Text style={styles.cardText}>{card.label}</Text>
-            <Ionicons name="chevron-forward-outline" size={23} color="#6F42C1" style={{ marginLeft: "auto" }} />
+            <Ionicons name="chevron-forward-outline" size={20} color="#6F42C1" style={{ marginLeft: "auto" }} />
           </TouchableOpacity>
         ))}
       </View>
@@ -126,7 +126,14 @@ const styles = StyleSheet.create({
   name: { fontSize: 20, fontWeight: "700", color: "white", marginBottom: 6 },
   email: { fontSize: 16, color: "white", opacity: 0.9 },
 
-  cardsContainer: { width: "90%", marginTop: 20, flexGrow: 1, paddingLeft: 20 },
+  // FIXED HERE
+  cardsContainer: { 
+    width: "90%", 
+    marginTop: 20, 
+    flex: 1,          // instead of flexGrow: 1
+    paddingLeft: 20,
+    paddingBottom: 90 // ensures BottomNav has space
+  },
 
   card: {
     flexDirection: "row",
@@ -143,5 +150,5 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 
-  cardText: { color: "#6F42C1", fontSize: 18, fontWeight: "600" },
+  cardText: { color: "#6F42C1", fontSize: 17, fontWeight: "600" },
 });
