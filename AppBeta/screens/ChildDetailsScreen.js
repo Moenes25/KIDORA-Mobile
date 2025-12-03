@@ -72,6 +72,76 @@ export default function ChildDetailScreen({ route, navigation }) {
     return "frown";
   };
 
+  const todaysTasks = [
+    {
+      id: 1,
+      title: "Math Homework",
+      description: "Complete exercises 5–10 on page 32.",
+    },
+    {
+      id: 2,
+      title: "Reading Assignment",
+      description: "Read chapter 3 of 'The Magic Tree House'.",
+    },
+    {
+      id: 3,
+      title: "Drawing Activity",
+      description: "Draw your favorite animal for the art class.",
+    },
+  ];
+
+  const getTaskIcon = (title) => {
+    const t = title.toLowerCase();
+
+    if (t.includes("math") || t.includes("numbers") || t.includes("count"))
+      return "hash"; // math / counting
+
+    if (t.includes("reading") || t.includes("read") || t.includes("story"))
+      return "book"; // reading
+
+    if (t.includes("writing") || t.includes("write") || t.includes("essay"))
+      return "edit"; // writing
+
+    if (t.includes("drawing") || t.includes("draw") || t.includes("art"))
+      return "edit-3"; // drawing / art
+
+    if (t.includes("science") || t.includes("experiment"))
+      return "cpu"; // science
+
+    if (t.includes("music") || t.includes("song") || t.includes("rhythm"))
+      return "music"; // music
+
+    if (t.includes("physical") || t.includes("exercise") || t.includes("sport"))
+      return "activity"; // physical activity / sport
+
+    if (t.includes("homework") || t.includes("assignment"))
+      return "check-circle"; // general homework
+
+    if (t.includes("clean") || t.includes("classroom duty"))
+      return "clipboard"; // chores / duties
+
+    if (t.includes("language") || t.includes("vocabulary") || t.includes("words"))
+      return "type"; // language
+
+    if (t.includes("project"))
+      return "folder"; // projects
+
+    if (t.includes("presentation"))
+      return "monitor"; // presentation
+
+    if (t.includes("group") || t.includes("team"))
+      return "users"; // group work
+
+    if (t.includes("home") || t.includes("parent"))
+      return "home"; // home activity
+
+    if (t.includes("test") || t.includes("quiz") || t.includes("exam"))
+      return "file-text"; // tests
+
+    return "check"; // fallback icon for unknown tasks
+  };
+
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
@@ -146,6 +216,39 @@ export default function ChildDetailScreen({ route, navigation }) {
             </View>
           ))}
         </View>
+
+        {/* Today's Tasks Card */}
+        <View style={styles.task_card}>
+          <View style={styles.cardHeader}>
+            <Feather name="check-circle" size={24} color="#6F42C1" style={{ marginRight: 8 }} />
+            <View style={styles.cardTitleBox}>
+              <Text style={styles.cardTitle}>Today's Tasks</Text>
+            </View>
+          </View>
+
+          {todaysTasks.length > 0 ? (
+            todaysTasks.map((task) => (
+              <View key={task.id} style={styles.taskItem}>
+
+                {/* Icon */}
+                <View style={styles.taskIconCircle}>
+                  <Feather name={getTaskIcon(task.title)} size={20} color="white" />
+                </View>
+
+                {/* Text */}
+                <View style={{ marginLeft: 10, flex: 1 }}>
+                  <Text style={styles.taskTitle}>{task.title}</Text>
+                  <Text style={styles.taskDesc}>{task.description}</Text>
+                </View>
+
+              </View>
+            ))
+          ) : (
+            <Text style={styles.infoLabel}>No assigned tasks for today.</Text>
+          )}
+
+        </View>
+
 
         {/* Health Information Card */}
         <View style={styles.card}>
@@ -256,6 +359,19 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: "white",
+    marginHorizontal: 16,
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  task_card: {
+    backgroundColor: "#F2dbe7",
     marginHorizontal: 16,
     borderRadius: 18,
     padding: 16,
@@ -380,5 +496,45 @@ moodText: {
   flex: 1,
   flexWrap: "wrap",
 },
+
+taskIconCircle: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#5a2e84",
+  justifyContent: "center",
+  alignItems: "center",
+  marginRight: 10,
+},
+
+taskItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#f8f5ff",
+  padding: 12,
+  borderRadius: 15,
+  marginBottom: 12,
+  borderLeftWidth: 4,
+  borderLeftColor: "#5a2e84",
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowOffset: { width: 0, height: 2 },
+  shadowRadius: 4,
+  elevation: 3,
+},
+
+
+taskTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#b53389",
+},
+
+taskDesc: {
+  fontSize: 14,
+  color: "#555",
+  marginTop: 4,
+},
+
 
 });

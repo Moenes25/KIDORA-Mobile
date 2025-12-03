@@ -5,58 +5,27 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import TopNav from "../components/TopNav";
 import BottomNav from "../components/BottomNav";
+import { useTheme } from "../context/ThemeContext";
+import { LightTheme, DarkTheme } from "../context/ThemeColors";
 
 const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen({ navigation, route }) {
   const [expandedCard, setExpandedCard] = useState(null);
   const [animatedHeights, setAnimatedHeights] = useState({});
+  const { theme } = useTheme();
+  const colors = theme === "dark" ? DarkTheme : LightTheme;
 
   const user = route.params?.user;
 
   const children = [
-    {
-      id: 1,
-      name: "John Doe",
-      age: 8,
-      grade: 3,
-      present: true,
-      completedTasks: 10,
-      totalTasks: 15,
-      performance: 42,
-      avatar: require("../assets/child1.jpg"),
-    },
-    {
-      id: 2,
-      name: "Emma Smith",
-      age: 7,
-      grade: 2,
-      present: false,
-      completedTasks: 7,
-      totalTasks: 12,
-      performance: 74,
-      avatar: require("../assets/child3.jpg"),
-    },
-    {
-      id: 3,
-      name: "Liam Brown",
-      age: 9,
-      grade: 4,
-      present: true,
-      completedTasks: 12,
-      totalTasks: 15,
-      performance: 91,
-      avatar: require("../assets/child2.jpg"),
-    },
+    { id: 1, name: "John Doe", age: 8, grade: 3, present: true, completedTasks: 10, totalTasks: 15, performance: 42, avatar: require("../assets/child1.jpg") },
+    { id: 2, name: "Emma Smith", age: 7, grade: 2, present: false, completedTasks: 7, totalTasks: 12, performance: 74, avatar: require("../assets/child3.jpg") },
+    { id: 3, name: "Liam Brown", age: 9, grade: 4, present: true, completedTasks: 12, totalTasks: 15, performance: 91, avatar: require("../assets/child2.jpg") },
   ];
 
   const extraHeight = 60;
-  const getTopPosition = (index) => {
-    if (expandedCard !== null && index > expandedCard) {
-      return index * 70 + extraHeight;
-    }
-    return index * 70;
-  };
+  const getTopPosition = (index) => (expandedCard !== null && index > expandedCard ? index * 70 + extraHeight : index * 70);
 
   const today = new Date();
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -64,8 +33,7 @@ export default function HomeScreen({ navigation, route }) {
   const currentDayIndex = (today.getDay() + 6) % 7;
   const weekDays = dayNames.map((day, index) => {
     const d = new Date(today);
-    const diff = index - currentDayIndex;
-    d.setDate(today.getDate() + diff);
+    d.setDate(today.getDate() + (index - currentDayIndex));
     return { name: day, date: d.getDate() };
   });
 
@@ -81,82 +49,55 @@ export default function HomeScreen({ navigation, route }) {
 
   const toggleCard = (index) => {
     if (expandedCard === index) {
-      Animated.timing(animatedHeights[index], {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start(() => setExpandedCard(null));
+      Animated.timing(animatedHeights[index], { toValue: 0, duration: 300, useNativeDriver: false }).start(() => setExpandedCard(null));
     } else {
       const newAnimatedHeights = { ...animatedHeights };
       if (!newAnimatedHeights[index]) newAnimatedHeights[index] = new Animated.Value(0);
       if (expandedCard !== null && expandedCard !== index) {
-        Animated.timing(animatedHeights[expandedCard], {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: false,
-        }).start();
+        Animated.timing(animatedHeights[expandedCard], { toValue: 0, duration: 300, useNativeDriver: false }).start();
       }
       setExpandedCard(index);
-      Animated.timing(newAnimatedHeights[index], {
-        toValue: 50,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
+      Animated.timing(newAnimatedHeights[index], { toValue: 50, duration: 300, useNativeDriver: false }).start();
       setAnimatedHeights(newAnimatedHeights);
     }
   };
 
   return (
-    <View style={styles.container}>
-      {/* Top Navigation */}
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <TopNav user={user} />
 
       <ScrollView contentContainerStyle={styles.mainScroll}>
         {/* Welcome Card */}
-        <LinearGradient
-          colors={["#6F42C1", "#9b59b6"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.welcomeCard}
-        >
+        <LinearGradient colors={colors.headerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.welcomeCard}>
           <View style={styles.welcomeContent}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.welcomeTitle}>Welcome to Family Space</Text>
-              <Text style={styles.welcomeSubtitle}>
+              <Text style={[styles.welcomeTitle, { color: colors.cardText }]}>Welcome to Family Space</Text>
+              <Text style={[styles.welcomeSubtitle, { color: colors.cardText }]}>
                 Track your children's progress and educational activities
               </Text>
             </View>
-            <Image
-              source={require("../assets/famGif.gif")}
-              style={styles.famGif}
-              resizeMode="contain"
-            />
+            <Image source={require("../assets/famGif.gif")} style={styles.famGif} resizeMode="contain" />
           </View>
         </LinearGradient>
 
         {/* Metric Cards + Calendar */}
-        <LinearGradient
-          colors={["#6F42C1", "#9b59b6"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.metricBigCard}
-        >
+        <LinearGradient colors={colors.headerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.metricBigCard}>
           <View style={[styles.metricContainer, { marginBottom: 12 }]}>
-            <View style={[styles.metricCard, { backgroundColor: "rgba(110, 190, 252, 0.7)" }]}>
+            <View style={[styles.metricCard, { backgroundColor: colors.metricChildren }]}>
               <View style={styles.metricTop}>
                 <Feather name="users" size={22} color="white" style={{ marginRight: 8 }} />
                 <Text style={styles.metricNumber}>3</Text>
               </View>
               <Text style={styles.metricText}>Children</Text>
             </View>
-            <View style={[styles.metricCard, { backgroundColor: "rgba(55, 224, 178, 0.7)" }]}>
+            <View style={[styles.metricCard, { backgroundColor: colors.metricTasks }]}>
               <View style={styles.metricTop}>
                 <Feather name="check-circle" size={22} color="white" style={{ marginRight: 8 }} />
                 <Text style={styles.metricNumber}>15</Text>
               </View>
               <Text style={styles.metricText}>Completed Tasks</Text>
             </View>
-            <View style={[styles.metricCard, { backgroundColor: "rgba(255, 140, 97, 0.7)" }]}>
+            <View style={[styles.metricCard, { backgroundColor: colors.metricPerformance }]}>
               <View style={styles.metricTop}>
                 <Feather name="bar-chart-2" size={22} color="white" style={{ marginRight: 8 }} />
                 <Text style={styles.metricNumber}>82%</Text>
@@ -166,12 +107,7 @@ export default function HomeScreen({ navigation, route }) {
           </View>
 
           {/* Calendar */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            ref={scrollRef}
-            contentContainerStyle={{ paddingHorizontal: 8 }}
-          >
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} ref={scrollRef} contentContainerStyle={{ paddingHorizontal: 8 }}>
             <View style={{ flexDirection: "row" }}>
               {weekDays.map((day, index) => {
                 const isToday = index === currentDayIndex;
@@ -203,9 +139,9 @@ export default function HomeScreen({ navigation, route }) {
         {/* Child Cards */}
         <View style={styles.childStackContainer}>
           {children.map((child, index) => {
-            let gradientColors = ["#6FCF97", "#27AE60"];
-            if (child.performance >= 45 && child.performance < 75) gradientColors = ["#F2C94C", "#F2994A"];
-            if (child.performance < 45) gradientColors = ["#EB5757", "#E53935"];
+            let gradientColors = colors.childGood;
+            if (child.performance >= 45 && child.performance < 75) gradientColors = colors.childMedium;
+            if (child.performance < 45) gradientColors = colors.childLow;
 
             if (!animatedHeights[index]) animatedHeights[index] = new Animated.Value(0);
 
@@ -220,28 +156,28 @@ export default function HomeScreen({ navigation, route }) {
                   <View style={styles.childHeader}>
                     <Image source={child.avatar} style={styles.childAvatar} />
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.childName}>{child.name}</Text>
+                      <Text style={[styles.childName, { color: colors.cardText }]}>{child.name}</Text>
                       <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <Text style={styles.childInfo}>
+                        <Text style={[styles.childInfo, { color: colors.cardText }]}>
                           Age: {child.age} | Grade: {child.grade} | {child.present ? "Present" : "Absent"}
                         </Text>
-                        <Feather name={child.present ? "check" : "x"} size={16} color="#fff" style={{ marginLeft: 4 }} />
+                        <Feather name={child.present ? "check" : "x"} size={16} color={colors.cardText} style={{ marginLeft: 4 }} />
                       </View>
                     </View>
                   </View>
 
                   <View style={[styles.taskRow, { alignItems: "center" }]}>
-                    <Feather name="clipboard" size={16} color="#fff" style={{ marginRight: 6 }} />
-                    <Text style={styles.taskText}>Tasks:</Text>
-                    <View style={styles.taskBarBackground}>
-                      <View style={[styles.taskBarProgress, { width: `${(child.completedTasks / child.totalTasks) * 100}%` }]} />
+                    <Feather name="clipboard" size={16} color={colors.cardText} style={{ marginRight: 6 }} />
+                    <Text style={[styles.taskText, { color: colors.cardText }]}>Tasks:</Text>
+                    <View style={[styles.taskBarBackground, { backgroundColor: colors.taskBarBackground }]}>
+                      <View style={[styles.taskBarProgress, { width: `${(child.completedTasks / child.totalTasks) * 100}%`, backgroundColor: colors.taskBarProgress }]} />
                     </View>
-                    <Text style={styles.taskNumber}>{child.completedTasks}/{child.totalTasks}</Text>
+                    <Text style={[styles.taskNumber, { color: colors.cardText }]}>{child.completedTasks}/{child.totalTasks}</Text>
                   </View>
 
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Feather name="bar-chart-2" size={16} color="#fff" style={{ marginRight: 6 }} />
-                    <Text style={styles.performanceText}>Performance: {child.performance}%</Text>
+                    <Feather name="bar-chart-2" size={16} color={colors.cardText} style={{ marginRight: 6 }} />
+                    <Text style={[styles.performanceText, { color: colors.cardText }]}>Performance: {child.performance}%</Text>
                   </View>
                 </LinearGradient>
               </TouchableOpacity>
@@ -250,19 +186,18 @@ export default function HomeScreen({ navigation, route }) {
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation */}
       <BottomNav navigation={navigation} activeScreen="home"/>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fbf7ff" },
+  container: { flex: 1 },
   mainScroll: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 90 },
   welcomeCard: { borderRadius: 16, padding: 18, shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 8, elevation: 4, marginBottom: 16 },
   welcomeContent: { flexDirection: "row", alignItems: "center" },
-  welcomeTitle: { color: "white", fontSize: 20, fontWeight: "700", marginBottom: 6 },
-  welcomeSubtitle: { color: "white", fontSize: 14, opacity: 0.95 },
+  welcomeTitle: { fontSize: 20, fontWeight: "700", marginBottom: 6 },
+  welcomeSubtitle: { fontSize: 14, opacity: 0.95 },
   famGif: { width: 80, height: 80, marginLeft: 12 },
   metricBigCard: { borderRadius: 16, paddingVertical: 16, paddingHorizontal: 10, marginBottom: 16 },
   metricContainer: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 0 },
@@ -275,12 +210,12 @@ const styles = StyleSheet.create({
   childCard: { borderRadius: 20, padding: 16 },
   childHeader: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   childAvatar: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
-  childName: { fontSize: 16, fontWeight: "700", marginBottom: 2, color: "#fff" },
-  childInfo: { fontSize: 13, color: "#fff" },
+  childName: { fontSize: 16, fontWeight: "700", marginBottom: 2 },
+  childInfo: { fontSize: 13 },
   taskRow: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
-  taskText: { fontSize: 14, fontWeight: "600", marginRight: 6, color: "#fff" },
-  taskBarBackground: { flex: 1, height: 10, backgroundColor: "rgba(255,255,255,0.3)", borderRadius: 5, overflow: "hidden", marginRight: 6 },
-  taskBarProgress: { height: "100%", backgroundColor: "white", borderRadius: 5 },
-  taskNumber: { fontSize: 13, fontWeight: "600", color: "#fff" },
-  performanceText: { fontSize: 14, fontWeight: "600", color: "#fff" },
+  taskText: { fontSize: 14, fontWeight: "600", marginRight: 6 },
+  taskBarBackground: { flex: 1, height: 10, borderRadius: 5, overflow: "hidden", marginRight: 6 },
+  taskBarProgress: { height: "100%", borderRadius: 5 },
+  taskNumber: { fontSize: 13, fontWeight: "600" },
+  performanceText: { fontSize: 14, fontWeight: "600" },
 });
