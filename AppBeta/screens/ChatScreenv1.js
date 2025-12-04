@@ -4,7 +4,7 @@ import { View, TextInput, Button, FlatList, Text, StyleSheet, KeyboardAvoidingVi
 import io from "socket.io-client";
 import BottomNavApp from "../components/BottomNavApp";
 
-const SERVER_URL = "http://http://172.25.90.174:5000"; // <--- change to your server IP or domain
+const SERVER_URL = "http:///192.168.0.120:3000"; // <--- change to your server IP or domain
 
 export default function ChatScreen() {
   const [message, setMessage] = useState("");

@@ -1,4 +1,4 @@
-const BASE = 'http://192.168.1.183:5000/api';
+const BASE = 'http://192.168.0.120:3000/api';
 
 async function request(path, method = 'GET', body = null, token = null) {
   const headers = { Accept: 'application/json' };

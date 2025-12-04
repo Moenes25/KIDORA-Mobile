@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, Button, FlatList, StyleSheet } from "react-native";
 import io from "socket.io-client";
 
-const SERVER_URL = "http://172.25.90.174:5000";
+const SERVER_URL = "http://192.168.0.120:3000";
 
 export default function ChatScreen() {
   const [message, setMessage] = useState("");

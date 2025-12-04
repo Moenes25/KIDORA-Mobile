@@ -1,152 +1,336 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Animated, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Animated, ActivityIndicator, Alert, ScrollView } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../api/api";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 
 export default function LoginSc({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Animation refs
-  const spinnerOpacity = useRef(new Animated.Value(1)).current;
-  const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoY = useRef(new Animated.Value(0)).current;
-  const cardY = useRef(new Animated.Value(600)).current; // start offscreen
-  const [showForm, setShowForm] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
-    // Phase 1: Show spinner
-    // Phase 2: Fade out spinner, fade in logo
-    setTimeout(() => {
-      Animated.parallel([
-        Animated.timing(spinnerOpacity, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoOpacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        // Phase 3: Move logo higher and slide card up
-        setShowForm(true);
-        Animated.parallel([
-          Animated.timing(logoY, {
-            toValue: -250, // move logo higher than center
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(cardY, {
-            toValue: 0,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      });
-    }, 500); // 0.5s delay
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
   const onLogin = async () => {
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      const user = res.data.user;
-      const username = user.email.split("@")[0];
+    // Validation
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter email and password.");
+      return;
+    }
 
-      await api.post(`/profile/create`, {
-        username,
-        name: user.name,
-        profession: "",
-        DOB: "",
-        titleline: "",
-        about: "",
-        img: "",
-      });
-      localStorage.setItem("user"  , JSON.stringify(user));
-     //navigation.replace("Main");
-      //navigation.replace("MainApp");
-      navigation.navigate("home",{user});
+    setLoading(true);
+    try {
+      // Login request
+      const response = await api.post("/auth/login", { email, password });
+      console.log("Login success:", response.data);
+
+      // Save token and user data
+      if (response.data && response.data.token) {
+        await AsyncStorage.setItem("token", response.data.token);
+        await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+
+        const user = response.data.user;
+
+        // Optional: Create/update profile
+        try {
+          const username = email.split("@")[0];
+          await api.post("/profile/create", {
+            username,
+            name: user.name,
+            userEmail: email,
+            profession: "",
+            DOB: "",
+            titleline: "",
+            about: "",
+            img: "",
+          });
+        } catch (profileErr) {
+          console.log("Profile creation skipped:", profileErr.message);
+        }
+
+        // Navigate to home
+        navigation.replace("HomeScreen", { user });
+      }
     } catch (err) {
-      alert("Error: " + err.response?.data?.msg);
+      console.log("Login error:", err.response?.data || err.message);
+      
+      const errorMsg = err.response?.data?.message || 
+                       err.response?.data || 
+                       "Login failed. Please check your credentials.";
+      
+      Alert.alert("Login Error", typeof errorMsg === 'string' ? errorMsg : "Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Loading Spinner */}
-      <Animated.View style={[styles.centered, { opacity: spinnerOpacity }]}>
-        <ActivityIndicator size="large" color="white" />
-      </Animated.View>
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View 
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}
+        >
+          {/* Logo */}
+          <Image
+            source={require("../assets/kidora.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
 
-      {/* Kidora Logo */}
-      <Animated.Image
-        source={require("../assets/kidora.png")}
-        style={[styles.logo, { opacity: logoOpacity, transform: [{ translateY: logoY }] }]}
-        resizeMode="contain"
-      />
+          {/* Title */}
+          <Text style={styles.title}>Log In</Text>
+          <Text style={styles.subtitle}>Login to your Kidora account</Text>
 
-      {/* Login Card */}
-      {showForm && (
-        <Animated.View style={[styles.card, { transform: [{ translateY: cardY }] }]}>
-          <Text style={styles.title}>Login</Text>
+          {/* Form Container */}
           <View style={styles.formContainer}>
+            {/* Email Input */}
             <View style={styles.inputContainer}>
-              <Feather name="mail" size={20} color="#6F42C1" style={{ marginRight: 10 }} />
+              <Feather name="mail" size={20} color="#999" style={styles.inputIcon} />
               <TextInput
-                placeholder="Enter your email"
-                placeholderTextColor="#777"
+                placeholder="Email"
+                placeholderTextColor="#999"
+                value={email}
                 onChangeText={setEmail}
-                style={{ flex: 1, paddingVertical: 12 }}
+                style={styles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                editable={!loading}
               />
             </View>
+
+            {/* Password Input */}
             <View style={styles.inputContainer}>
-              <Feather name="lock" size={20} color="#6F42C1" style={{ marginRight: 10 }} />
+              <Feather name="lock" size={20} color="#999" style={styles.inputIcon} />
               <TextInput
-                placeholder="Enter your password"
-                placeholderTextColor="#777"
-                secureTextEntry
+                placeholder="Password"
+                placeholderTextColor="#999"
+                value={password}
+                secureTextEntry={!showPassword}
                 onChangeText={setPassword}
-                style={{ flex: 1, paddingVertical: 12 }}
+                style={styles.input}
+                editable={!loading}
               />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={22}
+                  color="#666"
+                />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.btn} onPress={onLogin}>
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-                <Feather name="log-in" size={20} color="white" style={{ marginRight: 8 }} />
-                <Text style={styles.btntxt}>Login</Text>
-              </View>
+
+            {/* Forgot Password */}
+            <TouchableOpacity onPress={() => {/* Navigate to forgot password */}}>
+              <Text style={styles.forgotPassword}>
+                Forgot Password? <Text style={styles.forgotPasswordLink}>Recover it</Text>
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-              <Text style={styles.link}>Create Account</Text>
+
+            {/* Login Button */}
+            <TouchableOpacity 
+              style={[styles.loginBtn, loading && styles.disabledBtn]} 
+              onPress={onLogin} 
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text style={styles.loginBtnText}>Login with Email</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {/* Social Login Buttons */}
+            <TouchableOpacity style={styles.socialBtn}>
+              <Ionicons name="logo-apple" size={24} color="#1a1a1a" />
+              <Text style={styles.socialBtnText}>Continue with Apple</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.socialBtn}>
+              <Ionicons name="logo-google" size={24} color="#1a1a1a" />
+              <Text style={styles.socialBtnText}>Continue with Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.socialBtn}>
+              <Ionicons name="logo-facebook" size={24} color="#1a1a1a" />
+              <Text style={styles.socialBtnText}>Continue with Facebook</Text>
+            </TouchableOpacity>
+
+            {/* Sign Up Link */}
+            <TouchableOpacity 
+              onPress={() => navigation.navigate("Registerv1")}
+              style={styles.signupContainer}
+            >
+              <Text style={styles.signupText}>
+                New to Kidora? <Text style={styles.signupLink}>Sign up for FREE</Text>
+              </Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
-      )}
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#6F42C1", justifyContent: "flex-end", alignItems: "center" },
-  centered: { position: "absolute", top: "50%", left: "50%", transform: [{ translateX: -25 }, { translateY: -25 }] }, // center spinner
-  logo: { width: 140, height: 140, position: "absolute", top: "40%" },
-  card: {
-    width: "100%",
-    height: "60%",
-    backgroundColor: "white",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 5,
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
   },
-  title: { fontSize: 28, fontWeight: "bold", textAlign: "center", color: "#6F42C1", marginTop: 30, marginBottom: 5 },
-  formContainer: { flex: 1, justifyContent: "center" },
-  inputContainer: { flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "#ddd", borderRadius: 10, paddingHorizontal: 12, marginVertical: 10, backgroundColor: "#fff" },
-  btn: { backgroundColor: "#6F42C1", padding: 15, borderRadius: 10, marginTop: 10 },
-  btntxt: { color: "white", textAlign: "center", fontWeight: "bold" },
-  link: { textAlign: "center", marginTop: 15, color: "#6F42C1", fontWeight: "600" },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  content: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#1a1a1a",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 30,
+  },
+  formContainer: {
+    width: "100%",
+    maxWidth: 400,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 4,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  inputIcon: {
+    marginRight: 10,
+    color: "#666",
+  },
+  input: {
+    flex: 1,
+    color: "#1a1a1a",
+    fontSize: 16,
+    paddingVertical: 12,
+  },
+  forgotPassword: {
+    textAlign: "center",
+    color: "#666",
+    fontSize: 14,
+    marginBottom: 20,
+  },
+  forgotPasswordLink: {
+    color: "#6F42C1",
+    fontWeight: "600",
+  },
+  loginBtn: {
+    backgroundColor: "#6F42C1",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  disabledBtn: {
+    backgroundColor: "#9C77D9",
+    opacity: 0.7,
+  },
+  loginBtnText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#e0e0e0",
+  },
+  dividerText: {
+    color: "#666",
+    paddingHorizontal: 15,
+    fontSize: 14,
+  },
+  socialBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  socialBtnText: {
+    color: "#1a1a1a",
+    fontSize: 16,
+    fontWeight: "500",
+    marginLeft: 10,
+  },
+  signupContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  signupText: {
+    color: "#666",
+    fontSize: 14,
+  },
+  signupLink: {
+    color: "#6F42C1",
+    fontWeight: "600",
+  },
 });
