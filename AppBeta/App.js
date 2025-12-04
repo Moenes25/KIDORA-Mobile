@@ -15,6 +15,7 @@ import AppearanceScreen from "./screens/AppearanceScreen";
 import { ThemeProvider } from "./context/ThemeContext";
 import LanguageScreen from "./screens/LanguageScreen";
 import AboutUsScreen from "./screens/AboutUsScreen";
+import PaymentsScreen from "./screens/PaymentsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,12 +32,14 @@ export default function App() {
           <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
           <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
           <Stack.Screen name="ChangePwdScreen" component={ChangePwdScreen} />
+          <Stack.Screen name="PaymentsScreen" component={PaymentsScreen} />
           <Stack.Screen name="ChildrenListScreen" component={ChildrenListScreen} />
           <Stack.Screen name="ChildDetailScreen" component={ChildDetailScreen} />
           <Stack.Screen name="MenuScreen" component={MenuScreen} />
           <Stack.Screen name="AppearanceScreen" component={AppearanceScreen} />
           <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
           <Stack.Screen name="AboutUsScreen" component={AboutUsScreen} />
+          
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeProvider>

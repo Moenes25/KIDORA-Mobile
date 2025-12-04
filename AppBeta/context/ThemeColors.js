@@ -19,6 +19,9 @@ export const LightTheme = {
   // Task bar
   taskBarBackground: "rgba(255,255,255,0.3)",
   taskBarProgress: "white",
+
+  // Sub Card Background
+  subCard: "#f5f5f5",
 };
 
 export const DarkTheme = {
@@ -42,4 +45,7 @@ export const DarkTheme = {
   // Task bar
   taskBarBackground: "rgba(255,255,255,0.2)",
   taskBarProgress: "#fff",
+
+  // Sub Card Background
+  subCard: "#454444",
 };

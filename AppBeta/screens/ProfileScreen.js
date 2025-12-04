@@ -28,7 +28,7 @@ export default function ProfileScreen({ navigation, route }) {
     { 
       label: "Payments", 
       icon: "card-outline", 
-      onPress: () => navigation.navigate("Payments") 
+      onPress: () => navigation.navigate("PaymentsScreen") 
     },
     { 
       label: "Logout", 
