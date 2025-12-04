@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -11,6 +11,16 @@ export default function BottomNav({ onNavigate }) {
     daily: useRef(new Animated.Value(1)).current,
     profile: useRef(new Animated.Value(1)).current,
   };
+
+  // Animate the active icon on mount
+  useEffect(() => {
+    Animated.spring(animations[active], {
+      toValue: 1.2,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 6,
+    }).start();
+  }, []);
 
   const handlePress = (key) => {
     setActive(key);
@@ -29,13 +39,31 @@ export default function BottomNav({ onNavigate }) {
         }).start();
       }
     });
+
+    // navigate to the screen
+    switch (key) {
+      case "home":
+        navigation.navigate("HomeScreen");
+        break;
+      case "people":
+        navigation.navigate("ChildrenListScreen"); // replace with your screen if needed
+        break;
+      case "clipboard":
+        navigation.navigate("TasksScreen"); // replace with your screen
+        break;
+      case "person":
+        navigation.navigate("ProfileScreen");
+        break;
+      default:
+        break;
+    }
   };
 
   const renderIcon = (key, iconName) => {
     const isActive = active === key;
 
     return (
-      <TouchableOpacity onPress={() => handlePress(key)} activeOpacity={0.8}>
+      <TouchableOpacity key={key} onPress={() => handlePress(key)} activeOpacity={0.8}>
         <Animated.View
           style={[
             styles.iconWrapper,
@@ -74,7 +102,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#fbf7ff",
     borderTopWidth: 1,
     borderTopColor: "#eee",
     elevation: 10,

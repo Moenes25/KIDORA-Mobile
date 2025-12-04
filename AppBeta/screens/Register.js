@@ -16,15 +16,33 @@ export default function Register({ navigation }) {
     password: "",
   });
 
-  const onRegister = async () => {
-    try {
-      await api.post("/auth/register", form);
-      alert("Account created!");
-      navigation.navigate("Login");
-    } catch (err) {
-      alert(err.response?.data?.msg || "Error");
-    }
-  };
+const onRegister = async () => {
+  if (!form.email || !form.password || !form.name || !form.firstname || !form.lastname) {
+    Alert.alert("Error", "Please fill all fields.");
+    return;
+  }
+
+  setLoading(true);
+  console.log("Sending registration:", form); // ADD THIS
+  
+  try {
+    const response = await api.post("/auth/register", form);
+    console.log("Registration response:", response.data); // ADD THIS
+    
+    Alert.alert("Success", "Registration complete. Please log in.", [
+      { text: "OK", onPress: () => navigation.navigate("Login") }
+    ]);
+  } catch (err) {
+    console.log("Registration error:", err.response?.data); // ADD THIS
+    console.log("Full error:", err); // ADD THIS
+    
+    const errorMsg = err.response?.data?.msg || err.response?.data?.error || "Registration failed. Please try again.";
+    Alert.alert("Registration Error", errorMsg);
+  } finally {
+    setLoading(false);
+  }
+};
+const [loading, setLoading] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -37,8 +55,8 @@ export default function Register({ navigation }) {
       <TextInput placeholder="Email" style={styles.input} onChangeText={(v) => setForm({...form, email: v})} />
       <TextInput placeholder="Password" secureTextEntry style={styles.input} onChangeText={(v) => setForm({...form, password: v})} />
 
-      <TouchableOpacity style={styles.btn} onPress={onRegister}>
-        <Text style={styles.btnText}>Register</Text>
+      <TouchableOpacity style={styles.btn} onPress={onRegister} disabled={loading}>
+        <Text style={styles.btnText}>{loading ? "Registering..." : "Register"}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate("Login")}>

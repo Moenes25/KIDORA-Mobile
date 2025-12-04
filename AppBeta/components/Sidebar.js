@@ -1,7 +1,7 @@
 // components/Sidebar.js  (enhanced)
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 
@@ -15,44 +15,53 @@ export default function Sidebar({ visible, onClose }) {
   };
 
   return (
-    <View style={styles.overlay}>
-      <LinearGradient
-        colors={['#6F42C1', '#9b59b6']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={styles.sidebar}
-      >
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Parental Portal</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Feather name="x" size={28} color="white" />
-          </TouchableOpacity>
-        </View>
+    <>
+      <View style={styles.overlay}>
+        <LinearGradient
+          colors={['#6F42C1', '#9b59b6']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.sidebar}
+        >
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Image
+                source={require("../assets/kidora.png")}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+              <Text style={styles.headerText}>Parent Portal</Text>
+            </View>
+            <TouchableOpacity onPress={onClose}>
+              <MaterialCommunityIcons name="close-circle" size={27} color="white" />
+            </TouchableOpacity>
+          </View>
 
-        <View style={styles.items}>
-          <TouchableOpacity style={styles.item} onPress={() => goTo("Chat")}>
-            <Feather name="message-circle" size={24} color="white" />
-            <Text style={styles.itemText}>Chat</Text>
-          </TouchableOpacity>
+          <View style={styles.items}>
+            <TouchableOpacity style={styles.item} onPress={() => goTo("Chat")}>
+              <Feather name="message-circle" size={24} color="white" />
+              <Text style={styles.itemText}>Chat</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.item} onPress={() => goTo("Calendar")}>
-            <Feather name="calendar" size={24} color="white" />
-            <Text style={styles.itemText}>Calendar</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.item} onPress={() => goTo("Calendar")}>
+              <Feather name="calendar" size={24} color="white" />
+              <Text style={styles.itemText}>Calendar</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.item} onPress={() => {
-            // placeholder logout action
-            onClose();
-            // add your logout logic here (e.g., clear tokens + navigate to Auth)
-          }}>
-            <Feather name="log-out" size={24} color="white" />
-            <Text style={styles.itemText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
+            <TouchableOpacity style={styles.item} onPress={() => {
+              // placeholder logout action
+              onClose();
+              // add your logout logic here (e.g., clear tokens + navigate to Auth)
+            }}>
+              <Feather name="log-out" size={24} color="white" />
+              <Text style={styles.itemText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
 
-      <TouchableOpacity style={styles.overlayTouchable} onPress={onClose} />
-    </View>
+        <TouchableOpacity style={styles.overlayTouchable} onPress={onClose} />
+      </View>
+    </>
   );
 }
 
@@ -67,13 +76,13 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   sidebar: {
-    width: 250,
+    width: 180,
     paddingTop: 20,
     paddingHorizontal: 20,
     shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   header: {
     flexDirection: "row",
@@ -81,13 +90,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 30,
   },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: -15, // move logo closer to the left edge
+    gap: 2, // space between logo and text
+  },
+  logo: {
+    width: 50,
+    height: 50,
+  },
   headerText: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: "bold",
     color: "white",
   },
   items: {
     marginTop: 10,
+    flex: 1,
   },
   item: {
     flexDirection: "row",
