@@ -14,7 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BottomNav from "../components/BottomNav";
-import SideBar from   "../components/SideBar.js";
+import SideBar from   "../components/Sidebar";
 import TopBar from "../components/TopBar";
 const screenWidth = Dimensions.get("window").width;
 

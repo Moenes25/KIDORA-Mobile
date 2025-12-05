@@ -5,7 +5,7 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BottomNav from "../components/BottomNav";
 import TopBar from "../components/TopBar";
-import SideBar from "../components/SideBar";
+import SideBar from "../components/Sidebar";
 
 const childrenGif = require("../assets/children.gif");
 

@@ -20,7 +20,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import BottomNav from "../components/BottomNav";
 import TopBar from "../components/TopBar";
-import SideBar from "../components/SideBar.js";   // Your exact same SideBar
+import SideBar from "../components/Sidebar";   // Your exact same SideBar
 
 export default function ProfileScreen({ navigation, route }) {
   const user = route.params?.user || {};
