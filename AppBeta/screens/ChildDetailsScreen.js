@@ -15,7 +15,7 @@ export default function ChildDetailScreen({ route, navigation }) {
   };
 
   const skills = {
-    language: 80,
+    language: 40,
     motor: 70,
     cognition: 60,
     social: 90,
@@ -54,6 +54,94 @@ export default function ChildDetailScreen({ route, navigation }) {
     },
   ];
 
+  const getProgressColor = (percent) => {
+    if (percent <= 40) return "#e74c3c"; // red
+    if (percent <= 75) return "#f1c40f"; // yellow
+    return "#2ecc71"; // green
+  };
+
+  const getMoodColor = (mood) => {
+  if (mood === "good") return "#2ecc71";    // green
+  if (mood === "neutral") return "#f1c40f"; // yellow
+  return "#e74c3c";                         // red
+  };
+
+  const getMoodIcon = (mood) => {
+    if (mood === "good") return "smile";
+    if (mood === "neutral") return "meh";
+    return "frown";
+  };
+
+  const todaysTasks = [
+    {
+      id: 1,
+      title: "Math Homework",
+      description: "Complete exercises 5–10 on page 32.",
+    },
+    {
+      id: 2,
+      title: "Reading Assignment",
+      description: "Read chapter 3 of 'The Magic Tree House'.",
+    },
+    {
+      id: 3,
+      title: "Drawing Activity",
+      description: "Draw your favorite animal for the art class.",
+    },
+  ];
+
+  const getTaskIcon = (title) => {
+    const t = title.toLowerCase();
+
+    if (t.includes("math") || t.includes("numbers") || t.includes("count"))
+      return "hash"; // math / counting
+
+    if (t.includes("reading") || t.includes("read") || t.includes("story"))
+      return "book"; // reading
+
+    if (t.includes("writing") || t.includes("write") || t.includes("essay"))
+      return "edit"; // writing
+
+    if (t.includes("drawing") || t.includes("draw") || t.includes("art"))
+      return "edit-3"; // drawing / art
+
+    if (t.includes("science") || t.includes("experiment"))
+      return "cpu"; // science
+
+    if (t.includes("music") || t.includes("song") || t.includes("rhythm"))
+      return "music"; // music
+
+    if (t.includes("physical") || t.includes("exercise") || t.includes("sport"))
+      return "activity"; // physical activity / sport
+
+    if (t.includes("homework") || t.includes("assignment"))
+      return "check-circle"; // general homework
+
+    if (t.includes("clean") || t.includes("classroom duty"))
+      return "clipboard"; // chores / duties
+
+    if (t.includes("language") || t.includes("vocabulary") || t.includes("words"))
+      return "type"; // language
+
+    if (t.includes("project"))
+      return "folder"; // projects
+
+    if (t.includes("presentation"))
+      return "monitor"; // presentation
+
+    if (t.includes("group") || t.includes("team"))
+      return "users"; // group work
+
+    if (t.includes("home") || t.includes("parent"))
+      return "home"; // home activity
+
+    if (t.includes("test") || t.includes("quiz") || t.includes("exam"))
+      return "file-text"; // tests
+
+    return "check"; // fallback icon for unknown tasks
+  };
+
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
@@ -70,6 +158,7 @@ export default function ChildDetailScreen({ route, navigation }) {
           </View>
         </LinearGradient>
 
+
         {/* Daily Attendance Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -84,6 +173,26 @@ export default function ChildDetailScreen({ route, navigation }) {
           <Text style={styles.infoLabel}>
             This week: <Text style={styles.infoValue}>{weekAttendance} / 5 days</Text>
           </Text>
+        </View>
+
+        {/* Mood Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Feather name="heart" size={24} color="#6F42C1" style={{ marginRight: 8 }} />
+            <View style={styles.cardTitleBox}>
+              <Text style={styles.cardTitle}>Today's Mood</Text>
+            </View>
+          </View>
+
+          <View style={styles.moodRow}>
+            <View style={[styles.moodIconCircle, { backgroundColor: getMoodColor(child.mood) }]}>
+              <Feather name={getMoodIcon(child.mood)} size={24} color="white" />
+            </View>
+
+            <Text style={styles.moodText}>
+              {child.moodDescription || "No mood description available"}
+            </Text>
+          </View>
         </View>
 
         {/* Today's Activities Card */}
@@ -108,6 +217,39 @@ export default function ChildDetailScreen({ route, navigation }) {
           ))}
         </View>
 
+        {/* Today's Tasks Card */}
+        <View style={styles.task_card}>
+          <View style={styles.cardHeader}>
+            <Feather name="check-circle" size={24} color="#6F42C1" style={{ marginRight: 8 }} />
+            <View style={styles.cardTitleBox}>
+              <Text style={styles.cardTitle}>Today's Tasks</Text>
+            </View>
+          </View>
+
+          {todaysTasks.length > 0 ? (
+            todaysTasks.map((task) => (
+              <View key={task.id} style={styles.taskItem}>
+
+                {/* Icon */}
+                <View style={styles.taskIconCircle}>
+                  <Feather name={getTaskIcon(task.title)} size={20} color="white" />
+                </View>
+
+                {/* Text */}
+                <View style={{ marginLeft: 10, flex: 1 }}>
+                  <Text style={styles.taskTitle}>{task.title}</Text>
+                  <Text style={styles.taskDesc}>{task.description}</Text>
+                </View>
+
+              </View>
+            ))
+          ) : (
+            <Text style={styles.infoLabel}>No assigned tasks for today.</Text>
+          )}
+
+        </View>
+
+
         {/* Health Information Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -124,7 +266,7 @@ export default function ChildDetailScreen({ route, navigation }) {
           </Text>
         </View>
 
-        {/* Skills Development Card */}
+         {/* Skills Development Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Feather name="trending-up" size={24} color="#6F42C1" style={{ marginRight: 8 }} />
@@ -138,8 +280,15 @@ export default function ChildDetailScreen({ route, navigation }) {
                 {skill.charAt(0).toUpperCase() + skill.slice(1)}:
                 <Text style={styles.infoValue}> {percent}%</Text>
               </Text>
+
+              {/* Progress Bar with dynamic color */}
               <View style={styles.progressBackground}>
-                <View style={[styles.progressFill, { width: `${percent}%` }]} />
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${percent}%`, backgroundColor: getProgressColor(percent) },
+                  ]}
+                />
               </View>
             </View>
           ))}
@@ -171,6 +320,7 @@ export default function ChildDetailScreen({ route, navigation }) {
           ))}
         </View>
 
+
         {/* Educator Comments Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -195,8 +345,10 @@ const styles = StyleSheet.create({
   },
 
   header: {
+    marginTop:40,
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
     flexDirection: "row",
-    alignItems: "center",
     padding: 16,
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
@@ -209,6 +361,20 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: "white",
+    marginHorizontal: 16,
+    borderRadius: 18,
+    padding: 16,
+    
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  task_card: {
+    backgroundColor: "#F2dbe7",
     marginHorizontal: 16,
     borderRadius: 18,
     padding: 16,
@@ -249,17 +415,16 @@ const styles = StyleSheet.create({
   },
 
   progressBackground: {
-    height: 10,
     width: "100%",
-    backgroundColor: "#e0e0e0",
-    borderRadius: 5,
-    overflow: "hidden",
+    height: 10,
+    backgroundColor: "#ddd",
+    borderRadius: 10,
+    marginTop: 4,
   },
 
   progressFill: {
     height: "100%",
-    backgroundColor: "#5a2e84",
-    borderRadius: 5,
+    borderRadius: 10,
   },
 
   activityCard: {
@@ -311,4 +476,68 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#555",
   },
+
+  moodRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: 10,
+},
+
+moodIconCircle: {
+  width: 50,
+  height: 50,
+  borderRadius: 25,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+moodText: {
+  marginLeft: 15,
+  fontSize: 16,
+  fontWeight: "500",
+  color: "#333",
+  flex: 1,
+  flexWrap: "wrap",
+},
+
+taskIconCircle: {
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  backgroundColor: "#5a2e84",
+  justifyContent: "center",
+  alignItems: "center",
+  marginRight: 10,
+},
+
+taskItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#f8f5ff",
+  padding: 12,
+  borderRadius: 15,
+  marginBottom: 12,
+  borderLeftWidth: 4,
+  borderLeftColor: "#5a2e84",
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowOffset: { width: 0, height: 2 },
+  shadowRadius: 4,
+  elevation: 3,
+},
+
+
+taskTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#b53389",
+},
+
+taskDesc: {
+  fontSize: 14,
+  color: "#555",
+  marginTop: 4,
+},
+
+
 });

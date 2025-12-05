@@ -46,7 +46,7 @@ export default function ProfileEdit({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20 },
+  container: { padding: 20, marginTop: 40 },
   title: { fontSize: 28, fontWeight: "bold", marginBottom: 15 },
   input: { borderWidth: 1, padding: 10, marginVertical: 8, borderRadius: 8 },
   btn: { backgroundColor: "#000", padding: 15, borderRadius: 8, marginTop: 10 },

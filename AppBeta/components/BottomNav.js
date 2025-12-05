@@ -2,14 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function BottomNav({ onNavigate }) {
-  const [active, setActive] = useState("home");
+export default function BottomNav({ navigation, activeScreen = "home" }) {
+  const [active, setActive] = useState(activeScreen);
 
+  // Animated values for each icon
   const animations = {
     home: useRef(new Animated.Value(1)).current,
-    chat: useRef(new Animated.Value(1)).current,
-    daily: useRef(new Animated.Value(1)).current,
-    profile: useRef(new Animated.Value(1)).current,
+    people: useRef(new Animated.Value(1)).current,
+    clipboard: useRef(new Animated.Value(1)).current,
+    person: useRef(new Animated.Value(1)).current,
   };
 
   // Animate the active icon on mount
@@ -24,18 +25,23 @@ export default function BottomNav({ onNavigate }) {
 
   const handlePress = (key) => {
     setActive(key);
-    onNavigate(key);
 
+    // animate selected icon (scale up)
     Animated.spring(animations[key], {
       toValue: 1.2,
       useNativeDriver: true,
+      speed: 20,
+      bounciness: 6,
     }).start();
 
+    // animate other icons back to normal
     Object.keys(animations).forEach((k) => {
       if (k !== key) {
         Animated.spring(animations[k], {
           toValue: 1,
           useNativeDriver: true,
+          speed: 20,
+          bounciness: 4,
         }).start();
       }
     });
@@ -49,7 +55,8 @@ export default function BottomNav({ onNavigate }) {
         navigation.navigate("ChildrenListScreen"); // replace with your screen if needed
         break;
       case "clipboard":
-        navigation.navigate("TasksScreen"); // replace with your screen
+        //navigation.navigate("TasksScreen"); // replace with your screen
+        alert("Tasks Screen coming soon!");
         break;
       case "person":
         navigation.navigate("ProfileScreen");
@@ -59,6 +66,7 @@ export default function BottomNav({ onNavigate }) {
     }
   };
 
+  // Render helper
   const renderIcon = (key, iconName) => {
     const isActive = active === key;
 
@@ -71,14 +79,14 @@ export default function BottomNav({ onNavigate }) {
             {
               transform: [
                 { scale: animations[key] },
-                { translateY: isActive ? -8 : 0 },
+                { translateY: isActive ? -8 : 0 }, // lifted when active
               ],
             },
           ]}
         >
           <Ionicons
             name={iconName}
-            size={isActive ? 28 : 24}
+            size={isActive ? 26 : 24}
             color={isActive ? "white" : "#6F42C1"}
           />
         </Animated.View>
@@ -89,9 +97,9 @@ export default function BottomNav({ onNavigate }) {
   return (
     <View style={styles.container}>
       {renderIcon("home", "home")}
-      {renderIcon("chat", "chatbubble")}
-      {renderIcon("daily", "bar-chart")}
-      {renderIcon("profile", "person")}
+      {renderIcon("people", "people")}
+      {renderIcon("clipboard", "game-controller")}
+      {renderIcon("person", "person")}
     </View>
   );
 }
@@ -107,14 +115,21 @@ const styles = StyleSheet.create({
     borderTopColor: "#eee",
     elevation: 10,
   },
+
   iconWrapper: {
     width: 50,
     height: 50,
-    borderRadius: 40,
+    borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
   },
+
   activeIconWrapper: {
     backgroundColor: "#6F42C1",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 6,
   },
 });

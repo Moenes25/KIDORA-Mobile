@@ -12,10 +12,17 @@ import ChildrenListScreen from "./screens/ChildrenListScreen";
 import ChildDetailScreen from "./screens/ChildDetailsScreen";
 import MapScreen from "./screens/MapScreen";
 import CalendarScreen from "./screens/CalendarScreen";
+import PaymentsScreen from "./screens/PaymentsScreen";
+import AppearanceScreen from "./screens/AppearanceScreen";
+import LanguageScreen from "./screens/LanguageScreen";
+import AboutUsScreen from "./screens/AboutUsScreen";
+import { ThemeProvider } from "./context/ThemeContext";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
+        <ThemeProvider>
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Login" component={Login} />
@@ -28,8 +35,15 @@ export default function App() {
         <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
         <Stack.Screen name="ChangePwdScreen" component={ChangePwdScreen} />
         <Stack.Screen name="ChildrenListScreen" component={ChildrenListScreen} />
+       <Stack.Screen name="PaymentsScreen" component={PaymentsScreen} />
         <Stack.Screen name="ChildDetailScreen" component={ChildDetailScreen} />
+       <Stack.Screen name="AppearanceScreen" component={AppearanceScreen} />
+       <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
+         <Stack.Screen name="AboutUsScreen" component={AboutUsScreen} />
+
+
       </Stack.Navigator>
     </NavigationContainer>
+    </ThemeProvider>
   );
 }

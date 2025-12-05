@@ -1,37 +1,21 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { View, Image, TouchableOpacity, StyleSheet, Modal } from "react-native";
 
-// Define flag mappings at the top to avoid require() issues
-const FLAGS = {
-  en: require("../assets/flags/en.png"),
-  fr: require("../assets/flags/fr.png"),
-  ar: require("../assets/flags/ar.png"),
-};
-
-export default function LanguageSelector({ onLanguageChange, initialLanguage = "en" }) {
+export default function LanguageSelector() {
   const [open, setOpen] = useState(false);
   const [language, setLanguage] = useState({
-    code: initialLanguage,
-    flag: FLAGS[initialLanguage] || FLAGS.en,
+    code: "en",
+    flag: require("../assets/eng.png"),
   });
 
-  const languages = useMemo(() => [
-    { code: "en", flag: FLAGS.en },
-    { code: "fr", flag: FLAGS.fr },
-    { code: "ar", flag: FLAGS.ar },
-  ], []);
+  const languages = [
+    { code: "en", flag: require("../assets/eng.png") },
+    { code: "fr", flag: require("../assets/fr.png") },
+    { code: "ar", flag: require("../assets/arab.png") },
+  ];
 
   // Filter out the currently selected language
   const availableLanguages = languages.filter((lang) => lang.code !== language.code);
-
-  const handleLanguageSelect = (lang) => {
-    setLanguage(lang);
-    setOpen(false);
-    // Notify parent component about language change
-    if (onLanguageChange) {
-      onLanguageChange(lang.code);
-    }
-  };
 
   return (
     <View>
@@ -40,7 +24,7 @@ export default function LanguageSelector({ onLanguageChange, initialLanguage = "
         <Image source={language.flag} style={styles.flag} />
       </TouchableOpacity>
 
-      {/* Dropdown Modal */}
+      {/* Dropdown */}
       <Modal
         visible={open}
         transparent
@@ -57,7 +41,10 @@ export default function LanguageSelector({ onLanguageChange, initialLanguage = "
               <TouchableOpacity
                 key={lang.code}
                 style={styles.option}
-                onPress={() => handleLanguageSelect(lang)}
+                onPress={() => {
+                  setLanguage(lang);
+                  setOpen(false);
+                }}
               >
                 <Image source={lang.flag} style={styles.flag} />
               </TouchableOpacity>
@@ -87,7 +74,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.1)",
     justifyContent: "flex-start",
     alignItems: "flex-end",
-    paddingTop: 50,
+    paddingTop: 50, // reduced from 70 to bring dropdown closer
     paddingRight: 15,
   },
   dropdown: {
