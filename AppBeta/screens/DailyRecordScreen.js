@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import axios from "axios";
 
-const SERVER_URL = "http://192.168.0.120:3000"; // <-- change to your server
+const SERVER_URL = "http://192.168.0.222:5000"; // <-- change to your server
 
 export default function DailyRecordScreen() {
   const [uid, setUid] = useState("user123"); // change or use login

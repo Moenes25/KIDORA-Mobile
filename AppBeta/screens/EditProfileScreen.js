@@ -47,7 +47,6 @@ export default function EditProfileScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      {/* Transparent StatusBar */}
       <StatusBar
         barStyle="light-content"
         translucent={true}
@@ -62,7 +61,7 @@ export default function EditProfileScreen({ navigation, route }) {
               <Ionicons name="chevron-back" size={28} color="white" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Edit Profile</Text>
-            <View style={{ width: 28 }} /> {/* Placeholder for centering */}
+            <View style={{ width: 28 }} />
           </View>
 
           <View style={styles.avatarContainer}>
@@ -88,6 +87,7 @@ export default function EditProfileScreen({ navigation, route }) {
                 style={styles.input}
                 value={form[item.key]}
                 onChangeText={(text) => handleChange(item.key, text)}
+                placeholderTextColor="#999"
               />
               <Ionicons
                 name={item.icon}
@@ -99,28 +99,25 @@ export default function EditProfileScreen({ navigation, route }) {
           </View>
         ))}
 
-        {/* Buttons */}
+        {/* Action Buttons */}
         <View style={styles.buttonsRow}>
           <TouchableOpacity
-            style={[styles.btn, { backgroundColor: "#6F42C1" }]}
+            style={[styles.btn, styles.saveBtn]}
             onPress={() => {
               console.log("Save pressed", form);
-              // TODO: save changes to backend
+              // TODO: Implement save logic
             }}
           >
             <Ionicons name="checkmark-outline" size={20} color="white" />
-            <Text style={styles.btnText}> Save</Text>
+            <Text style={styles.btnText}>Save</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.btn,
-              { backgroundColor: "#ccc", flexDirection: "row", justifyContent: "center" },
-            ]}
+            style={[styles.btn, styles.discardBtn]}
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="close-outline" size={20} color="#333" />
-            <Text style={[styles.btnText, { color: "#333" }]}> Discard</Text>
+            <Text style={[styles.btnText, { color: "#333" }]}>Discard</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -129,81 +126,121 @@ export default function EditProfileScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fbf7ff" },
-  content: { paddingBottom: 20, alignItems: "center" },
-
+  container: {
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+  
+    flex: 1,
+    backgroundColor: "#fbf7ff",
+  },
+  content: {
+    paddingBottom: 30,
+    alignItems: "center",
+  },
   header: {
     width: "100%",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 20 : 40,
-    paddingBottom: 20,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 20 : 50,
+    paddingBottom: 30,
     alignItems: "center",
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 6,
-    marginBottom: 20,
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+    marginBottom: 25,
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    width: "100%",
     justifyContent: "space-between",
-    marginBottom: 15,
+    width: "100%",
     paddingHorizontal: 20,
+    marginBottom: 20,
   },
-  headerTitle: { fontSize: 22, fontWeight: "700", color: "white" },
-
-  avatarContainer: { alignItems: "center", marginBottom: 20, position: "relative" },
-  avatar: { width: 110, height: 110, borderRadius: 55 },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "white",
+  },
+  avatarContainer: {
+    position: "relative",
+  },
+  avatar: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 4,
+    borderColor: "white",
+  },
   addAvatarBtn: {
     position: "absolute",
     bottom: 0,
     right: 0,
     backgroundColor: "#6F42C1",
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: "white",
   },
-
-  inputContainer: { width: "90%", marginBottom: 12 },
-  inputLabel: { fontSize: 14, color: "#6F42C1", fontWeight: "600", marginBottom: 4 },
+  inputContainer: {
+    width: "90%",
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: "#6F42C1",
+    fontWeight: "600",
+    marginBottom: 6,
+  },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    width: "100%",
     backgroundColor: "white",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    elevation: 3,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowOpacity: 0.12,
+    shadowRadius: 5,
   },
-  input: { flex: 1, height: 45, fontSize: 16, color: "#333" },
-  inputIcon: { marginLeft: 10 },
-
+  input: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+    color: "#333",
+  },
+  inputIcon: {
+    marginLeft: 10,
+  },
   buttonsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     width: "90%",
-    marginTop: 20,
+    marginTop: 30,
+    gap: 12,
   },
   btn: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginHorizontal: 5,
-    alignItems: "center",
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 14,
+    borderRadius: 14,
+    gap: 8,
   },
-  btnText: { color: "white", fontWeight: "600", fontSize: 16 },
+  saveBtn: {
+    backgroundColor: "#6F42C1",
+  },
+  discardBtn: {
+    backgroundColor: "#e0e0e0",
+  },
+  btnText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 16,
+  },
 });

@@ -2,11 +2,9 @@ import React, { useRef, useState } from "react";
 import { View, TouchableOpacity, Text, Image, Animated, StyleSheet } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import LanguageSelector from "./LanguageSelector";
-import Sidebar from "./Sidebar";
+import SideBar from "./SideBar"; // Changed from Sidebar to SideBar
 
-  
-
-export default function TopNav({ user }) {
+export default function TopNav({ user, navigation }) {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const notifScale = useRef(new Animated.Value(1)).current;
 
@@ -20,11 +18,30 @@ export default function TopNav({ user }) {
   };
 
   const userName = user?.name || "Parent";
+  const userEmail = user?.email || "user@example.com";
   const userAvatar = user?.avatar || require("../assets/default_avatar.jpg");
+
+  const handleNotifications = () => {
+    console.log("Notifications pressed");
+    // Add your notification logic here
+  };
+
+  const handleLogout = () => {
+    console.log("Logout pressed");
+    // Add your logout logic here
+  };
 
   return (
     <>
-      <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
+      <SideBar 
+        visible={sidebarVisible} 
+        onClose={() => setSidebarVisible(false)}
+        username={userName}
+        email={userEmail}
+        navigation={navigation}
+        onLogout={handleLogout}
+        onNotifications={handleNotifications}
+      />
 
       <View style={styles.topBar}>
         <View style={styles.leftSection}>
@@ -43,6 +60,7 @@ export default function TopNav({ user }) {
             <TouchableOpacity
               onPressIn={() => animateNotif(1.1)}
               onPressOut={() => animateNotif(1)}
+              onPress={handleNotifications}
               activeOpacity={0.8}
             >
               <MaterialCommunityIcons name="bell" size={24} color="#6F42C1" />
