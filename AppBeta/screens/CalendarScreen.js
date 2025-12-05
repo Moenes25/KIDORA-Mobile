@@ -39,7 +39,7 @@ export default function CalendarScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header with Back Button (same position as MapScreen) */}
+      {/* Header with Back Button */}
       <SafeAreaView style={styles.safeHeader}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -49,7 +49,7 @@ export default function CalendarScreen({ navigation }) {
             <Feather name="arrow-left" size={26} color="#6F42C1" />
           </TouchableOpacity>
 
-          <Text style={styles.headerTitle}></Text>
+          <Text style={styles.headerTitle}>Calendar</Text>
 
           <View style={{ width: 44 }} />
         </View>
@@ -91,55 +91,62 @@ export default function CalendarScreen({ navigation }) {
         </View>
       </LinearGradient>
 
-      {/* Event List */}
-      <ScrollView style={styles.eventList} showsVerticalScrollIndicator={false}>
-        <View style={styles.eventHeader}>
-          <Text style={styles.eventCount}>2 tasks 4 lessons</Text>
-          <Text style={styles.eventDate}>
-            Wednesday {selectedDate.getDate()}
-          </Text>
-        </View>
-
-        {events.map((event, index) => (
-          <View key={index} style={styles.eventCardWrapper}>
-            <LinearGradient
-              colors={event.color}
-              style={styles.eventCard}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <View style={styles.eventTimeRow}>
-                <Text style={styles.eventTime}>{event.time}</Text>
-                <Feather name="chevron-right" size={20} color="#fff" opacity={0.7} />
-              </View>
-
-              <View style={styles.eventIcon}>
-                {event.title === "Literature" && (
-                  <Feather name="book-open" size={20} color="#fff" />
-                )}
-                {event.title === "Math" && (
-                  <Feather name="calculator" size={20} color="#fff" />
-                )}
-                {event.title === "Design" && (
-                  <Feather name="pen-tool" size={20} color="#fff" />
-                )}
-              </View>
-
-              <Text style={styles.eventTitle}>{event.title}</Text>
-              <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
-            </LinearGradient>
+      {/* Event List - Now with curved top that overlaps the calendar */}
+      <View style={styles.eventListContainer}>
+        <ScrollView 
+          style={styles.eventList} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.eventListContent}
+        >
+          <View style={styles.eventHeader}>
+            <Text style={styles.eventCount}>2 tasks • 4 lessons</Text>
+            <Text style={styles.eventDate}>
+              Wednesday {selectedDate.getDate()}
+            </Text>
           </View>
-        ))}
 
-        {/* Spare Time Note */}
-        <View style={styles.spareTimeCard}>
-          <Text style={styles.spareTimeText}>
-             spare time: from 12:00 – 13:00
-          </Text>
-        </View>
+          {events.map((event, index) => (
+            <View key={index} style={styles.eventCardWrapper}>
+              <LinearGradient
+                colors={event.color}
+                style={styles.eventCard}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <View style={styles.eventTimeRow}>
+                  <Text style={styles.eventTime}>{event.time}</Text>
+                  <Feather name="chevron-right" size={20} color="#fff" opacity={0.7} />
+                </View>
 
-        <View style={{ height: 100 }} />
-      </ScrollView>
+                <View style={styles.eventIcon}>
+                  {event.title === "Literature" && (
+                    <Feather name="book-open" size={20} color="#fff" />
+                  )}
+                  {event.title === "Math" && (
+                    <Feather name="calculator" size={20} color="#fff" />
+                  )}
+                  {event.title === "Design" && (
+                    <Feather name="pen-tool" size={20} color="#fff" />
+                  )}
+                </View>
+
+                <Text style={styles.eventTitle}>{event.title}</Text>
+                <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
+              </LinearGradient>
+            </View>
+          ))}
+
+          {/* Spare Time Note */}
+          <View style={styles.spareTimeCard}>
+            <Feather name="coffee" size={18} color="#E53935" style={{ marginBottom: 8 }} />
+            <Text style={styles.spareTimeText}>
+              ☕ Spare time: 12:00 – 13:00
+            </Text>
+          </View>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -147,7 +154,7 @@ export default function CalendarScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#6F42C1",
   },
   safeHeader: {
     backgroundColor: "#fff",
@@ -159,6 +166,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
+    backgroundColor: "#fff",
   },
   backButton: {
     width: 44,
@@ -174,14 +182,13 @@ const styles = StyleSheet.create({
     color: "#6F42C1",
     flex: 1,
     textAlign: "center",
-    marginRight: 44,
   },
 
   // Dark Calendar Header
   calendarHeader: {
     paddingTop: 20,
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 32,
   },
   monthPicker: {
     flexDirection: "row",
@@ -201,7 +208,7 @@ const styles = StyleSheet.create({
   },
   weekDayText: {
     fontSize: 14,
-    color: "#888",
+    color: "rgba(255,255,255,0.6)",
     width: 40,
     textAlign: "center",
   },
@@ -229,42 +236,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   normalDateText: {
-    color: "#aaa",
+    color: "rgba(255,255,255,0.7)",
     fontSize: 15,
   },
   selectedDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#6F42C1",
+    backgroundColor: "#fff",
     marginTop: 4,
   },
 
-  // Events
+  // Events Container with curved top
+  eventListContainer: {
+    flex: 1,
+    backgroundColor: "#fbf7ff",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    marginTop: -16,
+    overflow: "hidden",
+  },
   eventList: {
     flex: 1,
   },
+  eventListContent: {
+    paddingTop: 8,
+  },
   eventHeader: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 20,
+    paddingTop: 24,
   },
   eventCount: {
     fontSize: 14,
     color: "#999",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   eventDate: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
-    color: "#000",
+    color: "#2c2c2c",
   },
   eventCardWrapper: {
     marginHorizontal: 20,
     marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   eventCard: {
     borderRadius: 20,
-    padding: 16,
+    padding: 18,
     paddingLeft: 20,
   },
   eventTimeRow: {
@@ -277,18 +301,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#fff",
     opacity: 0.9,
+    fontWeight: "500",
   },
   eventIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "rgba(255,255,255,0.25)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
   },
   eventTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 4,
@@ -300,16 +325,24 @@ const styles = StyleSheet.create({
   },
   spareTimeCard: {
     marginHorizontal: 20,
-    padding: 16,
+    marginTop: 8,
+    padding: 18,
     backgroundColor: "#fff",
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#ddd",
+    borderWidth: 2,
+    borderColor: "#FFE5E5",
     borderStyle: "dashed",
+    alignItems: "center",
+    shadowColor: "#E53935",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   spareTimeText: {
     fontSize: 14,
     color: "#E53935",
     textAlign: "center",
+    fontWeight: "600",
   },
 });
