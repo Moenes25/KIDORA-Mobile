@@ -1,8 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Animated, ActivityIndicator, Alert, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Animated,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../api/api";
 import { Feather, Ionicons } from "@expo/vector-icons";
+
+// ──────────────────────────────────────────────────────────────
+// Static test credentials (for demo/offline APK)
+// ──────────────────────────────────────────────────────────────
+const TEST_EMAIL = "mrdjebbi@gmail.com";
+const TEST_PASSWORD = "26318943";
 
 export default function LoginSc({ navigation }) {
   const [email, setEmail] = useState("");
@@ -29,27 +46,68 @@ export default function LoginSc({ navigation }) {
     ]).start();
   }, []);
 
+  const handleStaticLogin = async () => {
+    // Hard-coded mock user data (adjust as needed)
+    const mockUser = {
+      id: "static-001",
+      email: TEST_EMAIL,
+      name: "Mr Djebbi",
+      username: "mrdjebbi",
+    };
+
+    const mockToken = "static-jwt-token-for-demo-purposes-only";
+
+    await AsyncStorage.setItem("token", mockToken);
+    await AsyncStorage.setItem("user", JSON.stringify(mockUser));
+
+    // Optionally create a static profile
+    try {
+      await api.post("/profile/create", {
+        username: mockUser.username,
+        name: mockUser.name,
+        userEmail: mockUser.email,
+        profession: "",
+        DOB: "",
+        titleline: "",
+        about: "",
+        img: "",
+      });
+    } catch (e) {
+      console.log("Static profile creation skipped (offline mode)");
+    }
+
+    navigation.replace("HomeScreen", { user: mockUser });
+  };
+
   const onLogin = async () => {
-    // Validation
     if (!email || !password) {
       Alert.alert("Error", "Please enter email and password.");
       return;
     }
 
+    // ────── Static / Demo login bypass ──────
+    if (email.trim().toLowerCase() === TEST_EMAIL && password === TEST_PASSWORD) {
+      setLoading(true);
+      // Simulate small delay for realism
+      setTimeout(() => {
+        handleStaticLogin();
+        setLoading(false);
+      }, 800);
+      return;
+    }
+
+    // ────── Normal API login (for production) ──────
     setLoading(true);
     try {
-      // Login request
       const response = await api.post("/auth/login", { email, password });
-      console.log("Login success:", response.data);
 
-      // Save token and user data
       if (response.data && response.data.token) {
         await AsyncStorage.setItem("token", response.data.token);
         await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
 
         const user = response.data.user;
 
-        // Optional: Create/update profile
+        // Optional profile creation (keep your existing logic)
         try {
           const username = email.split("@")[0];
           await api.post("/profile/create", {
@@ -66,17 +124,18 @@ export default function LoginSc({ navigation }) {
           console.log("Profile creation skipped:", profileErr.message);
         }
 
-        // Navigate to home
         navigation.replace("HomeScreen", { user });
       }
     } catch (err) {
-      console.log("Login error:", err.response?.data || err.message);
-      
-      const errorMsg = err.response?.data?.message || 
-                       err.response?.data || 
-                       "Login failed. Please check your credentials.";
-      
-      Alert.alert("Login Error", typeof errorMsg === 'string' ? errorMsg : "Invalid credentials");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data ||
+        "Login failed. Please check your credentials.";
+
+      Alert.alert(
+        "Login Error",
+        typeof errorMsg === "string" ? errorMsg : "Invalid credentials"
+      );
     } finally {
       setLoading(false);
     }
@@ -84,18 +143,18 @@ export default function LoginSc({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Animated.View 
+        <Animated.View
           style={[
             styles.content,
             {
               opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }]
-            }
+              transform: [{ translateY: slideAnim }],
+            },
           ]}
         >
           {/* Logo */}
@@ -105,11 +164,9 @@ export default function LoginSc({ navigation }) {
             resizeMode="contain"
           />
 
-          {/* Title */}
           <Text style={styles.title}>Log In</Text>
           <Text style={styles.subtitle}>Login to your Kidora account</Text>
 
-          {/* Form Container */}
           <View style={styles.formContainer}>
             {/* Email Input */}
             <View style={styles.inputContainer}>
@@ -148,16 +205,16 @@ export default function LoginSc({ navigation }) {
             </View>
 
             {/* Forgot Password */}
-            <TouchableOpacity onPress={() => {/* Navigate to forgot password */}}>
+            <TouchableOpacity onPress={() => {}}>
               <Text style={styles.forgotPassword}>
                 Forgot Password? <Text style={styles.forgotPasswordLink}>Recover it</Text>
               </Text>
             </TouchableOpacity>
 
             {/* Login Button */}
-            <TouchableOpacity 
-              style={[styles.loginBtn, loading && styles.disabledBtn]} 
-              onPress={onLogin} 
+            <TouchableOpacity
+              style={[styles.loginBtn, loading && styles.disabledBtn]}
+              onPress={onLogin}
               disabled={loading}
             >
               {loading ? (
@@ -167,14 +224,13 @@ export default function LoginSc({ navigation }) {
               )}
             </TouchableOpacity>
 
-            {/* Divider */}
+            {/* Divider & Social Buttons remain unchanged */}
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>or</Text>
               <View style={styles.dividerLine} />
             </View>
 
-            {/* Social Login Buttons */}
             <TouchableOpacity style={styles.socialBtn}>
               <Ionicons name="logo-apple" size={24} color="#1a1a1a" />
               <Text style={styles.socialBtnText}>Continue with Apple</Text>
@@ -190,8 +246,7 @@ export default function LoginSc({ navigation }) {
               <Text style={styles.socialBtnText}>Continue with Facebook</Text>
             </TouchableOpacity>
 
-            {/* Sign Up Link */}
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => navigation.navigate("Registerv1")}
               style={styles.signupContainer}
             >
@@ -206,42 +261,15 @@ export default function LoginSc({ navigation }) {
   );
 }
 
+/* Styles remain exactly the same as your original code */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingVertical: 40,
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 30,
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#1a1a1a",
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 30,
-  },
-  formContainer: {
-    width: "100%",
-    maxWidth: 400,
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
+  scrollContent: { flexGrow: 1, justifyContent: "center", paddingVertical: 40 },
+  content: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 30 },
+  logo: { width: 80, height: 80, marginBottom: 20 },
+  title: { fontSize: 32, fontWeight: "bold", color: "#1a1a1a", marginBottom: 8 },
+  subtitle: { fontSize: 16, color: "#666", marginBottom: 30 },
+  formContainer: { width: "100%", maxWidth: 400 },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -253,26 +281,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
-  inputIcon: {
-    marginRight: 10,
-    color: "#666",
-  },
-  input: {
-    flex: 1,
-    color: "#1a1a1a",
-    fontSize: 16,
-    paddingVertical: 12,
-  },
-  forgotPassword: {
-    textAlign: "center",
-    color: "#666",
-    fontSize: 14,
-    marginBottom: 20,
-  },
-  forgotPasswordLink: {
-    color: "#6F42C1",
-    fontWeight: "600",
-  },
+  inputIcon: { marginRight: 10, color: "#666" },
+  input: { flex: 1, color: "#1a1a1a", fontSize: 16, paddingVertical: 12 },
+  forgotPassword: { textAlign: "center", color: "#666", fontSize: 14, marginBottom: 20 },
+  forgotPasswordLink: { color: "#6F42C1", fontWeight: "600" },
   loginBtn: {
     backgroundColor: "#6F42C1",
     paddingVertical: 16,
@@ -280,30 +292,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  disabledBtn: {
-    backgroundColor: "#9C77D9",
-    opacity: 0.7,
-  },
-  loginBtnText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#e0e0e0",
-  },
-  dividerText: {
-    color: "#666",
-    paddingHorizontal: 15,
-    fontSize: 14,
-  },
+  disabledBtn: { backgroundColor: "#9C77D9", opacity: 0.7 },
+  loginBtnText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  divider: { flexDirection: "row", alignItems: "center", marginVertical: 20 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: "#e0e0e0" },
+  dividerText: { color: "#666", paddingHorizontal: 15, fontSize: 14 },
   socialBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -315,22 +308,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 12,
   },
-  socialBtnText: {
-    color: "#1a1a1a",
-    fontSize: 16,
-    fontWeight: "500",
-    marginLeft: 10,
-  },
-  signupContainer: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  signupText: {
-    color: "#666",
-    fontSize: 14,
-  },
-  signupLink: {
-    color: "#6F42C1",
-    fontWeight: "600",
-  },
+  socialBtnText: { color: "#1a1a1a", fontSize: 16, fontWeight: "500", marginLeft: 10 },
+  signupContainer: { marginTop: 20, alignItems: "center" },
+  signupText: { color: "#666", fontSize: 14 },
+  signupLink: { color: "#6F42C1", fontWeight: "600" },
 });
