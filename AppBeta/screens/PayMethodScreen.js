@@ -8,15 +8,19 @@ import {
   Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useTheme } from "../context/ThemeContext";
 
 // Import your logos from assets
 import MastercardLogo from "../assets/mastercard.png";
 import VisaLogo from "../assets/visa.png";
 import D17Logo from "../assets/D17.png";
 import FlouciLogo from "../assets/flouci.png";
-import PayoneerLogo from "../assets/payoneer.png"; // Add Payoneer logo
+import PayoneerLogo from "../assets/payoneer.png";
 
 export default function PayMethodScreen({ visible, onClose }) {
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
+
   if (!visible) return null;
 
   // Example primary card data
@@ -35,70 +39,93 @@ export default function PayMethodScreen({ visible, onClose }) {
         onPress={onClose}
         activeOpacity={1}
       >
-        <TouchableOpacity style={styles.sheet} activeOpacity={1}>
+        <TouchableOpacity 
+          style={[styles.sheet, { backgroundColor: colors.card }]} 
+          activeOpacity={1}
+        >
           
           {/* TITLE */}
           <View style={styles.titleRow}>
-            <Text style={styles.title}>Choose payment method</Text>
+            <Text style={[styles.title, { color: colors.primary }]}>Choose payment method</Text>
             <TouchableOpacity onPress={onClose}>
-              <Feather name="x" size={24} color="#5a2e84" />
+              <Feather name="x" size={24} color={colors.primary} />
             </TouchableOpacity>
           </View>
 
           {/* CREDIT & DEBIT CARDS SECTION */}
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>Credit & Debit Card</Text>
+            <Text style={[styles.sectionLabel, { color: colors.primary }]}>Credit & Debit Card</Text>
           </View>
 
           {/* CURRENT CARD */}
-          <TouchableOpacity style={styles.cardItem}>
+          <TouchableOpacity 
+            style={[
+              styles.cardItem, 
+              { backgroundColor: isDark ? colors.sidebarItemBg : "#f5f5f5" }
+            ]}
+          >
             <Image source={cardLogo} style={styles.cardLogo} resizeMode="contain" />
 
             <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={styles.cardTitle}>{primaryCard.name}</Text>
-              <Text style={styles.cardSubtitle}>•••• {primaryCard.number}</Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{primaryCard.name}</Text>
+              <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>•••• {primaryCard.number}</Text>
             </View>
 
-            <View style={styles.primaryTag}>
+            <View style={[styles.primaryTag, { backgroundColor: colors.primary }]}>
               <Text style={styles.primaryText}>Primary</Text>
             </View>
           </TouchableOpacity>
 
           {/* ADD NEW CARD */}
-          <TouchableOpacity style={styles.addBtn}>
+          <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]}>
             <Feather name="plus" size={20} color="white" />
             <Text style={styles.addBtnText}>Add new card</Text>
           </TouchableOpacity>
 
           {/* OTHER PAYMENT METHODS */}
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionLabel, { marginTop: 0 }]}>Or pay with</Text>
+            <Text style={[styles.sectionLabel, { marginTop: 0, color: colors.primary }]}>Or pay with</Text>
           </View>
 
           {/* D17 */}
-          <TouchableOpacity style={styles.altMethod}>
+          <TouchableOpacity 
+            style={[
+              styles.altMethod, 
+              { backgroundColor: isDark ? colors.sidebarItemBg : "#f5f5f5" }
+            ]}
+          >
             <Image source={D17Logo} style={styles.altLogo} resizeMode="contain" />
             <View style={{ marginLeft: 12 }}>
-              <Text style={styles.altTitle}>D17</Text>
-              <Text style={styles.altDesc}>Poste office card</Text>
+              <Text style={[styles.altTitle, { color: colors.text }]}>D17</Text>
+              <Text style={[styles.altDesc, { color: colors.textSecondary }]}>Poste office card</Text>
             </View>
           </TouchableOpacity>
 
           {/* FLOUCI */}
-          <TouchableOpacity style={styles.altMethod}>
+          <TouchableOpacity 
+            style={[
+              styles.altMethod, 
+              { backgroundColor: isDark ? colors.sidebarItemBg : "#f5f5f5" }
+            ]}
+          >
             <Image source={FlouciLogo} style={styles.altLogo} resizeMode="contain" />
             <View style={{ marginLeft: 12 }}>
-              <Text style={styles.altTitle}>Flouci</Text>
-              <Text style={styles.altDesc}>Digital wallet</Text>
+              <Text style={[styles.altTitle, { color: colors.text }]}>Flouci</Text>
+              <Text style={[styles.altDesc, { color: colors.textSecondary }]}>Digital wallet</Text>
             </View>
           </TouchableOpacity>
 
           {/* PAYONEER */}
-          <TouchableOpacity style={styles.altMethod}>
+          <TouchableOpacity 
+            style={[
+              styles.altMethod, 
+              { backgroundColor: isDark ? colors.sidebarItemBg : "#f5f5f5" }
+            ]}
+          >
             <Image source={PayoneerLogo} style={styles.altLogo} resizeMode="contain" />
             <View style={{ marginLeft: 12 }}>
-              <Text style={styles.altTitle}>Payoneer</Text>
-              <Text style={styles.altDesc}>Global payment service</Text>
+              <Text style={[styles.altTitle, { color: colors.text }]}>Payoneer</Text>
+              <Text style={[styles.altDesc, { color: colors.textSecondary }]}>Global payment service</Text>
             </View>
           </TouchableOpacity>
 
@@ -111,12 +138,11 @@ export default function PayMethodScreen({ visible, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.25)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
   },
 
   sheet: {
-    backgroundColor: "white",
     padding: 20,
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
@@ -134,7 +160,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     textAlign: "center",
-    color: "#5a2e84",
   },
 
   sectionHeader: {
@@ -146,14 +171,12 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#6F42C1",
     marginLeft: 6,
   },
 
   cardItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
     padding: 14,
     borderRadius: 12,
     marginTop: 10,
@@ -171,12 +194,10 @@ const styles = StyleSheet.create({
 
   cardSubtitle: {
     fontSize: 13,
-    color: "#777",
     marginTop: 4,
   },
 
   primaryTag: {
-    backgroundColor: "#6F42C1",
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 8,
@@ -192,7 +213,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#6F42C1",
     paddingVertical: 10,
     borderRadius: 12,
     marginTop: 12,
@@ -209,7 +229,6 @@ const styles = StyleSheet.create({
   altMethod: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
     padding: 14,
     borderRadius: 12,
     marginTop: 12,
@@ -228,7 +247,6 @@ const styles = StyleSheet.create({
 
   altDesc: {
     fontSize: 13,
-    color: "#777",
     marginTop: 2,
   },
 });

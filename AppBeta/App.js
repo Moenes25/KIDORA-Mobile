@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ThemeProvider } from './context/ThemeContext';
-
 // Import all screens
 import Login from './screens/LoginSc';
 import Registerv1 from './screens/Registerv1';
@@ -21,6 +20,7 @@ import PaymentsScreen from './screens/PaymentsScreen';
 import AppearanceScreen from './screens/AppearanceScreen';
 import LanguageScreen from './screens/LanguageScreen';
 import AboutUsScreen from './screens/AboutUsScreen';
+import ChildrenAreaScreen from './screens/ChildrenAreaScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +51,7 @@ export default function App() {
             <Stack.Screen name="AppearanceScreen" component={AppearanceScreen} />
             <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
             <Stack.Screen name="AboutUsScreen" component={AboutUsScreen} />
+            <Stack.Screen name="ChildrenAreaScreen" component={ChildrenAreaScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

@@ -1,51 +1,77 @@
+// context/ThemeColors.js — FINAL & PERFECT
 export const LightTheme = {
   background: "#fbf7ff",
-  card: "white",
-  text: "#6F42C1", // used for calendar text
-  cardText: "white", // used for card texts
+  card: "#ffffff",
+  text: "#2c2c2c",
+  textSecondary: "#666666",
+  primary: "#6F42C1",
   headerGradient: ["#6F42C1", "#9b59b6"],
-  shadow: "rgba(0,0,0,0.1)",
+  sidebarGradient: ["#6F42C1", "#9b59b6"],
+  sidebarText: "#ffffff",
+  sidebarIconBg: "#ffffff",
+  sidebarItemBg: "rgba(255,255,255,0.1)",
+  bgGradient: ["#fbf7ff", "#f0e8ff"], // Soft violet gradient
+  childrenArea: {
+    gradient1: ['#a78bfa', '#f472b6', '#fb923c'],
+    gradient2: ['#60a5fa', '#a78bfa', '#f472b6'],
+    gradient3: ['#60a5fa', '#6366f1', '#8b5cf6'],
+    gradient4: ['#fbbf24', '#fb923c', '#f87171'],
+    gradient5: ['#a78bfa', '#f472b6', '#f87171'],
+    gradient6: ['#34d399', '#10b981', '#059669'],
+    gradient7: ['#fb923c', '#f87171', '#f472b6'],
+    badgeText: '#6F42C1',
+    cardBg: '#ffffff',
+    cardText: '#1f2937',
+    cardTextSecondary: '#6b7280',
+  },
 
-  // Metric Cards
-  metricChildren: "rgba(110, 190, 252, 0.7)",
-  metricTasks: "rgba(55, 224, 178, 0.7)",
-  metricPerformance: "rgba(255, 140, 97, 0.7)",
-
-  // Child Card performance gradients
-  childGood: ["#6FCF97", "#27AE60"],
-  childMedium: ["#F2C94C", "#F2994A"],
-  childLow: ["#EB5757", "#E53935"],
-
-  // Task bar
-  taskBarBackground: "rgba(255,255,255,0.3)",
-  taskBarProgress: "white",
-
-  // Sub Card Background
-  subCard: "#f5f5f5",
+  // MAP COLORS — Clean & grouped
+  map: {
+    pinColor: "#E91E63",
+    routeColor: "#6F42C1",
+    labelBg: "rgba(255,255,255,0.98)",
+    labelText: "#2c2c2c",
+  },
 };
 
 export const DarkTheme = {
-  background: "#121212",
-  card: "#2a2a2a",
-  text: "#d9c9ff", // used for calendar text
-  cardText: "#f3e8ff", // used for card texts
-  headerGradient: ["#3b2061", "#5d3d8a"],
-  shadow: "rgba(255,255,255,0.1)",
+  background: "#0a0a1a",
+  card: "rgba(0, 0, 0, 0.6)", // Dark with 60% opacity - adaptable to background
+  cardSolid: "#1a1a2e", // Solid fallback if needed
+  text: "#e0d4ff",
+  textSecondary: "#b0a8d9",
+  bgGradient: ["#0a0a1a", "#0f0f1f"], // Pure dark gradient - NO purple tones
+  primary: "#050307ff",
+  headerGradient: ["#1a1a2e", "#2d1b69"], // Header keeps purple for accent
+  sidebarGradient: ["#1a1a2e", "#050017ff"], // Sidebar keeps purple for accent
+  sidebarText: "#e6d9ff",
+  sidebarIconBg: "rgba(255,255,255,0.15)",
+  sidebarItemBg: "rgba(255,255,255,0.08)",
 
-  // Metric Cards
-  metricChildren: "rgba(50, 130, 210, 0.7)",
-  metricTasks: "rgba(50, 210, 160, 0.7)",
-  metricPerformance: "rgba(220, 100, 80, 0.7)",
-
-  // Child Card performance gradients
-  childGood: ["#4CAF70", "#219653"],
-  childMedium: ["#F2C94C", "#F2994A"],
-  childLow: ["#EB5757", "#E53935"],
-
-  // Task bar
-  taskBarBackground: "rgba(255,255,255,0.2)",
-  taskBarProgress: "#fff",
-
-  // Sub Card Background
-  subCard: "#454444",
+  // Card opacity variations for different contexts
+  cardLight: "rgba(0, 0, 0, 0.4)", // Light cards - 40% opacity
+  cardMedium: "rgba(0, 0, 0, 0.6)", // Medium cards - 60% opacity
+  cardHeavy: "rgba(0, 0, 0, 0.8)", // Heavy cards - 80% opacity
+  childrenArea: {
+    // Keep gradients colorful for visual appeal in kids area
+    gradient1: ['#a78bfa', '#f472b6', '#fb923c'],
+    gradient2: ['#60a5fa', '#a78bfa', '#f472b6'],
+    gradient3: ['#60a5fa', '#6366f1', '#8b5cf6'],
+    gradient4: ['#fbbf24', '#fb923c', '#f87171'],
+    gradient5: ['#a78bfa', '#f472b6', '#f87171'],
+    gradient6: ['#34d399', '#10b981', '#059669'],
+    gradient7: ['#fb923c', '#f87171', '#f472b6'],
+    // Cards use dark with opacity
+    cardBg: 'rgba(0, 0, 0, 0.6)', // 60% opacity
+    badgeText: '#f6f5f7ff',
+    cardText: '#ffffff',
+    cardTextSecondary: '#e0d4ff',
+  },
+  // MAP COLORS — Clean & grouped
+  map: {
+    pinColor: "#FF4081",
+    routeColor: "#07010fff",
+    labelBg: "rgba(0, 0, 0, 0.85)",
+    labelText: "#e6d9ff",
+  },
 };
