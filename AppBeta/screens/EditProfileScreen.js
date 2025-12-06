@@ -7,21 +7,28 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  StatusBar,
   Platform,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "../context/ThemeContext";
 
 export default function EditProfileScreen({ navigation, route }) {
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
+  
   const user = route.params?.user || {};
 
   const [avatar, setAvatar] = useState(
     user.avatar || require("../assets/default_avatar.jpg")
   );
   const [form, setForm] = useState({
-    fullname: user.fullname || "",
+    fullname: user.fullname || user.firstname && user.lastname
+      ? `${user.firstname} ${user.lastname}`
+      : "Omar Djebbi",
     email: user.email || "",
     phone: user.phone || "",
     address: user.address || "",
@@ -33,7 +40,7 @@ export default function EditProfileScreen({ navigation, route }) {
   };
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
@@ -45,202 +52,279 @@ export default function EditProfileScreen({ navigation, route }) {
     }
   };
 
+  const shadowColor = isDark ? "#2d1b69" : "#000";
+
   return (
-    <View style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        translucent={true}
-        backgroundColor="transparent"
+    <View style={{ flex: 1 }}>
+      <View 
+        style={{ 
+          height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
+          backgroundColor: "white" 
+        }} 
       />
+      <LinearGradient colors={colors.bgGradient} style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
+          <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Gradient Header */}
-        <LinearGradient colors={["#6F42C1", "#9b59b6"]} style={styles.header}>
-          <View style={styles.headerRow}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Ionicons name="chevron-back" size={28} color="white" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Edit Profile</Text>
-            <View style={{ width: 28 }} />
-          </View>
+          <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+            {/* Header - Dark with opacity in dark theme */}
+            {isDark ? (
+              <View 
+                style={[
+                  styles.header,
+                  {
+                    backgroundColor: colors.cardHeavy,
+                    shadowColor: shadowColor,
+                    shadowOpacity: 0.4,
+                  }
+                ]}
+              >
+                <View style={styles.headerTop}>
+                  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+                    <Ionicons name="arrow-back" size={26} color="#fff" />
+                  </TouchableOpacity>
+                  <Text style={styles.headerTitle}>Modifier le profil</Text>
+                  <View style={{ width: 40 }} />
+                </View>
 
-          <View style={styles.avatarContainer}>
-            <Image source={avatar} style={styles.avatar} />
-            <TouchableOpacity style={styles.addAvatarBtn} onPress={pickImage}>
-              <Ionicons name="add" size={20} color="white" />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
+                {/* Avatar with Floating Edit Button */}
+                <View style={styles.avatarWrapper}>
+                  <Image source={avatar} style={styles.avatar} />
+                  <TouchableOpacity 
+                    style={[styles.cameraOverlay, { backgroundColor: colors.primary }]} 
+                    onPress={pickImage}
+                  >
+                    <Ionicons name="camera" size={24} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <LinearGradient 
+                colors={colors.headerGradient} 
+                style={[
+                  styles.header,
+                  {
+                    shadowColor: shadowColor,
+                    shadowOpacity: 0.2,
+                  }
+                ]}
+              >
+                <View style={styles.headerTop}>
+                  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+                    <Ionicons name="arrow-back" size={26} color="#fff" />
+                  </TouchableOpacity>
+                  <Text style={styles.headerTitle}>Modifier le profil</Text>
+                  <View style={{ width: 40 }} />
+                </View>
 
-        {/* Form Fields */}
-        {[
-          { label: "Full Name", key: "fullname", icon: "person-outline" },
-          { label: "Email", key: "email", icon: "mail-outline" },
-          { label: "Phone", key: "phone", icon: "call-outline" },
-          { label: "Address", key: "address", icon: "location-outline" },
-          { label: "Occupation", key: "occupation", icon: "briefcase-outline" },
-        ].map((item) => (
-          <View key={item.key} style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>{item.label}</Text>
-            <View style={styles.inputRow}>
-              <TextInput
-                style={styles.input}
-                value={form[item.key]}
-                onChangeText={(text) => handleChange(item.key, text)}
-                placeholderTextColor="#999"
-              />
-              <Ionicons
-                name={item.icon}
-                size={22}
-                color="#6F42C1"
-                style={styles.inputIcon}
-              />
+                {/* Avatar with Floating Edit Button */}
+                <View style={styles.avatarWrapper}>
+                  <Image source={avatar} style={styles.avatar} />
+                  <TouchableOpacity 
+                    style={[styles.cameraOverlay, { backgroundColor: colors.primary }]} 
+                    onPress={pickImage}
+                  >
+                    <Ionicons name="camera" size={24} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              </LinearGradient>
+            )}
+
+            {/* Form Section */}
+            <View 
+              style={[
+                styles.formCard, 
+                { 
+                  backgroundColor: isDark ? colors.cardMedium : colors.card,
+                  shadowColor: shadowColor,
+                  shadowOpacity: isDark ? 0.4 : 0.15,
+                }
+              ]}
+            >
+              {[
+                { label: "Nom complet", key: "fullname", icon: "person-outline" },
+                { label: "Email", key: "email", icon: "mail-outline" },
+                { label: "Téléphone", key: "phone", icon: "call-outline" },
+                { label: "Adresse", key: "address", icon: "location-outline" },
+                { label: "Profession", key: "occupation", icon: "briefcase-outline" },
+              ].map((field) => (
+                <View key={field.key} style={styles.inputGroup}>
+                  <Text style={[styles.inputLabel, { color: isDark ? "#e0d4ff" : colors.primary }]}>{field.label}</Text>
+                  <View 
+                    style={[
+                      styles.inputWrapper, 
+                      {
+                        backgroundColor: isDark ? colors.cardLight : "#f9f7ff",
+                        borderColor: isDark ? "rgba(255,255,255,0.1)" : "#e0d4ff",
+                      }
+                    ]}
+                  >
+                    <Ionicons 
+                      name={field.icon} 
+                      size={20} 
+                      color={isDark ? "#e0d4ff" : colors.primary} 
+                      style={styles.inputIcon} 
+                    />
+                    <TextInput
+                      style={[styles.textInput, { color: isDark ? "#ffffff" : colors.text }]}
+                      value={form[field.key]}
+                      onChangeText={(text) => handleChange(field.key, text)}
+                      placeholder={`Entrer ${field.label.toLowerCase()}`}
+                      placeholderTextColor={colors.textSecondary}
+                    />
+                  </View>
+                </View>
+              ))}
             </View>
-          </View>
-        ))}
 
-        {/* Action Buttons */}
-        <View style={styles.buttonsRow}>
-          <TouchableOpacity
-            style={[styles.btn, styles.saveBtn]}
-            onPress={() => {
-              console.log("Save pressed", form);
-              // TODO: Implement save logic
-            }}
-          >
-            <Ionicons name="checkmark-outline" size={20} color="white" />
-            <Text style={styles.btnText}>Save</Text>
-          </TouchableOpacity>
+            {/* Action Buttons */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[
+                  styles.saveButton, 
+                  { 
+                    backgroundColor: isDark ? "#7c3aed" : colors.primary,
+                    shadowColor: isDark ? "#7c3aed" : colors.primary,
+                  }
+                ]} 
+                onPress={() => console.log("Saved:", form, avatar)}
+              >
+                <Ionicons name="checkmark" size={24} color="#fff" />
+                <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.btn, styles.discardBtn]}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="close-outline" size={20} color="#333" />
-            <Text style={[styles.btnText, { color: "#333" }]}>Discard</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+              <TouchableOpacity 
+                style={[
+                  styles.cancelButton, 
+                  { backgroundColor: isDark ? colors.cardLight : "#f1f1f1" }
+                ]} 
+                onPress={() => navigation.goBack()}
+              >
+                <Text style={[styles.cancelButtonText, { color: isDark ? "#b0a8d9" : colors.textSecondary }]}>Annuler</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-  
-    flex: 1,
-    backgroundColor: "#fbf7ff",
-  },
-  content: {
-    paddingBottom: 30,
-    alignItems: "center",
-  },
+  container: { flex: 1 },
+
   header: {
-    width: "100%",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight + 20 : 50,
-    paddingBottom: 30,
+    paddingTop: 20,
+    paddingBottom: 40,
     alignItems: "center",
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 12,
     elevation: 8,
-    marginBottom: 25,
   },
-  headerRow: {
+  headerTop: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 30,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "white",
-  },
-  avatarContainer: {
-    position: "relative",
-  },
+  backBtn: { padding: 8 },
+  headerTitle: { fontSize: 22, fontWeight: "700", color: "#fff" },
+
+  avatarWrapper: { position: "relative" },
   avatar: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    borderWidth: 4,
-    borderColor: "white",
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 5,
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 12,
   },
-  addAvatarBtn: {
+  cameraOverlay: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#6F42C1",
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: "center",
+    bottom: 8,
+    right: 8,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: "center",
-    borderWidth: 3,
-    borderColor: "white",
+    alignItems: "center",
+    borderWidth: 4,
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
   },
-  inputContainer: {
-    width: "90%",
-    marginBottom: 16,
+
+  formCard: {
+    marginTop: -20,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    padding: 24,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 20,
+    elevation: 12,
   },
+
+  inputGroup: { marginBottom: 20 },
   inputLabel: {
     fontSize: 14,
-    color: "#6F42C1",
     fontWeight: "600",
-    marginBottom: 6,
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
-  inputRow: {
+  inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 5,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
+    borderWidth: 1.5,
   },
-  input: {
+  inputIcon: { marginRight: 12 },
+  textInput: {
     flex: 1,
-    height: 50,
     fontSize: 16,
-    color: "#333",
   },
-  inputIcon: {
+
+  buttonContainer: {
+    marginHorizontal: 20,
+    marginTop: 30,
+    marginBottom: 40,
+  },
+  saveButton: {
+    flexDirection: "row",
+    paddingVertical: 16,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 10,
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "700",
     marginLeft: 10,
   },
-  buttonsRow: {
-    flexDirection: "row",
-    width: "90%",
-    marginTop: 30,
-    gap: 12,
-  },
-  btn: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+  cancelButton: {
+    marginTop: 12,
     paddingVertical: 14,
-    borderRadius: 14,
-    gap: 8,
+    borderRadius: 16,
+    alignItems: "center",
   },
-  saveBtn: {
-    backgroundColor: "#6F42C1",
-  },
-  discardBtn: {
-    backgroundColor: "#e0e0e0",
-  },
-  btnText: {
-    color: "white",
-    fontWeight: "600",
+  cancelButtonText: {
     fontSize: 16,
+    fontWeight: "600",
   },
 });

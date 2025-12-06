@@ -1,104 +1,81 @@
-"use client"
-
-import { useState, useEffect, useRef } from "react"
+// screens/MapScreen.js — DEEP PURPLE COSMIC THEME
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  StyleSheet,
-  TouchableOpacity,
   Text,
+  StyleSheet,
   ScrollView,
+  TouchableOpacity,
   Alert,
   Platform,
   StatusBar,
-  
-} from "react-native"
-import { Feather } from "@expo/vector-icons"
-import MapView, { Marker, Polyline, PROVIDER_DEFAULT } from "react-native-maps"
-import * as Location from "expo-location"
-import polyline from "@mapbox/polyline"
-import { supabase } from "../utils/supabase.js"
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import MapView, { Marker, Polyline } from "react-native-maps";
+import * as Location from "expo-location";
+import polyline from "@mapbox/polyline";
+import { supabase } from "../utils/supabase.js";
+import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from "../context/ThemeContext";
+
+// Reusable TopNavBar
+import TopNavBar from "../components/TopNavBar";
 
 export default function MapScreen({ navigation, route }) {
-  const mapRef = useRef(null)
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
+  const mapRef = useRef(null);
 
-  const [parentLocation, setParentLocation] = useState(null)
-  const [childLocation, setChildLocation] = useState(null)
-  const [childBattery, setChildBattery] = useState(null)
-  const [lastUpdated, setLastUpdated] = useState(null)
-  const [routeCoordinates, setRouteCoordinates] = useState([])
-  const [distance, setDistance] = useState(null)
-  const [duration, setDuration] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [parentLocation, setParentLocation] = useState(null);
+  const [childLocation, setChildLocation] = useState(null);
+  const [childBattery, setChildBattery] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [distance, setDistance] = useState(null);
+  const [duration, setDuration] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Safe child name – prevents the Text error
-  const childName = route?.params?.childName
-    ? String(route.params.childName).trim()
-    : "My Child"
+  const childName = route?.params?.childName?.trim() || "My Child";
+  const childId = route?.params?.childId || "child_1";
 
-  const childId = route?.params?.childId || "child_1"
-
-  // ─── Parent Location with better error handling ───
+  // Get parent location
   useEffect(() => {
-    const init = async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync()
-        if (status !== "granted") {
-          Alert.alert("Permission denied", "Location permission is required")
-          setLoading(false)
-          return
-        }
-
-        const loc = await Location.getCurrentPositionAsync({ 
-          accuracy: Location.Accuracy.High,
-          timeout: 10000,
-          maximumAge: 1000,
-        })
-        setParentLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude })
-        setLoading(false)
-
-        Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 10 },
-          (l) => setParentLocation({ latitude: l.coords.latitude, longitude: l.coords.longitude })
-        )
-      } catch (error) {
-        console.error("Location error:", error)
-        Alert.alert("Location Error", "Could not get your location. Please check your device settings.")
-        setLoading(false)
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission denied", "Location access is required");
+        setLoading(false);
+        return;
       }
-    }
-    init()
-  }, [])
+      const loc = await Location.getCurrentPositionAsync({});
+      setParentLocation({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+      setLoading(false);
+    })();
+  }, []);
 
-  // ─── Supabase Realtime Child Location with error handling ───
+  // Supabase realtime child location
   useEffect(() => {
-    if (!childId) return
+    if (!childId) return;
 
     const fetchInitial = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("child_locations")
-          .select("*")
-          .eq("child_id", childId)
-          .order("timestamp", { ascending: false })
-          .limit(1)
-          .maybeSingle()
+      const { data } = await supabase
+        .from("child_locations")
+        .select("*")
+        .eq("child_id", childId)
+        .order("timestamp", { ascending: false })
+        .limit(1)
+        .single();
 
-        if (error) {
-          console.error("Supabase error:", error)
-          return
-        }
-
-        if (data) {
-          setChildLocation({ latitude: data.latitude, longitude: data.longitude })
-          setChildBattery(data.battery_level)
-          setLastUpdated(new Date(data.timestamp).toLocaleTimeString())
-        }
-      } catch (error) {
-        console.error("Fetch error:", error)
+      if (data) {
+        setChildLocation({ latitude: data.latitude, longitude: data.longitude });
+        setChildBattery(data.battery_level);
+        setLastUpdated(new Date(data.timestamp).toLocaleTimeString());
       }
-    }
-    fetchInitial()
+    };
+    fetchInitial();
 
     const subscription = supabase
       .channel("child_locations_channel")
@@ -111,472 +88,490 @@ export default function MapScreen({ navigation, route }) {
           filter: `child_id=eq.${childId}`,
         },
         (payload) => {
-          const n = payload.new
-          setChildLocation({ latitude: n.latitude, longitude: n.longitude })
-          setChildBattery(n.battery_level)
-          setLastUpdated(new Date(n.timestamp).toLocaleTimeString())
+          const n = payload.new;
+          setChildLocation({ latitude: n.latitude, longitude: n.longitude });
+          setChildBattery(n.battery_level);
+          setLastUpdated(new Date(n.timestamp).toLocaleTimeString());
         }
       )
-      .subscribe()
+      .subscribe();
 
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [childId])
+    return () => subscription.unsubscribe();
+  }, [childId]);
 
-  // ─── Route Calculation ───
+  // Route calculation
   useEffect(() => {
-    if (parentLocation && childLocation) fetchRoute()
-  }, [parentLocation, childLocation])
+    if (parentLocation && childLocation) fetchRoute();
+  }, [parentLocation, childLocation]);
 
   const fetchRoute = async () => {
-    if (!parentLocation || !childLocation) return
+    if (!parentLocation || !childLocation) return;
 
     try {
-      const url = `http://router.project-osrm.org/route/v1/driving/${parentLocation.longitude},${parentLocation.latitude};${childLocation.longitude},${childLocation.latitude}?overview=full&geometries=polyline`
-      const res = await fetch(url)
-      const json = await res.json()
+      const url = `http://router.project-osrm.org/route/v1/driving/${parentLocation.longitude},${parentLocation.latitude};${childLocation.longitude},${childLocation.latitude}?overview=full&geometries=polyline`;
+      const res = await fetch(url);
+      const json = await res.json();
 
       if (json.routes?.length) {
-        const points = polyline.decode(json.routes[0].geometry)
-        const coords = points.map((p) => ({ latitude: p[0], longitude: p[1] }))
-        setRouteCoordinates(coords)
-        setDistance((json.routes[0].distance / 1000).toFixed(1))
-        setDuration(Math.ceil(json.routes[0].duration / 60))
+        const points = polyline.decode(json.routes[0].geometry);
+        const coords = points.map((p) => ({ latitude: p[0], longitude: p[1] }));
+        setRouteCoordinates(coords);
+        setDistance((json.routes[0].distance / 1000).toFixed(1));
+        setDuration(Math.ceil(json.routes[0].duration / 60));
 
         mapRef.current?.fitToCoordinates(coords, {
           edgePadding: { top: 100, right: 80, bottom: 400, left: 80 },
           animated: true,
-        })
+        });
       }
     } catch (e) {
-      console.error("Route error:", e)
       const dist = calculateDistance(
         parentLocation.latitude,
         parentLocation.longitude,
         childLocation.latitude,
         childLocation.longitude
-      )
-      setDistance(dist.toFixed(1))
-      setDuration(Math.ceil(dist * 2))
-      setRouteCoordinates([parentLocation, childLocation])
+      );
+      setDistance(dist.toFixed(1));
+      setDuration(Math.ceil(dist * 2));
+      setRouteCoordinates([parentLocation, childLocation]);
     }
-  }
+  };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371
-    const dLat = ((lat2 - lat1) * Math.PI) / 180
-    const dLon = ((lon2 - lon1) * Math.PI) / 180
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
     const a =
       Math.sin(dLat / 2) ** 2 +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    return R * c
-  }
+      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const shadowColor = isDark ? "#2d1b69" : "#000";
 
   if (loading || !parentLocation) {
     return (
-      <View style={styles.loadingContainer}>
-        <Feather name="map-pin" size={48} color="#6F42C1" />
-        <Text style={styles.loadingText}>Loading map...</Text>
+      <View style={styles.container}>
+        <View 
+          style={{ 
+            height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
+            backgroundColor: "white" 
+          }} 
+        />
+        <LinearGradient colors={colors.bgGradient} style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Feather name="map-pin" size={48} color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.text }]}>Loading map...</Text>
+        </LinearGradient>
       </View>
-    )
+    );
   }
 
   return (
     <View style={styles.container}>
-      {/* Header with safe area */}
-      <SafeAreaView style={styles.safeHeader}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Feather name="arrow-left" size={26} color="#6F42C1" />
-          </TouchableOpacity>
+      <View 
+        style={{ 
+          height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
+          backgroundColor: "white" 
+        }} 
+      />
+      <LinearGradient colors={colors.bgGradient} style={{ flex: 1 }}>
+      <TopNavBar title={`Tracking ${childName}`} navigation={navigation} />
 
-          <Text style={styles.headerTitle}>Tracking {childName}</Text>
-
-          <View style={{ width: 44 }} />
-        </View>
-      </SafeAreaView>
-
-      {/* Map Container with gradient background */}
-      <View style={styles.mapWrapper}>
-        <MapView
-          ref={mapRef}
-          provider={PROVIDER_DEFAULT}
-          style={styles.map}
-          showsUserLocation={true}
-          showsMyLocationButton={false}
-          initialRegion={{
-            latitude: parentLocation.latitude,
-            longitude: parentLocation.longitude,
-            latitudeDelta: 0.02,
-            longitudeDelta: 0.02,
-          }}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Map Card */}
+        <View 
+          style={[
+            styles.mapCard,
+            {
+              shadowColor: shadowColor,
+              shadowOpacity: isDark ? 0.5 : 0.12,
+            }
+          ]}
         >
-          {/* Child marker */}
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            showsUserLocation={true}
+            showsMyLocationButton={false}
+            initialRegion={{
+              latitude: parentLocation.latitude,
+              longitude: parentLocation.longitude,
+              latitudeDelta: 0.02,
+              longitudeDelta: 0.02,
+            }}
+          >
+            {childLocation && (
+              <Marker coordinate={childLocation} title={`${childName}'s Location`}>
+                <View style={[styles.childMarker, { backgroundColor: colors.map.pinColor }]}>
+                  <View style={[styles.childMarkerInner, { backgroundColor: colors.map.pinColor }]} />
+                  <View style={[styles.markerTriangle, { 
+                    borderTopColor: colors.map.pinColor,
+                  }]} />
+                </View>
+              </Marker>
+            )}
+            {routeCoordinates.length > 0 && (
+              <Polyline 
+                coordinates={routeCoordinates} 
+                strokeColor={colors.map.routeColor} 
+                strokeWidth={5} 
+              />
+            )}
+          </MapView>
+
+          {/* Floating Label */}
           {childLocation && (
-            <Marker coordinate={childLocation} title={`${childName}'s Location`}>
-              <View style={styles.childMarker}>
-                <View style={styles.childMarkerInner} />
-                <View style={styles.markerTriangle} />
-              </View>
-            </Marker>
+            <View style={[styles.floatingLabel, { backgroundColor: colors.map.labelBg }]}>
+              <View style={[styles.labelDot, { backgroundColor: colors.map.pinColor }]} />
+              <Text style={[styles.labelText, { color: colors.map.labelText }]}>{childName}</Text>
+            </View>
           )}
+        </View>
 
-          {/* Route */}
-          {routeCoordinates.length > 0 && (
-            <Polyline coordinates={routeCoordinates} strokeColor="#6F42C1" strokeWidth={4} />
-          )}
-        </MapView>
-
-        {/* Child floating label */}
-        {childLocation && (
-          <View style={[styles.locationLabel, styles.childLocationLabel]}>
-            <View style={styles.labelDot} />
-            <Text style={styles.labelText}>{childName}</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Content with curved top */}
-      <View style={styles.contentContainer}>
-        <ScrollView 
-          contentContainerStyle={styles.scrollContent} 
-          showsVerticalScrollIndicator={false}
+        {/* Distance & Time */}
+        <View 
+          style={[
+            styles.infoCard, 
+            { 
+              backgroundColor: colors.card,
+              shadowColor: shadowColor,
+              shadowOpacity: isDark ? 0.4 : 0.08,
+            }
+          ]}
         >
-          <View style={styles.timeCard}>
-            <View style={styles.distanceHeader}>
-              <Feather name="navigation" size={24} color="#6F42C1" />
-              <View style={styles.distanceContent}>
-                <Text style={styles.timeNumber}>
-                  {distance ? `${distance} km away` : "Calculating..."}
+          <View style={styles.distanceRow}>
+            <Feather name="navigation" size={26} color={colors.primary} />
+            <View style={styles.distanceText}>
+              <Text style={[styles.distanceMain, { color: colors.text }]}>
+                {distance ? `${distance} km away` : "Calculating distance..."}
+              </Text>
+              <Text style={[styles.distanceSub, { color: colors.textSecondary }]}>
+                {duration ? `~${duration} min by car` : "Getting route..."}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Child Safety Card */}
+        <View 
+          style={[
+            styles.safetyCard, 
+            { 
+              backgroundColor: colors.card,
+              shadowColor: shadowColor,
+              shadowOpacity: isDark ? 0.4 : 0.08,
+            }
+          ]}
+        >
+          <View style={styles.safetyRow}>
+            <View style={[
+              styles.shieldIcon, 
+              { backgroundColor: isDark ? "rgba(76, 175, 80, 0.2)" : "#E8F5E9" }
+            ]}>
+              <Feather name="shield" size={26} color="#4CAF50" />
+            </View>
+            <View style={styles.safetyInfo}>
+              <Text style={[styles.safetyTitle, { color: colors.text }]}>{childName} is safe</Text>
+              <View style={styles.safetyDetail}>
+                <Feather name="clock" size={14} color={colors.textSecondary} />
+                <Text style={[styles.detailText, { color: colors.textSecondary }]}>
+                  Updated: {lastUpdated || "Just now"}
                 </Text>
-                <Text style={styles.timeSubtitle}>
-                  {duration ? `About ${duration} minutes travel time` : "Getting route..."}
+              </View>
+              <View style={styles.safetyDetail}>
+                <Feather name="battery-charging" size={14} color={colors.textSecondary} />
+                <Text style={[styles.detailText, { color: colors.textSecondary }]}>
+                  Battery: {childBattery !== null ? `${childBattery}%` : "—"}
                 </Text>
               </View>
             </View>
           </View>
+        </View>
 
-          <View style={styles.pricingCard}>
-            <View style={styles.priceRow}>
-              <View style={[styles.priceIcon, { backgroundColor: "#E8F5E9" }]}>
-                <Feather name="shield" size={22} color="#4CAF50" />
-              </View>
-              <View style={styles.priceContent}>
-                <Text style={styles.priceTitle}>{childName} is safe</Text>
-                <View style={styles.infoRow}>
-                  <Feather name="clock" size={14} color="#888" />
-                  <Text style={styles.priceSubtext}>Updated: {lastUpdated || "Just now"}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Feather name="battery-charging" size={14} color="#888" />
-                  <Text style={styles.priceSubtext}>
-                    Battery: {childBattery !== null ? `${childBattery}%` : "Unknown"}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
+       {/* Quick Actions */}
+<View 
+  style={[
+    styles.actionsCard, 
+    { 
+      backgroundColor: colors.card,
+      shadowColor: shadowColor,
+      shadowOpacity: isDark ? 0.4 : 0.08,
+    }
+  ]}
+>
+  <Text style={[styles.actionsTitle, { color: colors.text }]}>Quick Actions</Text>
+  <View style={styles.actionButtonsRow}>
+    <TouchableOpacity 
+      style={[
+        styles.actionBtn, 
+        { 
+          backgroundColor: isDark ? colors.sidebarItemBg : "#f8f5ff",
+          borderColor: isDark ? colors.sidebarIconBg : "#e8e0ff",
+        }
+      ]}
+    >
+      <Feather name="phone" size={20} color={isDark ? "#FFFFFF" : colors.primary} />
+      <Text style={[styles.actionBtnText, { color: isDark ? "#FFFFFF" : colors.primary }]}>Call</Text>
+    </TouchableOpacity>
 
-          <View style={styles.tipCard}>
-            <View style={styles.tipHeader}>
-              <Text style={styles.tipTitle}>Quick Actions</Text>
-              <Text style={styles.tipSubtitle}>Tap to perform action</Text>
-            </View>
+    <TouchableOpacity 
+      style={[
+        styles.actionBtn, 
+        { 
+          backgroundColor: isDark ? colors.sidebarItemBg : "#f8f5ff",
+          borderColor: isDark ? colors.sidebarIconBg : "#e8e0ff",
+        }
+      ]}
+    >
+      <Feather name="message-circle" size={20} color={isDark ? "#FFFFFF" : colors.primary} />
+      <Text style={[styles.actionBtnText, { color: isDark ? "#FFFFFF" : colors.primary }]}>Message</Text>
+    </TouchableOpacity>
 
-            <View style={styles.tipOptions}>
-              <TouchableOpacity style={styles.actionButton}>
-                <Feather name="phone" size={18} color="#6F42C1" />
-                <Text style={styles.actionButtonText}>Call</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
-                <Feather name="message-circle" size={18} color="#6F42C1" />
-                <Text style={styles.actionButtonText}>Message</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
-                <Feather name="bell" size={18} color="#6F42C1" />
-                <Text style={styles.actionButtonText}>Alert</Text>
-              </TouchableOpacity>
-            </View>
+    <TouchableOpacity 
+      style={[
+        styles.actionBtn, 
+        { 
+          backgroundColor: isDark ? colors.sidebarItemBg : "#f8f5ff",
+          borderColor: isDark ? colors.sidebarIconBg : "#e8e0ff",
+        }
+      ]}
+    >
+      <Feather name="bell" size={20} color={isDark ? "#FFFFFF" : colors.primary} />
+      <Text style={[styles.actionBtnText, { color: isDark ? "#FFFFFF" : colors.primary }]}>Alert</Text>
+    </TouchableOpacity>
+  </View>
 
-            <View style={styles.checkboxRow}>
-              <View style={styles.statusIndicator}>
-                <View style={styles.statusDot} />
-              </View>
-              <Text style={styles.checkboxText}>Location sharing active</Text>
-            </View>
-          </View>
+  <View style={[styles.activeStatus, { borderTopColor: isDark ? colors.sidebarItemBg : "#f0f0f0" }]}>
+    <View style={styles.statusDot} />
+    <Text style={[styles.statusText, { color: colors.textSecondary }]}>Location sharing active</Text>
+  </View>
+</View>
 
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.shareButton}>
-              <Feather name="compass" size={20} color="#fff" />
-              <Text style={styles.buttonText}>Navigate</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.paymentButton}>
-              <Feather name="clock" size={20} color="#6F42C1" />
-              <Text style={styles.shareText}>History</Text>
-            </TouchableOpacity>
-          </View>
+{/* Bottom Buttons – Fixed History Button Color */}
+<View style={styles.bottomButtons}>
+  <TouchableOpacity 
+    style={[
+      styles.navigateBtn, 
+      { 
+        backgroundColor: colors.primary,
+        shadowColor: shadowColor,
+        shadowOpacity: isDark ? 0.5 : 0.2,
+      }
+    ]}
+  >
+    <Feather name="compass" size={22} color="#fff" />
+    <Text style={styles.navigateText}>Navigate</Text>
+  </TouchableOpacity>
 
-          <View style={{ height: 60 }} />
-        </ScrollView>
-      </View>
+  <TouchableOpacity 
+    style={[
+      styles.historyBtn, 
+      { 
+        backgroundColor: colors.card,
+        borderColor: colors.primary,
+        shadowColor: shadowColor,
+        shadowOpacity: isDark ? 0.4 : 0.08,
+      }
+    ]}
+  >
+    <Feather name="clock" size={22} color={isDark ? "#FFFFFF" : colors.primary} />
+    <Text style={[styles.historyText, { color: isDark ? "#FFFFFF" : colors.primary }]}>History</Text>
+  </TouchableOpacity>
+</View>
+
+        <View style={{ height: 100 }} />
+      </ScrollView>
+      </LinearGradient>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#6F42C1" },
-  safeHeader: {
-    backgroundColor: "#ffffff",
+  container: {
+    flex: 1,
   },
-  header: {
-    marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  mapCard: {
+    marginHorizontal: 16,
+    marginTop: 20,
+    height: 340,
+    borderRadius: 24,
+    overflow: "hidden",
+    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
   },
-  backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#f5f5f5",
+  map: { flex: 1 },
+  childMarker: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#6F42C1",
-    flex: 1,
-    textAlign: "center",
-  },
-  mapWrapper: { 
-    width: "100%", 
-    height: 340, 
-    position: "relative",
-    backgroundColor: "#fbf7ff",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
-  map: { 
-    flex: 1,
-    borderRadius: 24,
-    overflow: "hidden",
-  },
-  childMarker: { alignItems: "center" },
   childMarkerInner: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#E91E63",
-    borderWidth: 4,
-    borderColor: "#ffffff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
+    width: 15,
+    height: 15,
+    borderRadius: 7.5,
+    borderWidth: 2,
+    borderColor: "#fff",
   },
   markerTriangle: {
+    position: "absolute",
+    bottom: -8,
     width: 0,
     height: 0,
-    backgroundColor: "transparent",
-    borderStyle: "solid",
-    borderLeftWidth: 8,
-    borderRightWidth: 8,
-    borderTopWidth: 12,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 8,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderTopColor: "#E91E63",
-    marginTop: -4,
   },
-  locationLabel: {
+  floatingLabel: {
     position: "absolute",
-    backgroundColor: "rgba(255,255,255,0.98)",
-    paddingVertical: 8,
+    top: 20,
+    right: 20,
     paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 6,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  childLocationLabel: { top: 30, right: 30 },
-  labelDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#E91E63",
-    marginRight: 8,
-  },
-  labelText: { fontSize: 14, fontWeight: "700", color: "#2c2c2c" },
-  
-  contentContainer: {
-    flex: 1,
-    backgroundColor: "#fbf7ff",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    marginTop: -16,
-    overflow: "hidden",
-  },
-  scrollContent: { paddingTop: 8 },
-  
-  timeCard: { 
-    marginHorizontal: 20, 
-    marginTop: 20,
-    marginBottom: 12, 
-    padding: 18, 
-    backgroundColor: "#fff", 
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 4,
   },
-  distanceHeader: {
-    flexDirection: "row",
-    alignItems: "center",
+  labelDot: { 
+    width: 10, 
+    height: 10, 
+    borderRadius: 5, 
+    marginRight: 8 
   },
-  distanceContent: {
-    marginLeft: 12,
-    flex: 1,
+  labelText: { 
+    fontSize: 15, 
+    fontWeight: "700" 
   },
-  timeNumber: { fontSize: 20, fontWeight: "700", color: "#2c2c2c", marginBottom: 4 },
-  timeSubtitle: { fontSize: 14, color: "#999" },
-  
-  pricingCard: { 
+
+  infoCard: { 
     marginHorizontal: 20, 
-    marginBottom: 12, 
+    marginTop: 16, 
     padding: 18, 
-    backgroundColor: "#fff", 
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    borderRadius: 20, 
     elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
   },
-  priceRow: { flexDirection: "row", alignItems: "flex-start" },
-  priceIcon: { 
-    width: 48, 
-    height: 48, 
-    borderRadius: 14, 
+  distanceRow: { flexDirection: "row", alignItems: "center" },
+  distanceText: { marginLeft: 16, flex: 1 },
+  distanceMain: { fontSize: 20, fontWeight: "700" },
+  distanceSub: { fontSize: 14, marginTop: 4 },
+
+  safetyCard: { 
+    marginHorizontal: 20, 
+    marginTop: 12, 
+    padding: 18, 
+    borderRadius: 20, 
+    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+  },
+  safetyRow: { flexDirection: "row" },
+  shieldIcon: { 
+    width: 56, 
+    height: 56, 
+    borderRadius: 16, 
     justifyContent: "center", 
-    alignItems: "center", 
-    marginRight: 14 
+    alignItems: "center" 
   },
-  priceContent: { flex: 1 },
-  priceTitle: { fontSize: 17, fontWeight: "700", color: "#2c2c2c", marginBottom: 8 },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 6,
-  },
-  priceSubtext: { fontSize: 13, color: "#666", marginLeft: 6 },
-  
-  tipCard: { 
+  safetyInfo: { marginLeft: 16, flex: 1 },
+  safetyTitle: { fontSize: 18, fontWeight: "700" },
+  safetyDetail: { flexDirection: "row", alignItems: "center", marginTop: 8 },
+  detailText: { fontSize: 14, marginLeft: 8 },
+
+  actionsCard: { 
     marginHorizontal: 20, 
-    marginBottom: 16, 
-    padding: 18, 
-    backgroundColor: "#fff", 
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    marginTop: 12, 
+    padding: 20, 
+    borderRadius: 20, 
     elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
   },
-  tipHeader: { marginBottom: 16 },
-  tipTitle: { fontSize: 17, fontWeight: "700", color: "#2c2c2c", marginBottom: 4 },
-  tipSubtitle: { fontSize: 13, color: "#999" },
-  tipOptions: { flexDirection: "row", gap: 10, marginBottom: 16 },
-  actionButton: { 
-    flex: 1,
+  actionsTitle: { fontSize: 18, fontWeight: "700", marginBottom: 16 },
+  actionButtonsRow: { 
     flexDirection: "row", 
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12, 
-    paddingHorizontal: 12, 
-    borderRadius: 14, 
-    backgroundColor: "#f8f5ff", 
-    borderWidth: 1.5, 
-    borderColor: "#e8e0ff", 
-    gap: 6 
+    justifyContent: "space-between", 
+    marginBottom: 16 
   },
-  actionButtonText: { fontSize: 14, fontWeight: "600", color: "#6F42C1" },
-  checkboxRow: { 
+  actionBtn: { 
+    flex: 1, 
+    alignItems: "center", 
+    paddingVertical: 14, 
+    borderRadius: 16, 
+    borderWidth: 1.5, 
+    marginHorizontal: 6 
+  },
+  actionBtnText: { marginTop: 8, fontSize: 14, fontWeight: "600" },
+  activeStatus: { 
     flexDirection: "row", 
     alignItems: "center", 
     paddingTop: 16, 
-    borderTopWidth: 1, 
-    borderTopColor: "#f0f0f0" 
+    borderTopWidth: 1 
   },
-  statusIndicator: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "#E8F5E9",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 10,
+  statusDot: { 
+    width: 10, 
+    height: 10, 
+    borderRadius: 5, 
+    backgroundColor: "#4CAF50", 
+    marginRight: 10 
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#4CAF50",
+  statusText: { fontSize: 14, fontWeight: "500" },
+
+  bottomButtons: { 
+    flexDirection: "row", 
+    marginHorizontal: 20, 
+    marginTop: 20, 
+    gap: 12 
   },
-  checkboxText: { fontSize: 14, color: "#666", fontWeight: "500" },
-  
-  actionButtons: { flexDirection: "row", marginHorizontal: 20, gap: 12, marginBottom: 20 },
-  shareButton: { 
+  navigateBtn: { 
     flex: 1, 
     flexDirection: "row", 
     alignItems: "center", 
     justifyContent: "center", 
-    paddingVertical: 16, 
-    backgroundColor: "#6F42C1", 
+    paddingVertical: 18, 
     borderRadius: 16, 
-    gap: 10,
-    shadowColor: "#6F42C1",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
     elevation: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
   },
-  buttonText: { fontSize: 16, fontWeight: "700", color: "#fff" },
-  paymentButton: { 
+  navigateText: { 
+    color: "#fff", 
+    fontSize: 17, 
+    fontWeight: "700", 
+    marginLeft: 10 
+  },
+  historyBtn: { 
     flex: 1, 
     flexDirection: "row", 
     alignItems: "center", 
     justifyContent: "center", 
-    paddingVertical: 16, 
-    backgroundColor: "#fff", 
+    paddingVertical: 18, 
     borderRadius: 16, 
-    gap: 10,
-    borderWidth: 2,
-    borderColor: "#6F42C1",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    borderWidth: 2, 
     elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
   },
-  shareText: { fontSize: 16, fontWeight: "700", color: "#6F42C1" },
-  
-  loadingContainer: { 
-    flex: 1, 
-    justifyContent: "center", 
-    alignItems: "center", 
-    backgroundColor: "#fbf7ff" 
+  historyText: { 
+    fontSize: 17, 
+    fontWeight: "700", 
+    marginLeft: 10 
   },
-  loadingText: { fontSize: 16, color: "#666", marginTop: 16, fontWeight: "500" },
-})
+
+  loadingText: { 
+    fontSize: 16, 
+    marginTop: 16, 
+    fontWeight: "500" 
+  },
+});

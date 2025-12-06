@@ -1,8 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../context/ThemeContext";
 
 export default function BottomNav({ navigation, activeScreen = "home" }) {
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
+  
   const [active, setActive] = useState(activeScreen);
 
   // Animated values for each icon
@@ -52,10 +56,9 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
         navigation.navigate("HomeScreen");
         break;
       case "people":
-        navigation.navigate("ChildrenListScreen"); // replace with your screen if needed
+        navigation.navigate("ChildrenListScreen");
         break;
       case "clipboard":
-        //navigation.navigate("TasksScreen"); // replace with your screen
         alert("Tasks Screen coming soon!");
         break;
       case "person":
@@ -75,11 +78,14 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
         <Animated.View
           style={[
             styles.iconWrapper,
-            isActive && styles.activeIconWrapper,
+            isActive && [
+              styles.activeIconWrapper,
+              { backgroundColor: isDark ? "#7c3aed" : "#6F42C1" }
+            ],
             {
               transform: [
                 { scale: animations[key] },
-                { translateY: isActive ? -8 : 0 }, // lifted when active
+                { translateY: isActive ? -8 : 0 },
               ],
             },
           ]}
@@ -87,7 +93,7 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
           <Ionicons
             name={iconName}
             size={isActive ? 26 : 24}
-            color={isActive ? "white" : "#6F42C1"}
+            color={isActive ? "white" : (isDark ? "#e0d4ff" : "#6F42C1")}
           />
         </Animated.View>
       </TouchableOpacity>
@@ -95,7 +101,15 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View 
+      style={[
+        styles.container,
+        { 
+          backgroundColor: isDark ? colors.cardHeavy : "#fbf7ff",
+          borderTopColor: isDark ? "rgba(255,255,255,0.1)" : "#eee",
+        }
+      ]}
+    >
       {renderIcon("home", "home")}
       {renderIcon("people", "people")}
       {renderIcon("clipboard", "game-controller")}
@@ -110,9 +124,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "#fbf7ff",
     borderTopWidth: 1,
-    borderTopColor: "#eee",
     elevation: 10,
   },
 
@@ -125,7 +137,6 @@ const styles = StyleSheet.create({
   },
 
   activeIconWrapper: {
-    backgroundColor: "#6F42C1",
     shadowColor: "#000",
     shadowOpacity: 0.15,
     shadowRadius: 4,

@@ -1,8 +1,21 @@
+// screens/ChildrenListScreen.js — Dark theme with opacity cards
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Platform,
+  StatusBar,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTheme } from "../context/ThemeContext";
+
 import BottomNav from "../components/BottomNav";
 import TopBar from "../components/TopBar";
 import SideBar from "../components/Sidebar";
@@ -10,8 +23,11 @@ import SideBar from "../components/Sidebar";
 const childrenGif = require("../assets/children.gif");
 
 export default function ChildrenListScreen({ navigation, route }) {
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
+
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [lang, setLang] = useState('en');
+  const [lang, setLang] = useState("en");
 
   const user = route?.params?.user || {};
   const username = user?.name || "User";
@@ -54,40 +70,27 @@ export default function ChildrenListScreen({ navigation, route }) {
   ];
 
   const handleNotifications = () => {
-    Alert.alert(
-      "Notifications",
-      "Notifications feature coming soon!",
-      [{ text: "OK" }]
-    );
+    Alert.alert("Notifications", "Coming soon!", [{ text: "OK" }]);
   };
 
   const handleLanguageChange = (newLang) => {
     setLang(newLang);
-    Alert.alert('Language Changed', `Language switched to ${newLang.toUpperCase()}`);
+    Alert.alert("Language Changed", `Switched to ${newLang.toUpperCase()}`);
   };
 
-  const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
-  };
+  const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to log out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Yes",
-          onPress: async () => {
-            await AsyncStorage.removeItem("user");
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Login" }],
-            });
-          },
+  const handleLogout = async () => {
+    Alert.alert("Logout", "Are you sure?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Yes",
+        onPress: async () => {
+          await AsyncStorage.removeItem("user");
+          navigation.reset({ index: 0, routes: [{ name: "Login" }] });
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const getGradient = (performance) => {
@@ -96,9 +99,17 @@ export default function ChildrenListScreen({ navigation, route }) {
     return ["#EB5757", "#E53935"];
   };
 
+  const shadowColor = isDark ? "#2d1b69" : "#000";
+
   return (
     <View style={styles.container}>
-      {/* SideBar */}
+      <View 
+        style={{ 
+          height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
+          backgroundColor: "white" 
+        }} 
+      />
+      <LinearGradient colors={colors.bgGradient} style={{ flex: 1 }}>
       <SideBar
         visible={sidebarVisible}
         onClose={toggleSidebar}
@@ -109,7 +120,6 @@ export default function ChildrenListScreen({ navigation, route }) {
         onNotifications={handleNotifications}
       />
 
-      {/* Top Bar */}
       <TopBar
         onMenuPress={toggleSidebar}
         onNotificationPress={handleNotifications}
@@ -117,67 +127,131 @@ export default function ChildrenListScreen({ navigation, route }) {
         lang={lang}
       />
 
-      {/* Scrollable Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Gradient Header */}
-        <LinearGradient colors={["#6F42C1", "#9b59b6"]} style={styles.header}>
-          <Text style={styles.headerTitle}>My Children</Text>
-          <Image source={childrenGif} style={styles.gif} />
-        </LinearGradient>
+        {/* Header - Dark with opacity in dark theme */}
+        {isDark ? (
+          <View 
+            style={[
+              styles.header,
+              {
+                backgroundColor: colors.cardHeavy,
+                shadowColor: shadowColor,
+                shadowOpacity: 0.4,
+              }
+            ]}
+          >
+            <Text style={styles.headerTitle}>My Children</Text>
+            <Image source={childrenGif} style={styles.gif} resizeMode="contain" />
+          </View>
+        ) : (
+          <LinearGradient 
+            colors={colors.headerGradient} 
+            style={[
+              styles.header,
+              {
+                shadowColor: shadowColor,
+                shadowOpacity: 0.2,
+              }
+            ]}
+          >
+            <Text style={styles.headerTitle}>My Children</Text>
+            <Image source={childrenGif} style={styles.gif} resizeMode="contain" />
+          </LinearGradient>
+        )}
 
         {/* Children List */}
         <View style={styles.listContainer}>
           {children.map((child) => (
             <TouchableOpacity
               key={child.id}
-              style={styles.childCardWrapper}
+              style={[
+                styles.childCardWrapper,
+                {
+                  shadowColor: shadowColor,
+                  shadowOpacity: isDark ? 0.5 : 0.15,
+                }
+              ]}
               onPress={() => navigation.navigate("ChildDetailScreen", { child })}
             >
-              <LinearGradient colors={getGradient(child.performance)} style={styles.childCard}>
-                <View style={styles.childHeader}>
-                  <Image source={child.avatar} style={styles.childAvatar} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.childName}>{child.name}</Text>
-                    <Text style={styles.childInfo}>
-                      Age: {child.age} | Grade: {child.grade} | {child.presence ? "Present" : "Absent"}
-                    </Text>
-                    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
-                      <Feather name="clipboard" size={16} color="white" style={{ marginRight: 6 }} />
-                      <Text style={styles.taskText}>Tasks:</Text>
-                      <View style={styles.taskBarBackground}>
-                        <View
-                          style={[
-                            styles.taskBarProgress,
-                            { width: `${(child.completedTasks / child.totalTasks) * 100}%` },
-                          ]}
-                        />
+              {isDark ? (
+                // Dark theme: dark card with opacity
+                <View style={[styles.childCard, { backgroundColor: colors.cardMedium }]}>
+                  <View style={styles.childHeader}>
+                    <Image source={child.avatar} style={styles.childAvatar} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.childName}>{child.name}</Text>
+                      <Text style={styles.childInfo}>
+                        Age: {child.age} | Grade: {child.grade} | {child.presence ? "Present" : "Absent"}
+                      </Text>
+                      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
+                        <Feather name="clipboard" size={16} color="white" style={{ marginRight: 6 }} />
+                        <Text style={styles.taskText}>Tasks:</Text>
+                        <View style={styles.taskBarBackground}>
+                          <View
+                            style={[
+                              styles.taskBarProgress,
+                              { width: `${(child.completedTasks / child.totalTasks) * 100}%` },
+                            ]}
+                          />
+                        </View>
+                        <Text style={styles.taskNumber}>{child.completedTasks}/{child.totalTasks}</Text>
                       </View>
-                      <Text style={styles.taskNumber}>{child.completedTasks}/{child.totalTasks}</Text>
+                      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                        <Feather name="bar-chart-2" size={16} color="white" style={{ marginRight: 6 }} />
+                        <Text style={styles.performanceText}>Performance: {child.performance}%</Text>
+                      </View>
                     </View>
-                    <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
-                      <Feather name="bar-chart-2" size={16} color="white" style={{ marginRight: 6 }} />
-                      <Text style={styles.performanceText}>Performance: {child.performance}%</Text>
-                    </View>
+                    <Ionicons name="chevron-forward-outline" size={26} color="white" />
                   </View>
-                  <Ionicons name="chevron-forward-outline" size={26} color="white" />
                 </View>
-              </LinearGradient>
+              ) : (
+                // Light theme: colored gradient based on performance
+                <LinearGradient colors={getGradient(child.performance)} style={styles.childCard}>
+                  <View style={styles.childHeader}>
+                    <Image source={child.avatar} style={styles.childAvatar} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.childName}>{child.name}</Text>
+                      <Text style={styles.childInfo}>
+                        Age: {child.age} | Grade: {child.grade} | {child.presence ? "Present" : "Absent"}
+                      </Text>
+                      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
+                        <Feather name="clipboard" size={16} color="white" style={{ marginRight: 6 }} />
+                        <Text style={styles.taskText}>Tasks:</Text>
+                        <View style={styles.taskBarBackground}>
+                          <View
+                            style={[
+                              styles.taskBarProgress,
+                              { width: `${(child.completedTasks / child.totalTasks) * 100}%` },
+                            ]}
+                          />
+                        </View>
+                        <Text style={styles.taskNumber}>{child.completedTasks}/{child.totalTasks}</Text>
+                      </View>
+                      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                        <Feather name="bar-chart-2" size={16} color="white" style={{ marginRight: 6 }} />
+                        <Text style={styles.performanceText}>Performance: {child.performance}%</Text>
+                      </View>
+                    </View>
+                    <Ionicons name="chevron-forward-outline" size={26} color="white" />
+                  </View>
+                </LinearGradient>
+              )}
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
 
-      {/* Bottom Navigation fixed at bottom */}
       <View style={styles.bottomNav}>
         <BottomNav navigation={navigation} activeScreen="people" />
       </View>
+      </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fbf7ff" },
-  scrollContent: { paddingBottom: 100},
+  container: { flex: 1 },
+  scrollContent: { paddingBottom: 100 },
   header: {
     width: "100%",
     paddingTop: 15,
@@ -185,12 +259,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 6,
-  
   },
   headerTitle: {
     fontSize: 22,
@@ -202,24 +273,20 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     resizeMode: "contain",
-    
     marginTop: 0,
   },
   listContainer: {
     paddingHorizontal: 20,
-    
-    
     paddingVertical: 10,
     marginTop: 20,
   },
   childCardWrapper: {
     marginBottom: 15,
-
-    shadowColor: "#000",
+    borderRadius: 20,
+    overflow: "hidden",
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
     shadowRadius: 6,
-    elevation: 4,
+    elevation: 6,
   },
   childCard: {
     borderRadius: 20,
