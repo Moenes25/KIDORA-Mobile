@@ -15,12 +15,15 @@ import EditProfileScreen from './screens/EditProfileScreen';
 import ChangePwdScreen from './screens/ChangePwdScreen';
 import ChildrenListScreen from './screens/ChildrenListScreen';
 import ChildDetailScreen from './screens/ChildDetailsScreen';
-import MapScreen from './screens/MapScreen';
+//import MapScreen from './screens/MapScreen';
 import CalendarScreen from './screens/CalendarScreen';
 import PaymentsScreen from './screens/PaymentsScreen';
 import AppearanceScreen from './screens/AppearanceScreen';
 import LanguageScreen from './screens/LanguageScreen';
 import AboutUsScreen from './screens/AboutUsScreen';
+import ChatNavs from './navigation/ChatNavs';
+import ChatList from './screens/ChatList';
+import ChatScreen from './screens/ChatScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -41,7 +44,8 @@ export default function App() {
             <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
             <Stack.Screen name="HomeScreen" component={HomeScreen} />
             <Stack.Screen name="Calendar" component={CalendarScreen} />
-            <Stack.Screen name="MapScreen" component={MapScreen} />
+            {/* <Stack.Screen name="MapScreen" component={MapScreen} /> */}
+           
             <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
             <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
             <Stack.Screen name="ChangePwdScreen" component={ChangePwdScreen} />
@@ -51,6 +55,7 @@ export default function App() {
             <Stack.Screen name="AppearanceScreen" component={AppearanceScreen} />
             <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
             <Stack.Screen name="AboutUsScreen" component={AboutUsScreen} />
+            <Stack.Screen name="ChatScreen" component={ChatNavs} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

@@ -11,7 +11,7 @@ import CalendarScreen from "./screens/CalendarScreen";
 import ProfileScreen from "./screens/Profile";
 import SidebarApp from "./components/SideBarApp";
 import BottomNavApp from "./components/BottomNavApp";
-
+import ChatNavs from "./navigation/ChatNavs";
 export default function MainApp() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [currentScreen, setCurrentScreen] = useState("home");
@@ -21,6 +21,8 @@ export default function MainApp() {
   const renderScreen = () => {
     switch (currentScreen) {
       case "chat": return <ChatScreen />;
+        case "ChatScreen": return <ChatScreen />;
+        case "ChatNavs": return <ChatScreen />;
       case "HomeScreen": return <HomeScreen />;
        case "MainApp": return <MainApp />;
       case "home": return <HomeScreen />;
@@ -46,7 +48,7 @@ export default function MainApp() {
 
       {renderScreen()}
 
-      <BottomNavApp onNavigate={(s) => setCurrentScreen(s)} />
+      <BottomNavApp navigation={(s) => setCurrentScreen(s)} />
 
       <View
         style={styles.sidebarTriggerArea}
