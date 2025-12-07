@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function BottomNav({ navigation, activeScreen = "home" }) {
+export default function BottomNavV1({ navigation, activeScreen = "home" }) {
   const [active, setActive] = useState(activeScreen);
 
   // Animated values for each icon
@@ -11,7 +11,6 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
     people: useRef(new Animated.Value(1)).current,
     clipboard: useRef(new Animated.Value(1)).current,
     person: useRef(new Animated.Value(1)).current,
-    chat: useRef(new Animated.Value(1)).current,
   };
 
   // Animate the active icon on mount
@@ -52,11 +51,11 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
       case "home":
         navigation.navigate("HomeScreen");
         break;
+       case "chat":
+        navigation.navigate("ChatNavs");
+        break;
       case "people":
         navigation.navigate("ChildrenListScreen"); // replace with your screen if needed
-        break;
-         case "chat":
-        navigation.navigate("ChatScreen");
         break;
       case "clipboard":
         //navigation.navigate("TasksScreen"); // replace with your screen
@@ -101,7 +100,7 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
   return (
     <View style={styles.container}>
       {renderIcon("home", "home")}
-       {renderIcon("chat", "chatbubble")}
+      {renderIcon("chat", "chatbubble")}
       {renderIcon("people", "people")}
       {renderIcon("clipboard", "game-controller")}
       {renderIcon("person", "person")}
