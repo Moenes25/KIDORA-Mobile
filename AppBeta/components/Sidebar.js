@@ -1,4 +1,4 @@
-// components/Sidebar.js — BEAUTIFUL DARK THEME SUPPORT
+// components/Sidebar.js - Full screen with colored sections
 import React from "react";
 import {
   View,
@@ -6,432 +6,357 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  ScrollView,
   Image,
-  Alert,
+  ScrollView,
   Dimensions,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { LinearGradient } from "expo-linear-gradient";
 
 const screenWidth = Dimensions.get("window").width;
 
-export default function SideBar({
-  visible,
-  onClose,
-  username,
-  email,
-  navigation,
-  onLogout,
-  onNotifications,
-}) {
-  const { colors, theme } = useTheme();
-  const isDark = theme === "dark";
+export default function SideBar({ visible, onClose, username, email, navigation, onLogout }) {
+  const { colors } = useTheme();
+  const [pressedShortcut, setPressedShortcut] = React.useState(null);
+  const [pressedRecommend, setPressedRecommend] = React.useState(null);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
-      <LinearGradient colors={colors.sidebarGradient} style={styles.fullScreenSidebar}>
-        {/* Header with Back Button */}
-        <View style={styles.sidebarTopBar}>
-          <TouchableOpacity onPress={onClose} style={styles.backButton}>
-            <Feather name="arrow-left" size={24} color={colors.sidebarText} />
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={styles.fullScreen}>
+        {/* Purple Gradient Top Section */}
+        <LinearGradient colors={colors.headerGradient} style={styles.topSection}>
+          {/* Close button */}
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Ionicons name="close" size={28} color="#ffffff" />
           </TouchableOpacity>
-          <Text style={[styles.sidebarTitle, { color: colors.sidebarText }]}>Menu</Text>
-          <View style={{ width: 40 }} />
-        </View>
 
-        <ScrollView style={styles.sidebarContent} showsVerticalScrollIndicator={false}>
           {/* Profile Section */}
-          <View style={[styles.profileSection, { borderBottomColor: colors.sidebarItemBg }]}>
-            <Image
-              source={require("../assets/omarPicture.jpg")}
-              style={styles.profileAvatar}
-              resizeMode="contain"
+          <View style={styles.profileSection}>
+            <Image 
+              source={require("../assets/default_avatar.jpg")} 
+              style={styles.avatar} 
             />
-            <Text style={[styles.profileName, { color: colors.sidebarText }]}>{username}</Text>
-            <Text style={[styles.profileEmail, { color: colors.sidebarText, opacity: 0.7 }]}>
-              {email || "user@example.com"}
-            </Text>
-            <View style={styles.badges}>
-              <View style={[styles.badge, { backgroundColor: colors.sidebarIconBg }]}>
-                <Text style={[styles.badgeText,{ color: colors.childrenArea.badgeText }]}>Regular</Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: colors.sidebarIconBg }]}>
-                <Text style={[styles.badgeText, { color: colors.childrenArea.badgeText }]}>Verified</Text>
+            <Text style={styles.username}>{username || "User Name"}</Text>
+            <Text style={styles.email}>{email || "user@example.com"}</Text>
+          </View>
+        </LinearGradient>
+
+        {/* White Bottom Section */}
+        <View style={styles.whiteSection}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Shortcuts Section - PURPLE */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>SHORTCUTS</Text>
+              <View style={styles.shortcutGrid}>
+                {[
+                  { icon: "home-outline", label: "Home", screen: "HomeScreen" },
+                  { icon: "people-outline", label: "Children", screen: "ChildrenList" },
+                  { icon: "calendar-outline", label: "Calendar", screen: "Calendar" },
+                  { icon: "location-outline", label: "Map", screen: "MapScreen" },
+                  { icon: "image-outline", label: "Galerie", screen: "GalleryScreen" },
+                ].map((item, index) => {
+                  const isPressed = pressedShortcut === index;
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      style={styles.shortcutItem}
+                      activeOpacity={1}
+                      onPressIn={() => setPressedShortcut(index)}
+                      onPressOut={() => setPressedShortcut(null)}
+                      onPress={() => {
+                        onClose();
+                        navigation.navigate(item.screen);
+                      }}
+                    >
+                      <View style={[
+                        styles.purpleIconCircle,
+                        isPressed && styles.purpleIconCirclePressed
+                      ]}>
+                        <Ionicons 
+                          name={item.icon} 
+                          size={28} 
+                          color={isPressed ? "#ffffff" : "#6F42C1"} 
+                        />
+                      </View>
+                      <Text style={styles.shortcutLabel}>{item.label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
-          </View>
 
-          {/* Shortcut Section */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.sidebarText }]}>Shortcut</Text>
-            <View style={styles.shortcutGrid}>
-              <TouchableOpacity style={styles.shortcutItem} onPress={() => {
-                onClose();
-                Alert.alert("Profile", "Profile screen coming soon!");
-              }}>
-                <View style={[styles.shortcutIcon, { backgroundColor: colors.sidebarIconBg }]}>
-                  <Feather name="user" size={24} color={isDark ? "#fff" : colors.primary} />
-                </View>
-                <Text style={[styles.shortcutText, { color: colors.sidebarText }]}>Profile</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.shortcutItem} onPress={() => {
-                onClose();
-                navigation.navigate("Calendar");
-              }}>
-                <View style={[styles.shortcutIcon, { backgroundColor: colors.sidebarIconBg }]}>
-                  <Feather name="calendar" size={24} color={isDark ? "#fff" : colors.primary} />
-                </View>
-                <Text style={[styles.shortcutText, { color: colors.sidebarText }]}>Calendar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.shortcutItem} onPress={() => {
-                onClose();
-                navigation.navigate("MapScreen");
-              }}>
-                <View style={[styles.shortcutIcon, { backgroundColor: colors.sidebarIconBg }]}>
-                  <Feather name="map" size={24} color={isDark ? "#fff" : colors.primary} />
-                </View>
-                <Text style={[styles.shortcutText, { color: colors.sidebarText }]}>Maps</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.shortcutItem} onPress={() => {
-                onClose();
-                Alert.alert("Settings", "Settings screen coming soon!");
-              }}>
-                <View style={[styles.shortcutIcon, { backgroundColor: colors.sidebarIconBg }]}>
-                  <Feather name="settings" size={24} color={isDark ? "#fff" : colors.primary} />
-                </View>
-                <Text style={[styles.shortcutText, { color: colors.sidebarText }]}>Settings</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Children Area - Featured Section */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.sidebarText }]}>Kids Zone</Text>
-            
-            <TouchableOpacity 
-              style={[styles.featuredCard, { backgroundColor: colors.sidebarItemBg }]} 
-              onPress={() => {
-                onClose();
-                navigation.navigate("ChildrenAreaScreen");
-              }}
-            >
-              <LinearGradient 
-                colors={colors.sidebarGradient} 
-                style={styles.featuredGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+            {/* Kids Zone - GREEN */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>KIDS ZONE</Text>
+              <TouchableOpacity
+                style={styles.kidsZoneCard}
+                onPress={() => {
+                  onClose();
+                  navigation.navigate("ChildrenAreaScreen");
+                }}
               >
-                <View style={styles.featuredContent}>
-                  <View style={styles.featuredLeft}>
-                    <Text style={styles.featuredEmoji}>🎈</Text>
-                    <View>
-                      <Text style={styles.featuredTitle}>عالم الأطفال</Text>
-                      <Text style={styles.featuredSubtitle}>التعلم والمرح معاً</Text>
+                <LinearGradient colors={["#4CAF50", "#27AE60"]} style={styles.kidsZoneGradient}>
+                  <View style={styles.kidsZoneContent}>
+                    <View style={styles.kidsZoneLeft}>
+                      <Text style={styles.kidsZoneEmoji}>🎈</Text>
+                      <View>
+                        <Text style={styles.kidsZoneTitle}>عالم الأطفال</Text>
+                        <Text style={styles.kidsZoneSubtitle}>التعلم والمرح معاً</Text>
+                      </View>
+                    </View>
+                    <View style={styles.kidsZoneArrow}>
+                      <Feather name="arrow-right" size={24} color="#fff" />
                     </View>
                   </View>
-                  <View style={styles.featuredRight}>
-                    <Feather name="arrow-right" size={24} color="#fff" />
-                  </View>
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
 
-          {/* Recommend Section */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.sidebarText }]}>Recommend</Text>
-            
-            <TouchableOpacity 
-              style={[styles.menuListItem, { backgroundColor: colors.sidebarItemBg }]} 
-              onPress={() => {
-                onClose();
-                Alert.alert("Language", "Language selection coming soon!");
-              }}
-            >
-              <View style={[styles.menuListIcon, { backgroundColor: colors.sidebarIconBg }]}>
-                <Feather name="globe" size={22} color={isDark ? "#fff" : colors.primary} />
-              </View>
-              <View style={styles.menuListContent}>
-                <Text style={[styles.menuListTitle, { color: colors.sidebarText }]}>Language</Text>
-                <Text style={[styles.menuListSubtitle, { color: colors.sidebarText, opacity: 0.6 }]}>
-                  Change app language
-                </Text>
-              </View>
-              <Feather name="chevron-right" size={20} color={colors.sidebarText} style={{ opacity: 0.5 }} />
-            </TouchableOpacity>
+            {/* Recommend Section - YELLOW */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>RECOMMEND</Text>
+              {[
+                { icon: "color-palette-outline", label: "Appearance", screen: "AppearanceScreen" },
+                { icon: "notifications-outline", label: "Notifications" },
+                { icon: "help-circle-outline", label: "Help & Support", screen: "HelpSupport" },
+                { icon: "settings-outline", label: "Settings" },
+              ].map((item, index) => {
+                const isPressed = pressedRecommend === index;
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.recommendItem}
+                    activeOpacity={1}
+                    onPressIn={() => setPressedRecommend(index)}
+                    onPressOut={() => setPressedRecommend(null)}
+                    onPress={() => {
+                      onClose();
+                      if (item.screen) navigation.navigate(item.screen);
+                    }}
+                  >
+                    <View style={[
+                      styles.yellowIconCircle,
+                      isPressed && styles.yellowIconCirclePressed
+                    ]}>
+                      <Ionicons 
+                        name={item.icon} 
+                        size={24} 
+                        color={isPressed ? "#ffffff" : "#FFC75F"} 
+                      />
+                    </View>
+                    <Text style={styles.recommendLabel}>{item.label}</Text>
+                    <Ionicons name="chevron-forward" size={20} color="#999999" />
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
 
-            <TouchableOpacity 
-              style={[styles.menuListItem, { backgroundColor: colors.sidebarItemBg }]} 
-              onPress={() => {
-                onClose();
-                onNotifications();
-              }}
-            >
-              <View style={[styles.menuListIcon, { backgroundColor: colors.sidebarIconBg }]}>
-                <Feather name="bell" size={22} color={isDark ? "#fff" : colors.primary} />
-              </View>
-              <View style={styles.menuListContent}>
-                <Text style={[styles.menuListTitle, { color: colors.sidebarText }]}>Notifications</Text>
-                <Text style={[styles.menuListSubtitle, { color: colors.sidebarText, opacity: 0.6 }]}>
-                  Manage notifications
-                </Text>
-              </View>
-              <Feather name="chevron-right" size={20} color={colors.sidebarText} style={{ opacity: 0.5 }} />
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.menuListItem, { backgroundColor: colors.sidebarItemBg }]} 
-              onPress={() => {
-                onClose();
-                Alert.alert("Help & Support", "Support center coming soon!");
-              }}
-            >
-              <View style={[styles.menuListIcon, { backgroundColor: colors.sidebarIconBg }]}>
-                <Feather name="help-circle" size={22} color={isDark ? "#fff" : colors.primary} />
-              </View>
-              <View style={styles.menuListContent}>
-                <Text style={[styles.menuListTitle, { color: colors.sidebarText }]}>Help & Support</Text>
-                <Text style={[styles.menuListSubtitle, { color: colors.sidebarText, opacity: 0.6 }]}>
-                  Get help and support
-                </Text>
-              </View>
-              <Feather name="chevron-right" size={20} color={colors.sidebarText} style={{ opacity: 0.5 }} />
+            {/* Logout Button */}
+            <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
+              <Ionicons name="log-out-outline" size={22} color="#E53935" />
+              <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[styles.menuListItem, { backgroundColor: colors.sidebarItemBg }]} 
-              onPress={() => {
-                onClose();
-                Alert.alert("Settings", "Settings screen coming soon!");
-              }}
-            >
-              <View style={[styles.menuListIcon, { backgroundColor: colors.sidebarIconBg }]}>
-                <Feather name="settings" size={22} color={isDark ? "#fff" : colors.primary} />
-              </View>
-              <View style={styles.menuListContent}>
-                <Text style={[styles.menuListTitle, { color: colors.sidebarText }]}>Settings</Text>
-                <Text style={[styles.menuListSubtitle, { color: colors.sidebarText, opacity: 0.6 }]}>
-                  App preferences
-                </Text>
-              </View>
-              <Feather name="chevron-right" size={20} color={colors.sidebarText} style={{ opacity: 0.5 }} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Logout Button */}
-          <TouchableOpacity 
-            style={[
-              styles.logoutButton,
-              { 
-                backgroundColor: isDark ? "rgba(255, 64, 129, 0.15)" : "rgba(235, 87, 87, 0.3)",
-                borderColor: isDark ? "rgba(255, 64, 129, 0.3)" : "rgba(235, 87, 87, 0.5)"
-              }
-            ]} 
-            onPress={() => {
-              onClose();
-              setTimeout(() => onLogout(), 300);
-            }}
-          >
-            <Feather name="log-out" size={20} color={isDark ? "#FF4081" : "#ff6b6b"} />
-            <Text style={[styles.logoutText, { color: isDark ? "#FF4081" : "#ff6b6b" }]}>Logout</Text>
-          </TouchableOpacity>
-
-          <View style={{ height: 40 }} />
-        </ScrollView>
-      </LinearGradient>
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  fullScreenSidebar: {
+  fullScreen: {
     flex: 1,
-    paddingTop: 40,
+    backgroundColor: "#ffffff",
   },
-  sidebarTopBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.1)",
+  
+  // Purple Top Section
+  topSection: {
+    paddingTop: 60,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    alignItems: "center",
+  closeButton: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
-  },
-  sidebarTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  sidebarContent: {
-    flex: 1,
+    alignItems: "center",
   },
   profileSection: {
     alignItems: "center",
-    paddingVertical: 32,
-    borderBottomWidth: 1,
+    marginTop: 20,
   },
-  profileAvatar: {
+  avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "rgba(255,255,255,0.1)",
     marginBottom: 16,
-    borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderWidth: 4,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
-  profileName: {
-    fontSize: 22,
+  username: {
+    fontSize: 24,
     fontWeight: "700",
-    marginBottom: 6,
+    color: "#ffffff",
+    marginBottom: 4,
   },
-  profileEmail: {
+  email: {
     fontSize: 14,
-    marginBottom: 12,
+    color: "rgba(255, 255, 255, 0.8)",
   },
-  badges: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    backgroundColor: "rgba(242, 201, 76, 0.8)",
-  },
-  badgeVerified: {
-    backgroundColor: "rgba(76, 175, 80, 0.8)",
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: "600",
+
+  // White Bottom Section
+  whiteSection: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -20,
+    paddingTop: 24,
   },
   section: {
-    paddingVertical: 24,
     paddingHorizontal: 20,
+    marginBottom: 32,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 13,
     fontWeight: "700",
+    color: "#999999",
+    letterSpacing: 1,
     marginBottom: 16,
   },
+
+  // Purple Shortcuts
   shortcutGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 16,
+    justifyContent: "space-between",
   },
   shortcutItem: {
-    width: (screenWidth - 72) / 4,
+    width: (screenWidth - 56) / 4,
     alignItems: "center",
+    marginBottom: 20,
   },
-  shortcutIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    alignItems: "center",
+  purpleIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: "rgba(111, 66, 193, 0.15)",
     justifyContent: "center",
+    alignItems: "center",
     marginBottom: 8,
+    borderWidth: 2,
+    borderColor: "#6F42C1",
   },
-  shortcutText: {
+  purpleIconCirclePressed: {
+    backgroundColor: "#6F42C1",
+  },
+  shortcutLabel: {
     fontSize: 12,
-    fontWeight: "500",
+    fontWeight: "600",
+    color: "#1a1a2e",
     textAlign: "center",
   },
-  featuredCard: {
+
+  // Green Kids Zone
+  kidsZoneCard: {
     borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: "#4CAF50",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 6,
+    elevation: 8,
   },
-  featuredGradient: {
+  kidsZoneGradient: {
     padding: 20,
   },
-  featuredContent: {
+  kidsZoneContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  featuredLeft: {
+  kidsZoneLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
-  featuredEmoji: {
+  kidsZoneEmoji: {
     fontSize: 40,
   },
-  featuredTitle: {
+  kidsZoneTitle: {
     fontSize: 20,
     fontWeight: "900",
-    color: "#fff",
+    color: "#ffffff",
     marginBottom: 4,
   },
-  featuredSubtitle: {
+  kidsZoneSubtitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "rgba(255,255,255,0.9)",
+    color: "rgba(255, 255, 255, 0.9)",
   },
-  featuredRight: {
+  kidsZoneArrow: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
+    alignItems: "center",
   },
-  menuListItem: {
+
+  // Yellow Recommend
+  recommendItem: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: "#f8f8f8",
+    borderRadius: 16,
+    marginBottom: 10,
   },
-  menuListIcon: {
-    width: 44,
-    height: 44,
+  yellowIconCircle: {
+    width: 48,
+    height: 48,
     borderRadius: 12,
-    alignItems: "center",
+    backgroundColor: "rgba(255, 199, 95, 0.2)",
     justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
+    borderWidth: 2,
+    borderColor: "#FFC75F",
   },
-  menuListContent: {
+  yellowIconCirclePressed: {
+    backgroundColor: "#FFC75F",
+  },
+  recommendLabel: {
     flex: 1,
-  },
-  menuListTitle: {
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 2,
+    color: "#1a1a2e",
   },
-  menuListSubtitle: {
-    fontSize: 13,
-  },
+
+  // Logout
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: 20,
-    marginTop: 12,
     paddingVertical: 16,
-    borderRadius: 12,
-    borderWidth: 1,
+    backgroundColor: "#FFEBEE",
+    borderRadius: 16,
+    marginTop: 10,
   },
   logoutText: {
     fontSize: 16,
     fontWeight: "600",
-    marginLeft: 8,
+    color: "#E53935",
+    marginLeft: 10,
   },
 });

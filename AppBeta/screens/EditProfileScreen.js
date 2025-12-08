@@ -55,157 +55,123 @@ export default function EditProfileScreen({ navigation, route }) {
   const shadowColor = isDark ? "#2d1b69" : "#000";
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: isDark ? "#0f0a1f" : "#f5f5f5" }}>
       <View 
         style={{ 
           height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
-          backgroundColor: "white" 
+          backgroundColor: isDark ? "#0f0a1f" : "#6f42c1" 
         }} 
       />
-      <LinearGradient colors={colors.bgGradient} style={{ flex: 1 }}>
-        <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
-          <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
+        <StatusBar barStyle="light-content" />
 
-          <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-            {/* Header - Dark with opacity in dark theme */}
-            {isDark ? (
-              <View 
-                style={[
-                  styles.header,
-                  {
-                    backgroundColor: colors.cardHeavy,
-                    shadowColor: shadowColor,
-                    shadowOpacity: 0.4,
-                  }
-                ]}
+        <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+          {/* Header - ALWAYS GRADIENT with WHITE TEXT */}
+          <LinearGradient 
+            colors={isDark ? colors.bgGradient : colors.headerGradient} 
+            style={[
+              styles.header,
+              {
+                shadowColor: shadowColor,
+                shadowOpacity: isDark ? 0.4 : 0.2,
+              }
+            ]}
+          >
+            <View style={styles.headerTop}>
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+                <Ionicons name="arrow-back" size={26} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Modifier le profil</Text>
+              <View style={{ width: 40 }} />
+            </View>
+
+            {/* Avatar with Floating Edit Button */}
+            <View style={styles.avatarWrapper}>
+              <Image source={avatar} style={styles.avatar} />
+              <TouchableOpacity 
+                style={[styles.cameraOverlay, { backgroundColor: colors.primary }]} 
+                onPress={pickImage}
               >
-                <View style={styles.headerTop}>
-                  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                    <Ionicons name="arrow-back" size={26} color="#fff" />
-                  </TouchableOpacity>
-                  <Text style={styles.headerTitle}>Modifier le profil</Text>
-                  <View style={{ width: 40 }} />
-                </View>
+                <Ionicons name="camera" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
 
-                {/* Avatar with Floating Edit Button */}
-                <View style={styles.avatarWrapper}>
-                  <Image source={avatar} style={styles.avatar} />
-                  <TouchableOpacity 
-                    style={[styles.cameraOverlay, { backgroundColor: colors.primary }]} 
-                    onPress={pickImage}
-                  >
-                    <Ionicons name="camera" size={24} color="#fff" />
-                  </TouchableOpacity>
+          {/* Form Section - WHITE in light mode, dark in dark mode */}
+          <View 
+            style={[
+              styles.formCard, 
+              { 
+                backgroundColor: isDark ? colors.cardMedium : "#ffffff",
+                shadowColor: shadowColor,
+                shadowOpacity: isDark ? 0.4 : 0.15,
+              }
+            ]}
+          >
+            {[
+              { label: "Nom complet", key: "fullname", icon: "person-outline" },
+              { label: "Email", key: "email", icon: "mail-outline" },
+              { label: "Téléphone", key: "phone", icon: "call-outline" },
+              { label: "Adresse", key: "address", icon: "location-outline" },
+              { label: "Profession", key: "occupation", icon: "briefcase-outline" },
+            ].map((field) => (
+              <View key={field.key} style={styles.inputGroup}>
+                <Text style={[styles.inputLabel, { color: isDark ? "#e0d4ff" : colors.primary }]}>{field.label}</Text>
+                <View 
+                  style={[
+                    styles.inputWrapper, 
+                    {
+                      backgroundColor: isDark ? colors.cardLight : "#f9f7ff",
+                      borderColor: isDark ? "rgba(255,255,255,0.1)" : "#e0d4ff",
+                    }
+                  ]}
+                >
+                  <Ionicons 
+                    name={field.icon} 
+                    size={20} 
+                    color={isDark ? "#e0d4ff" : colors.primary} 
+                    style={styles.inputIcon} 
+                  />
+                  <TextInput
+                    style={[styles.textInput, { color: isDark ? "#ffffff" : "#000000" }]}
+                    value={form[field.key]}
+                    onChangeText={(text) => handleChange(field.key, text)}
+                    placeholder={`Entrer ${field.label.toLowerCase()}`}
+                    placeholderTextColor={isDark ? "#8b7fc7" : "#999999"}
+                  />
                 </View>
               </View>
-            ) : (
-              <LinearGradient 
-                colors={colors.headerGradient} 
-                style={[
-                  styles.header,
-                  {
-                    shadowColor: shadowColor,
-                    shadowOpacity: 0.2,
-                  }
-                ]}
-              >
-                <View style={styles.headerTop}>
-                  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                    <Ionicons name="arrow-back" size={26} color="#fff" />
-                  </TouchableOpacity>
-                  <Text style={styles.headerTitle}>Modifier le profil</Text>
-                  <View style={{ width: 40 }} />
-                </View>
+            ))}
+          </View>
 
-                {/* Avatar with Floating Edit Button */}
-                <View style={styles.avatarWrapper}>
-                  <Image source={avatar} style={styles.avatar} />
-                  <TouchableOpacity 
-                    style={[styles.cameraOverlay, { backgroundColor: colors.primary }]} 
-                    onPress={pickImage}
-                  >
-                    <Ionicons name="camera" size={24} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              </LinearGradient>
-            )}
-
-            {/* Form Section */}
-            <View 
+          {/* Action Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
               style={[
-                styles.formCard, 
+                styles.saveButton, 
                 { 
-                  backgroundColor: isDark ? colors.cardMedium : colors.card,
-                  shadowColor: shadowColor,
-                  shadowOpacity: isDark ? 0.4 : 0.15,
+                  backgroundColor: isDark ? "#7c3aed" : colors.primary,
+                  shadowColor: isDark ? "#7c3aed" : colors.primary,
                 }
-              ]}
+              ]} 
+              onPress={() => console.log("Saved:", form, avatar)}
             >
-              {[
-                { label: "Nom complet", key: "fullname", icon: "person-outline" },
-                { label: "Email", key: "email", icon: "mail-outline" },
-                { label: "Téléphone", key: "phone", icon: "call-outline" },
-                { label: "Adresse", key: "address", icon: "location-outline" },
-                { label: "Profession", key: "occupation", icon: "briefcase-outline" },
-              ].map((field) => (
-                <View key={field.key} style={styles.inputGroup}>
-                  <Text style={[styles.inputLabel, { color: isDark ? "#e0d4ff" : colors.primary }]}>{field.label}</Text>
-                  <View 
-                    style={[
-                      styles.inputWrapper, 
-                      {
-                        backgroundColor: isDark ? colors.cardLight : "#f9f7ff",
-                        borderColor: isDark ? "rgba(255,255,255,0.1)" : "#e0d4ff",
-                      }
-                    ]}
-                  >
-                    <Ionicons 
-                      name={field.icon} 
-                      size={20} 
-                      color={isDark ? "#e0d4ff" : colors.primary} 
-                      style={styles.inputIcon} 
-                    />
-                    <TextInput
-                      style={[styles.textInput, { color: isDark ? "#ffffff" : colors.text }]}
-                      value={form[field.key]}
-                      onChangeText={(text) => handleChange(field.key, text)}
-                      placeholder={`Entrer ${field.label.toLowerCase()}`}
-                      placeholderTextColor={colors.textSecondary}
-                    />
-                  </View>
-                </View>
-              ))}
-            </View>
+              <Ionicons name="checkmark" size={24} color="#fff" />
+              <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
+            </TouchableOpacity>
 
-            {/* Action Buttons */}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity 
-                style={[
-                  styles.saveButton, 
-                  { 
-                    backgroundColor: isDark ? "#7c3aed" : colors.primary,
-                    shadowColor: isDark ? "#7c3aed" : colors.primary,
-                  }
-                ]} 
-                onPress={() => console.log("Saved:", form, avatar)}
-              >
-                <Ionicons name="checkmark" size={24} color="#fff" />
-                <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                style={[
-                  styles.cancelButton, 
-                  { backgroundColor: isDark ? colors.cardLight : "#f1f1f1" }
-                ]} 
-                onPress={() => navigation.goBack()}
-              >
-                <Text style={[styles.cancelButtonText, { color: isDark ? "#b0a8d9" : colors.textSecondary }]}>Annuler</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </LinearGradient>
+            <TouchableOpacity 
+              style={[
+                styles.cancelButton, 
+                { backgroundColor: isDark ? colors.cardLight : "#f1f1f1" }
+              ]} 
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={[styles.cancelButtonText, { color: isDark ? "#b0a8d9" : "#666666" }]}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }

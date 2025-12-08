@@ -1,5 +1,5 @@
-// screens/CalendarScreen.js — DARK THEME WITH CARD OPACITY
-import React, { useState } from "react";
+// screens/CalendarScreen.js - Colorful with meaningful colors
+import React from "react";
 import {
   View,
   Text,
@@ -8,93 +8,59 @@ import {
   ScrollView,
   Platform,
   StatusBar,
+  Dimensions,
 } from "react-native";
-import { Ionicons, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
-
-// Reusable TopNavBar
 import TopNavBar from "../components/TopNavBar";
 
-export default function CalendarScreen({ navigation }) {
-  const { colors, theme } = useTheme();
-  const isDark = theme === "dark";
+const { height: screenHeight } = Dimensions.get("window");
+const TOP_SECTION_HEIGHT = screenHeight * 0.42;
 
-  const [selectedDate] = useState(new Date(2023, 10, 17));
-  const [selectedMonth] = useState("November 2023");
+export default function CalendarScreen({ navigation }) {
+  const { colors } = useTheme();
+
+  const selectedMonth = "November 2023";
+  const selectedDate = 17;
 
   const events = [
-    {
-      time: "10:00 AM",
-      title: "Literature",
-      subtitle: "Introduction to the course",
-      color: colors.headerGradient,
-    },
-    {
-      time: "11:00 AM",
-      title: "Math",
-      subtitle: "Logarithms and their derivatives",
-      color: colors.headerGradient,
-    },
-    {
-      time: "01:00 PM",
-      title: "Design",
-      subtitle: "Lecture",
-      color: colors.headerGradient,
-    },
+    { time: "10:00 AM", title: "Literature", subtitle: "Introduction to the course", icon: "book-open", color: "#FF6B9D" },
+    { time: "11:00 AM", title: "Math", subtitle: "Logarithms and derivatives", icon: "trending-up", color: "#FFC75F" },
+    { time: "01:00 PM", title: "Design", subtitle: "UI/UX Lecture", icon: "pen-tool", color: "#845EC2" },
   ];
-
-  const shadowColor = isDark ? "#050017ff" : "#000";
 
   return (
     <View style={styles.container}>
-      {/* White Status Bar */}
-      <View 
-        style={{ 
-          height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
-          backgroundColor: "white" 
-        }} 
-      />
+      <StatusBar barStyle="light-content" backgroundColor="#6f42c1" />
 
-      <LinearGradient colors={colors.bgGradient} style={{ flex: 1 }}>
-        {/* Perfect reusable header */}
-        <TopNavBar title="Calendar" navigation={navigation} />
+      {/* PURPLE GRADIENT TOP SECTION */}
+      <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
+        <LinearGradient colors={colors.headerGradient} style={StyleSheet.absoluteFill}>
+          <View style={styles.safeArea} />
+          <TopNavBar title="Calendar" navigation={navigation} />
 
-        {/* Calendar Header - Dark with opacity in dark theme */}
-        {isDark ? (
-          <View 
-            style={[
-              styles.calendarHeader,
-              {
-                backgroundColor: colors.cardHeavy,
-                shadowColor: shadowColor,
-                shadowOpacity: 0.4,
-              }
-            ]}
-          >
+          {/* Calendar Header */}
+          <View style={styles.calendarHeader}>
             <View style={styles.monthPicker}>
               <Text style={styles.monthText}>{selectedMonth}</Text>
-              <Feather name="chevron-down" size={20} color="#fff" />
+              <Feather name="chevron-down" size={22} color="#fff" />
             </View>
 
-            {/* Weekday Labels */}
             <View style={styles.weekDays}>
-              {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
-                <Text key={i} style={styles.weekDayText}>
-                  {day}
-                </Text>
+              {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+                <Text key={`day-${index}`} style={styles.weekDayText}>{day}</Text>
               ))}
             </View>
 
-            {/* Date Grid */}
             <View style={styles.dateGrid}>
-              {[14, 15, 16, 17, 18, 19, 20].map((date, i) => {
-                const isSelected = date === 17;
+              {[14, 15, 16, 17, 18, 19, 20].map((date) => {
+                const isSelected = date === selectedDate;
                 return (
-                  <View key={i} style={styles.dateCell}>
+                  <View key={date} style={styles.dateCell}>
                     {isSelected ? (
-                      <View style={styles.selectedDateCircle}>
-                        <Text style={[styles.selectedDateText, { color: colors.primary }]}>{date}</Text>
+                      <View style={styles.selectedCircle}>
+                        <Text style={styles.selectedDateText}>{date}</Text>
                       </View>
                     ) : (
                       <Text style={styles.normalDateText}>{date}</Text>
@@ -105,145 +71,56 @@ export default function CalendarScreen({ navigation }) {
               })}
             </View>
           </View>
-        ) : (
-          <LinearGradient 
-            colors={colors.headerGradient} 
-            style={[
-              styles.calendarHeader,
-              {
-                shadowColor: shadowColor,
-                shadowOpacity: 0.15,
-              }
-            ]}
-          >
-            <View style={styles.monthPicker}>
-              <Text style={styles.monthText}>{selectedMonth}</Text>
-              <Feather name="chevron-down" size={20} color="#fff" />
-            </View>
+        </LinearGradient>
+      </View>
 
-            {/* Weekday Labels */}
-            <View style={styles.weekDays}>
-              {["S", "M", "T", "W", "T", "F", "S"].map((day, i) => (
-                <Text key={i} style={styles.weekDayText}>
-                  {day}
-                </Text>
-              ))}
-            </View>
+      {/* WHITE BOTTOM SECTION */}
+      <View 
+        style={[
+          styles.whiteSection, 
+          { top: TOP_SECTION_HEIGHT }
+        ]}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Event Header */}
+          <View style={styles.eventHeader}>
+            <Text style={styles.eventCount}>2 tasks • 4 lessons</Text>
+            <Text style={styles.eventDate}>Wednesday, November 17</Text>
+          </View>
 
-            {/* Date Grid */}
-            <View style={styles.dateGrid}>
-              {[14, 15, 16, 17, 18, 19, 20].map((date, i) => {
-                const isSelected = date === 17;
-                return (
-                  <View key={i} style={styles.dateCell}>
-                    {isSelected ? (
-                      <View style={styles.selectedDateCircle}>
-                        <Text style={[styles.selectedDateText, { color: colors.primary }]}>{date}</Text>
-                      </View>
-                    ) : (
-                      <Text style={styles.normalDateText}>{date}</Text>
-                    )}
-                    {isSelected && <View style={styles.selectedDot} />}
+          {events.map((event, i) => (
+            <TouchableOpacity key={i} style={styles.eventCardWrapper} activeOpacity={0.9}>
+              <View style={styles.eventCard}>
+                <LinearGradient 
+                  colors={[event.color, event.color + 'DD']} 
+                  style={styles.eventGradientBar}
+                />
+                <View style={styles.eventContent}>
+                  <View style={styles.timeRow}>
+                    <Text style={styles.time}>{event.time}</Text>
+                    <Feather name="chevron-right" size={22} color={event.color} />
                   </View>
-                );
-              })}
-            </View>
-          </LinearGradient>
-        )}
-
-        {/* Event List with curved top */}
-        <View style={[styles.eventListContainer, { backgroundColor: colors.background }]}>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.eventListContent}
-          >
-            <View style={styles.eventHeader}>
-              <Text style={[styles.eventCount, { color: colors.textSecondary }]}>2 tasks • 4 lessons</Text>
-              <Text style={[styles.eventDate, { color: colors.text }]}>
-                Wednesday {selectedDate.getDate()}
-              </Text>
-            </View>
-
-            {events.map((event, index) => (
-              <View 
-                key={index} 
-                style={[
-                  styles.eventCardWrapper,
-                  {
-                    shadowColor: shadowColor,
-                    shadowOpacity: isDark ? 0.5 : 0.1,
-                  }
-                ]}
-              >
-                {isDark ? (
-                  // Dark theme: dark card with opacity, no gradient
-                  <View style={[styles.eventCard, { backgroundColor: colors.cardMedium }]}>
-                    <View style={styles.eventTimeRow}>
-                      <Text style={styles.eventTime}>{event.time}</Text>
-                      <Feather name="chevron-right" size={20} color="#fff" opacity={0.7} />
-                    </View>
-
-                    <View style={styles.eventIcon}>
-                      {event.title === "Literature" && <Feather name="book-open" size={20} color="#fff" />}
-                      {event.title === "Math" && <Feather name="calculator" size={20} color="#fff" />}
-                      {event.title === "Design" && <Feather name="pen-tool" size={20} color="#fff" />}
-                    </View>
-
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
+                  <View style={[styles.iconCircle, { backgroundColor: event.color + '20' }]}>
+                    <Feather name={event.icon} size={24} color={event.color} />
                   </View>
-                ) : (
-                  // Light theme: keep original gradient
-                  <LinearGradient
-                    colors={event.color}
-                    style={styles.eventCard}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <View style={styles.eventTimeRow}>
-                      <Text style={styles.eventTime}>{event.time}</Text>
-                      <Feather name="chevron-right" size={20} color="#fff" opacity={0.7} />
-                    </View>
-
-                    <View style={styles.eventIcon}>
-                      {event.title === "Literature" && <Feather name="book-open" size={20} color="#fff" />}
-                      {event.title === "Math" && <Feather name="calculator" size={20} color="#fff" />}
-                      {event.title === "Design" && <Feather name="pen-tool" size={20} color="#fff" />}
-                    </View>
-
-                    <Text style={styles.eventTitle}>{event.title}</Text>
-                    <Text style={styles.eventSubtitle}>{event.subtitle}</Text>
-                  </LinearGradient>
-                )}
+                  <Text style={styles.title}>{event.title}</Text>
+                  <Text style={styles.subtitle}>{event.subtitle}</Text>
+                </View>
               </View>
-            ))}
+            </TouchableOpacity>
+          ))}
 
-            {/* Spare Time */}
-            <View 
-              style={[
-                styles.spareTimeCard,
-                { 
-                  backgroundColor: isDark ? colors.cardLight : colors.card,
-                  borderColor: isDark ? "rgba(255, 64, 129, 0.3)" : "#FFE5E5",
-                  shadowColor: isDark ? "#FF4081" : "#E53935",
-                }
-              ]}
-            >
-              <Feather 
-                name="coffee" 
-                size={18} 
-                color={isDark ? "#FF4081" : "#E53935"} 
-                style={{ marginBottom: 8 }} 
-              />
-              <Text style={[styles.spareTimeText, { color: isDark ? "#FF4081" : "#E53935" }]}>
-                Spare time: 12:00 – 13:00
-              </Text>
-            </View>
+          {/* Spare Time Card */}
+          <View style={styles.spareCard}>
+            <Feather name="coffee" size={20} color="#FF9671" />
+            <Text style={styles.spareText}>
+              Spare time: 12:00 – 13:00
+            </Text>
+          </View>
 
-            <View style={{ height: 100 }} />
-          </ScrollView>
-        </View>
-      </LinearGradient>
+          <View style={{ height: 100 }} />
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -251,155 +128,183 @@ export default function CalendarScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+
+  fixedTopSection: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    overflow: "hidden",
+    borderBottomEndRadius: 38,
+    borderBottomStartRadius: 38,
+  },
+
+  safeArea: {
+    height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
   },
 
   calendarHeader: {
-    marginTop: 5,
+    paddingHorizontal: 24,
     paddingTop: 20,
-    paddingHorizontal: 20,
     paddingBottom: 32,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    elevation: 6,
   },
+
   monthPicker: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 24,
+    alignItems: "center",
+    marginBottom: 28,
   },
   monthText: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "700",
     color: "#fff",
   },
+
   weekDays: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 16,
   },
   weekDayText: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
-    width: 40,
+    width: 44,
     textAlign: "center",
+    fontSize: 14,
+    color: "rgba(255,255,255,0.7)",
+    fontWeight: "600",
   },
+
   dateGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
   dateCell: {
-    width: 40,
-    height: 50,
+    width: 44,
+    height: 56,
     justifyContent: "center",
     alignItems: "center",
   },
-  selectedDateCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  selectedCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },
   selectedDateText: {
-    fontWeight: "700",
     fontSize: 16,
+    fontWeight: "700",
+    color: "#6f42c1",
   },
   normalDateText: {
-    color: "rgba(255,255,255,0.7)",
     fontSize: 15,
+    color: "rgba(255,255,255,0.7)",
   },
   selectedDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
     backgroundColor: "#fff",
-    marginTop: 4,
+    marginTop: 6,
   },
 
-  eventListContainer: {
-    flex: 1,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    marginTop: -16,
+  whiteSection: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 38,
+    borderTopRightRadius: 38,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 14,
+    elevation: 14,
   },
-  eventListContent: {
-    paddingTop: 24,
-  },
-  eventHeader: {
+
+  scrollContent: {
+    paddingTop: 32,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 120,
+  },
+
+  eventHeader: {
+    marginBottom: 24,
   },
   eventCount: {
-    fontSize: 14,
+    fontSize: 15,
+    color: "#888888",
     marginBottom: 6,
   },
   eventDate: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "700",
+    color: "#1a1a2e",
   },
+
   eventCardWrapper: {
-    marginHorizontal: 20,
-    marginBottom: 16,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    elevation: 5,
+    marginBottom: 18,
+    borderRadius: 24,
+    overflow: "hidden",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
   },
+
   eventCard: {
-    borderRadius: 20,
-    padding: 18,
-    paddingLeft: 20,
+    backgroundColor: "#ffffff",
+    borderRadius: 24,
+    overflow: "hidden",
   },
-  eventTimeRow: {
+  eventGradientBar: {
+    height: 6,
+    width: "100%",
+  },
+  eventContent: {
+    padding: 22,
+  },
+  timeRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  eventTime: {
-    fontSize: 13,
-    color: "#fff",
-    opacity: 0.9,
-    fontWeight: "500",
-  },
-  eventIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.25)",
+  time: { fontSize: 14, color: "#666666", fontWeight: "600" },
+  iconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  eventTitle: {
-    fontSize: 19,
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  eventSubtitle: {
-    fontSize: 14,
-    color: "#fff",
-    opacity: 0.9,
-  },
-  spareTimeCard: {
-    marginHorizontal: 20,
-    marginTop: 8,
-    padding: 18,
-    borderRadius: 16,
+  title: { fontSize: 20, fontWeight: "700", color: "#1a1a2e", marginBottom: 6 },
+  subtitle: { fontSize: 15, color: "#666666" },
+
+  spareCard: {
+    backgroundColor: "#FFF5F5",
     borderWidth: 2,
+    borderColor: "#FFE5E5",
     borderStyle: "dashed",
+    borderRadius: 18,
+    padding: 20,
+    flexDirection: "row",
     alignItems: "center",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    justifyContent: "center",
+    marginTop: 10,
   },
-  spareTimeText: {
-    fontSize: 14,
-    textAlign: "center",
+  spareText: {
+    marginLeft: 12,
+    fontSize: 15,
     fontWeight: "600",
+    color: "#FF9671",
   },
 });

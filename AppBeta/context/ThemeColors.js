@@ -1,4 +1,4 @@
-// context/ThemeColors.js — FINAL & PERFECT
+// context/ThemeColors.js — Updated for wallet-style design
 export const LightTheme = {
   background: "#fbf7ff",
   card: "#ffffff",
@@ -6,11 +6,26 @@ export const LightTheme = {
   textSecondary: "#666666",
   primary: "#6F42C1",
   headerGradient: ["#6F42C1", "#9b59b6"],
-  sidebarGradient: ["#6F42C1", "#9b59b6"],
+  sidebarGradient: ["#010003ff", "#000000ff"],
   sidebarText: "#ffffff",
   sidebarIconBg: "#ffffff",
   sidebarItemBg: "rgba(255,255,255,0.1)",
-  bgGradient: ["#fbf7ff", "#f0e8ff"], // Soft violet gradient
+  bgGradient: ["#fbf7ff", "#f0e8ff"],
+  
+  // Top section (fixed area)
+  topSectionBg: "#000000ff",
+  topCardBg: "rgba(2, 0, 0, 0.69)",
+  topCardPressedBg: "#ffffff",
+  topCardText: "#ffffff",
+  topCardPressedText: "#2c2c2c",
+  
+  // Bottom section (scrollable children area)
+  bottomSectionBg: "#ffffff",
+  bottomCardBg: "rgba(111, 66, 193, 0.08)",
+  bottomCardPressedBg: "#ffffff",
+  bottomCardText: "#2c2c2c",
+  bottomCardPressedText: "#2c2c2c",
+  
   childrenArea: {
     gradient1: ['#a78bfa', '#f472b6', '#fb923c'],
     gradient2: ['#60a5fa', '#a78bfa', '#f472b6'],
@@ -25,7 +40,6 @@ export const LightTheme = {
     cardTextSecondary: '#6b7280',
   },
 
-  // MAP COLORS — Clean & grouped
   map: {
     pinColor: "#E91E63",
     routeColor: "#6F42C1",
@@ -36,24 +50,37 @@ export const LightTheme = {
 
 export const DarkTheme = {
   background: "#0a0a1a",
-  card: "rgba(0, 0, 0, 0.6)", // Dark with 60% opacity - adaptable to background
-  cardSolid: "#1a1a2e", // Solid fallback if needed
+  card: "rgba(0, 0, 0, 0.6)",
+  cardSolid: "#1a1a2e",
   text: "#e0d4ff",
   textSecondary: "#b0a8d9",
-  bgGradient: ["#0a0a1a", "#0f0f1f"], // Pure dark gradient - NO purple tones
-  primary: "#050307ff",
-  headerGradient: ["#1a1a2e", "#2d1b69"], // Header keeps purple for accent
-  sidebarGradient: ["#1a1a2e", "#050017ff"], // Sidebar keeps purple for accent
-  sidebarText: "#e6d9ff",
+  bgGradient: ["#0a0a1a", "#0f0f1f"],
+  primary: "#6F42C1",
+  headerGradient: ["#000000ff", "#000000ff"],
+  sidebarGradient: ["#1a1a2e", "#050017ff"],
+  sidebarText: "#000000ff",
   sidebarIconBg: "rgba(255,255,255,0.15)",
   sidebarItemBg: "rgba(255,255,255,0.08)",
 
-  // Card opacity variations for different contexts
-  cardLight: "rgba(0, 0, 0, 0.4)", // Light cards - 40% opacity
-  cardMedium: "rgba(0, 0, 0, 0.6)", // Medium cards - 60% opacity
-  cardHeavy: "rgba(0, 0, 0, 0.8)", // Heavy cards - 80% opacity
+  // Top section (fixed area) - Dark background
+  topSectionBg: "#1a1a2e",
+  topCardBg: "rgba(0, 0, 0, 0.5)", // Semi-transparent dark cards
+  topCardPressedBg: "#ffffff", // White when pressed
+  topCardText: "#ffffff",
+  topCardPressedText: "#1a1a2e", // Dark text when pressed
+  
+  // Bottom section (scrollable children area) - WHITE even in dark theme
+  bottomSectionBg: "#ffffff", // ALWAYS WHITE - even in dark theme
+  bottomCardBg: "rgba(26, 26, 46, 0.8)", // Semi-transparent dark cards
+  bottomCardPressedBg: "#ffffff", // White when pressed with shadow
+  bottomCardText: "#ffffff",
+  bottomCardPressedText: "#1a1a2e",
+
+  cardLight: "rgba(0, 0, 0, 0.4)",
+  cardMedium: "rgba(0, 0, 0, 0.6)",
+  cardHeavy: "rgba(0, 0, 0, 0.8)",
+  
   childrenArea: {
-    // Keep gradients colorful for visual appeal in kids area
     gradient1: ['#a78bfa', '#f472b6', '#fb923c'],
     gradient2: ['#60a5fa', '#a78bfa', '#f472b6'],
     gradient3: ['#60a5fa', '#6366f1', '#8b5cf6'],
@@ -61,13 +88,12 @@ export const DarkTheme = {
     gradient5: ['#a78bfa', '#f472b6', '#f87171'],
     gradient6: ['#34d399', '#10b981', '#059669'],
     gradient7: ['#fb923c', '#f87171', '#f472b6'],
-    // Cards use dark with opacity
-    cardBg: 'rgba(0, 0, 0, 0.6)', // 60% opacity
+    cardBg: 'rgba(0, 0, 0, 0.6)',
     badgeText: '#f6f5f7ff',
     cardText: '#ffffff',
     cardTextSecondary: '#e0d4ff',
   },
-  // MAP COLORS — Clean & grouped
+  
   map: {
     pinColor: "#FF4081",
     routeColor: "#07010fff",

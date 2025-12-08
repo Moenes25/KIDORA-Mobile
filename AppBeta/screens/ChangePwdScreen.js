@@ -9,8 +9,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from "../context/ThemeContext";
 
 export default function ChangePwdScreen({ onClose }) {
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
+  
   const [form, setForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -33,8 +37,7 @@ export default function ChangePwdScreen({ onClose }) {
       return;
     }
     console.log("Password change submitted:", form);
-    // TODO: connect to backend
-    onClose(); // close modal after save
+    onClose();
   };
 
   return (
@@ -42,9 +45,18 @@ export default function ChangePwdScreen({ onClose }) {
       <View style={styles.modalCard}>
         {/* Gradient Header */}
         <LinearGradient
-          colors={["#6F42C1", "#9b59b6"]}
+          colors={isDark 
+            ? (colors.bgGradient || ["#1a1a2e", "#0f0f1f"])
+            : (colors.headerGradient || ["#6F42C1", "#9b59b6"])
+          }
           style={styles.header}
         >
+          {isDark && (
+            <View style={{
+              ...StyleSheet.absoluteFillObject,
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            }} />
+          )}
           <Text style={styles.headerTitle}>Change Password</Text>
         </LinearGradient>
 
@@ -55,12 +67,17 @@ export default function ChangePwdScreen({ onClose }) {
             { label: "Confirm Password", key: "confirmPassword", placeholder: "Confirm new password" },
           ].map((item) => (
             <View key={item.key} style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>{item.label}</Text>
-              <View style={styles.inputRow}>
+              <Text style={[styles.inputLabel, { color: isDark ? "#B794F4" : "#6F42C1" }]}>
+                {item.label}
+              </Text>
+              <View style={[
+                styles.inputRow,
+                { backgroundColor: isDark ? "rgba(0, 0, 0, 0.3)" : "white" }
+              ]}>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { color: isDark ? "#ffffff" : "#333" }]}
                   placeholder={item.placeholder}
-                  placeholderTextColor="#999"
+                  placeholderTextColor={isDark ? "#999" : "#999"}
                   value={form[item.key]}
                   onChangeText={(text) => handleChange(item.key, text)}
                   secureTextEntry={!showPassword[item.key]}
@@ -69,7 +86,7 @@ export default function ChangePwdScreen({ onClose }) {
                   <Ionicons
                     name={showPassword[item.key] ? "eye-off" : "eye"}
                     size={22}
-                    color="#6F42C1"
+                    color={isDark ? "#B794F4" : "#6F42C1"}
                     style={{ marginLeft: 10 }}
                   />
                 </TouchableOpacity>
@@ -78,14 +95,20 @@ export default function ChangePwdScreen({ onClose }) {
           ))}
 
           <View style={styles.buttonsRow}>
-            <TouchableOpacity style={[styles.btn, { backgroundColor: "#6F42C1" }]} onPress={handleSave}>
+            <TouchableOpacity 
+              style={[styles.btn, { backgroundColor: isDark ? "#7c3aed" : "#6F42C1" }]} 
+              onPress={handleSave}
+            >
               <Ionicons name="checkmark-outline" size={20} color="white" />
               <Text style={styles.btnText}> Save</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={[styles.btn, { backgroundColor: "#ccc" }]} onPress={onClose}>
-              <Ionicons name="close-outline" size={20} color="#333" />
-              <Text style={[styles.btnText, { color: "#333" }]}> Cancel</Text>
+            <TouchableOpacity 
+              style={[styles.btn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#ccc" }]} 
+              onPress={onClose}
+            >
+              <Ionicons name="close-outline" size={20} color={isDark ? "#ffffff" : "#333"} />
+              <Text style={[styles.btnText, { color: isDark ? "#ffffff" : "#333" }]}> Cancel</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -112,6 +135,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 15,
     alignItems: "center",
+    justifyContent: "center",
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
   },
@@ -124,11 +148,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   inputContainer: { marginBottom: 15 },
-  inputLabel: { fontSize: 16, color: "#6F42C1", fontWeight: "600", marginBottom: 5 },
+  inputLabel: { fontSize: 16, fontWeight: "600", marginBottom: 5 },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
     borderRadius: 10,
     paddingHorizontal: 12,
     elevation: 3,
@@ -137,7 +160,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
   },
-  input: { flex: 1, height: 45, fontSize: 16, color: "#333" },
+  input: { flex: 1, height: 45, fontSize: 16 },
   buttonsRow: {
     flexDirection: "row",
     justifyContent: "space-between",

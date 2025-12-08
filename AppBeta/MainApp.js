@@ -21,6 +21,8 @@ export default function MainApp() {
   const renderScreen = () => {
     switch (currentScreen) {
       case "chat": return <ChatScreen />;
+        case "ChatScreen": return <ChatScreen />;
+        case "ChatNavs": return <ChatScreen />;
       case "HomeScreen": return <HomeScreen />;
        case "MainApp": return <MainApp />;
       case "home": return <HomeScreen />;

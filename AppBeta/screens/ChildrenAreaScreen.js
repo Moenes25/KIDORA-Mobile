@@ -1,5 +1,5 @@
-// screens/ChildrenAreaScreen.js
-import React, { useState } from 'react';
+// screens/ChildrenAreaScreen.js - Updated with SpaceBackground
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,48 +14,11 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
+import SpaceBackground from '../components/SpaceBackground'; // Import the new component
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-// Mock data
-const learningModules = {
-  4: [
-    { id: 1, title: 'القرآن الكريم', icon: 'book-open', color: ['#34d399', '#059669'], lessons: 12 },
-    { id: 2, title: 'الحروف العربية', icon: 'type', color: ['#60a5fa', '#3b82f6'], lessons: 28 },
-    { id: 3, title: 'الأرقام', icon: 'hash', color: ['#a78bfa', '#8b5cf6'], lessons: 10 },
-    { id: 4, title: 'الألوان', icon: 'droplet', color: ['#fb923c', '#f97316'], lessons: 8 },
-  ],
-  5: [
-    { id: 1, title: 'القرآن الكريم', icon: 'book-open', color: ['#34d399', '#059669'], lessons: 20 },
-    { id: 2, title: 'القراءة', icon: 'book', color: ['#60a5fa', '#3b82f6'], lessons: 15 },
-    { id: 3, title: 'الحساب', icon: 'plus', color: ['#a78bfa', '#8b5cf6'], lessons: 18 },
-    { id: 4, title: 'الحيوانات', icon: 'feather', color: ['#fbbf24', '#f59e0b'], lessons: 12 },
-    { id: 5, title: 'الأشعار', icon: 'star', color: ['#f472b6', '#ec4899'], lessons: 10 },
-  ],
-  6: [
-    { id: 1, title: 'القرآن الكريم', icon: 'book-open', color: ['#34d399', '#059669'], lessons: 30 },
-    { id: 2, title: 'القراءة المتقدمة', icon: 'book', color: ['#60a5fa', '#3b82f6'], lessons: 25 },
-    { id: 3, title: 'الرياضيات', icon: 'hash', color: ['#a78bfa', '#8b5cf6'], lessons: 22 },
-    { id: 4, title: 'العلوم', icon: 'circle', color: ['#22d3ee', '#06b6d4'], lessons: 18 },
-    { id: 5, title: 'الأشعار', icon: 'star', color: ['#f472b6', '#ec4899'], lessons: 15 },
-  ],
-};
-
-const games = [
-  { id: 1, title: 'لعبة الحروف', icon: 'type', color: ['#60a5fa', '#3b82f6'], levels: 10 },
-  { id: 2, title: 'لعبة الأرقام', icon: 'target', color: ['#a78bfa', '#8b5cf6'], levels: 8 },
-  { id: 3, title: 'لعبة الذاكرة', icon: 'cpu', color: ['#34d399', '#059669'], levels: 12 },
-  { id: 4, title: 'التلوين', icon: 'droplet', color: ['#fb923c', '#f97316'], levels: 15 },
-];
-
-const skins = [
-  { id: 1, name: 'قميص أحمر', price: 500, type: 'shirt', color: '#ef4444', icon: 'shirt' },
-  { id: 2, name: 'قميص أزرق', price: 500, type: 'shirt', color: '#3b82f6', icon: 'shirt' },
-  { id: 3, name: 'قميص أخضر', price: 500, type: 'shirt', color: '#22c55e', icon: 'shirt' },
-  { id: 4, name: 'نظارة شمسية', price: 800, type: 'glasses', color: '#fbbf24', icon: 'sun' },
-  { id: 5, name: 'قبعة', price: 600, type: 'hat', color: '#8b5cf6', icon: 'umbrella' },
-  { id: 6, name: 'تاج ذهبي', price: 1500, type: 'crown', color: '#fbbf24', icon: 'award' },
-];
+// ... (keep all your existing mock data and component structure)
 
 export default function ChildrenAreaScreen({ navigation }) {
   const { colors, theme } = useTheme();
@@ -69,14 +32,46 @@ export default function ChildrenAreaScreen({ navigation }) {
   const [equippedSkin, setEquippedSkin] = useState(1);
   const [selectedModule, setSelectedModule] = useState(null);
   const [chatInput, setChatInput] = useState('');
+  const [isPortrait, setIsPortrait] = useState(true);
+
+  // Detect orientation changes
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setIsPortrait(window.height > window.width);
+    });
+    
+    return () => subscription?.remove();
+  }, []);
 
   const shadowColor = isDark ? '#2d1b69' : '#000';
 
-  // Age Selection Screen
+  // Determine background theme based on current screen
+  const getBackgroundTheme = () => {
+    switch (screen) {
+      case 'age-select':
+      case 'home':
+        return 'purple';
+      case 'modules':
+      case 'lesson':
+        return 'blue';
+      case 'games':
+        return 'purple';
+      case 'ai-tutor':
+        return 'green';
+      case 'store':
+        return 'orange';
+      default:
+        return 'blue';
+    }
+  };
+
+  // Age Selection Screen - UPDATED
   const AgeSelectionScreen = () => (
-    <View style={styles.container}>
-      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: 'white' }} />
-      <LinearGradient colors={['#a78bfa', '#f472b6', '#fb923c']} style={styles.fullScreen}>
+    <SpaceBackground theme="purple" isPortrait={isPortrait}>
+      <View style={styles.container}>
+        <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44 }} />
+        <StatusBar barStyle="light-content" />
+        
         <ScrollView contentContainerStyle={styles.centerContent} showsVerticalScrollIndicator={false}>
           <View style={styles.headerSection}>
             <View style={[styles.iconCircle, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
@@ -105,17 +100,18 @@ export default function ChildrenAreaScreen({ navigation }) {
             ))}
           </View>
         </ScrollView>
-      </LinearGradient>
-    </View>
+      </View>
+    </SpaceBackground>
   );
-
   // Home Screen
-  const HomeScreen = () => (
-    <View style={styles.container}>
-      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: 'white' }} />
-      <LinearGradient colors={['#60a5fa', '#a78bfa', '#f472b6']} style={styles.fullScreen}>
-        {/* Header */}
-        <View style={[styles.header, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+ const HomeScreen = () => (
+    <SpaceBackground theme="blue" isPortrait={isPortrait}>
+      <View style={styles.container}>
+        <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44 }} />
+        <StatusBar barStyle="light-content" />
+        
+        {/* Header - Remove gradient background, make it semi-transparent */}
+        <View style={[styles.header, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
           <View style={styles.headerLeft}>
             <View style={styles.avatarCircle}>
               <Text style={styles.avatarEmoji}>😊</Text>
@@ -140,59 +136,60 @@ export default function ChildrenAreaScreen({ navigation }) {
           <View style={styles.mainGrid}>
             {/* Learning */}
             <TouchableOpacity onPress={() => setScreen('modules')} style={styles.mainCard}>
-              <View style={styles.mainCardInner}>
+              <View style={[styles.mainCardInner, { backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff' }]}>
                 <LinearGradient colors={['#60a5fa', '#3b82f6']} style={styles.mainCardIcon}>
                   <Feather name="book" size={40} color="#fff" />
                 </LinearGradient>
-                <Text style={styles.mainCardTitle}>التعلم</Text>
-                <Text style={styles.mainCardSubtitle}>دروس ممتعة ومفيدة</Text>
+                <Text style={[styles.mainCardTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>التعلم</Text>
+                <Text style={[styles.mainCardSubtitle, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>دروس ممتعة ومفيدة</Text>
               </View>
             </TouchableOpacity>
 
             {/* Games */}
             <TouchableOpacity onPress={() => setScreen('games')} style={styles.mainCard}>
-              <View style={styles.mainCardInner}>
+              <View style={[styles.mainCardInner, { backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff' }]}>
                 <LinearGradient colors={['#a78bfa', '#8b5cf6']} style={styles.mainCardIcon}>
                   <Feather name="play" size={40} color="#fff" />
                 </LinearGradient>
-                <Text style={styles.mainCardTitle}>الألعاب</Text>
-                <Text style={styles.mainCardSubtitle}>العب واستمتع</Text>
+                <Text style={[styles.mainCardTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>الألعاب</Text>
+                <Text style={[styles.mainCardSubtitle, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>العب واستمتع</Text>
               </View>
             </TouchableOpacity>
 
             {/* AI Tutor */}
             <TouchableOpacity onPress={() => setScreen('ai-tutor')} style={styles.mainCard}>
-              <View style={styles.mainCardInner}>
+              <View style={[styles.mainCardInner, { backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff' }]}>
                 <LinearGradient colors={['#34d399', '#059669']} style={styles.mainCardIcon}>
                   <Feather name="cpu" size={40} color="#fff" />
                 </LinearGradient>
-                <Text style={styles.mainCardTitle}>المعلم الذكي</Text>
-                <Text style={styles.mainCardSubtitle}>اسأل عن أي شيء</Text>
+                <Text style={[styles.mainCardTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>المعلم الذكي</Text>
+                <Text style={[styles.mainCardSubtitle, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>اسأل عن أي شيء</Text>
               </View>
             </TouchableOpacity>
 
             {/* Store */}
             <TouchableOpacity onPress={() => setScreen('store')} style={styles.mainCard}>
-              <View style={styles.mainCardInner}>
+              <View style={[styles.mainCardInner, { backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff' }]}>
                 <LinearGradient colors={['#fb923c', '#f97316']} style={styles.mainCardIcon}>
                   <Feather name="shopping-bag" size={40} color="#fff" />
                 </LinearGradient>
-                <Text style={styles.mainCardTitle}>المتجر</Text>
-                <Text style={styles.mainCardSubtitle}>زيّن بطلك</Text>
+                <Text style={[styles.mainCardTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>المتجر</Text>
+                <Text style={[styles.mainCardSubtitle, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>زيّن بطلك</Text>
               </View>
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </LinearGradient>
-    </View>
+      </View>
+    </SpaceBackground>
   );
 
   // Modules Screen
   const ModulesScreen = () => (
     <View style={styles.container}>
-      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: 'white' }} />
+      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: isDark ? '#0f0a1f' : '#60a5fa' }} />
+      <StatusBar barStyle="light-content" />
       <LinearGradient colors={['#60a5fa', '#6366f1', '#8b5cf6']} style={styles.fullScreen}>
-        <View style={[styles.topBar, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
+        <View style={[styles.topBar, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
           <TouchableOpacity onPress={() => setScreen('home')} style={styles.backButton}>
             <Feather name="arrow-left" size={24} color="#fff" />
           </TouchableOpacity>
@@ -208,18 +205,26 @@ export default function ChildrenAreaScreen({ navigation }) {
                 setSelectedModule(module);
                 setScreen('lesson');
               }}
-        style={[styles.moduleCard, { backgroundColor: colors.childrenArea.cardBg }]}>
+              style={[styles.moduleCard, { 
+                backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+                shadowColor: shadowColor,
+                shadowOpacity: isDark ? 0.4 : 0.1,
+              }]}
+            >
               <View style={styles.moduleCardInner}>
                 <LinearGradient colors={module.color} style={styles.moduleIcon}>
                   <Feather name={module.icon} size={32} color="#fff" />
                 </LinearGradient>
                 <View style={styles.moduleInfo}>
-                  <Text style={[styles.moduleTitle, { color: colors.childrenArea.cardText }]}>
-{module.title}</Text>
-                  <Text style={[styles.moduleLessons, { color: colors.childrenArea.cardTextSecondary }]}>{module.lessons} درس</Text>
+                  <Text style={[styles.moduleTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+                    {module.title}
+                  </Text>
+                  <Text style={[styles.moduleLessons, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>
+                    {module.lessons} درس
+                  </Text>
                 </View>
               </View>
-              <View style={styles.progressBar}>
+              <View style={[styles.progressBar, { backgroundColor: isDark ? '#374151' : '#e5e7eb' }]}>
                 <View style={[styles.progressFill, { width: `${Math.random() * 60 + 20}%` }]}>
                   <LinearGradient colors={module.color} style={StyleSheet.absoluteFill} />
                 </View>
@@ -234,7 +239,8 @@ export default function ChildrenAreaScreen({ navigation }) {
   // Lesson Screen
   const LessonScreen = () => (
     <View style={styles.container}>
-      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: 'white' }} />
+      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: isDark ? '#0f0a1f' : '#fbbf24' }} />
+      <StatusBar barStyle="light-content" />
       <LinearGradient colors={['#fbbf24', '#fb923c', '#f87171']} style={styles.fullScreen}>
         <View style={[styles.topBar, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
           <TouchableOpacity onPress={() => setScreen('modules')} style={styles.backButton}>
@@ -248,21 +254,33 @@ export default function ChildrenAreaScreen({ navigation }) {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {/* Progress */}
-          <View style={styles.lessonProgressCard}>
+          <View style={[styles.lessonProgressCard, { 
+            backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+            shadowColor: shadowColor,
+            shadowOpacity: isDark ? 0.4 : 0.1,
+          }]}>
             <View style={styles.lessonProgressHeader}>
-              <Text style={styles.lessonProgressText}>الدرس 2 من 9</Text>
+              <Text style={[styles.lessonProgressText, { color: isDark ? colors.childrenArea.cardTextSecondary : '#4b5563' }]}>
+                الدرس 2 من 9
+              </Text>
               <Text style={styles.lessonProgressEmoji}>📚</Text>
             </View>
-            <View style={styles.progressBar}>
+            <View style={[styles.progressBar, { backgroundColor: isDark ? '#374151' : '#e5e7eb' }]}>
               <LinearGradient colors={['#34d399', '#059669']} style={[styles.progressFill, { width: '22%' }]} />
             </View>
           </View>
 
           {/* Content */}
-          <View style={styles.lessonContentCard}>
+          <View style={[styles.lessonContentCard, { 
+            backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+            shadowColor: shadowColor,
+            shadowOpacity: isDark ? 0.4 : 0.1,
+          }]}>
             <Text style={styles.lessonEmoji}>🦁</Text>
-            <Text style={styles.lessonTitle}>الأسد الملك</Text>
-            <Text style={styles.lessonText}>
+            <Text style={[styles.lessonTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+              الأسد الملك
+            </Text>
+            <Text style={[styles.lessonText, { color: isDark ? colors.childrenArea.cardTextSecondary : '#4b5563' }]}>
               الأسد هو ملك الغابة. يعيش في أفريقيا وله صوت قوي يسمى الزئير. 
               الأسد حيوان قوي وشجاع ويحب أن يعيش مع عائلته.
             </Text>
@@ -275,8 +293,10 @@ export default function ChildrenAreaScreen({ navigation }) {
             </TouchableOpacity>
 
             {/* Question */}
-            <View style={styles.questionBox}>
-              <Text style={styles.questionText}>أين يعيش الأسد؟</Text>
+            <View style={[styles.questionBox, { backgroundColor: isDark ? '#2d1b69' : '#faf5ff' }]}>
+              <Text style={[styles.questionText, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+                أين يعيش الأسد؟
+              </Text>
               {['في البحر 🌊', 'في أفريقيا 🌍', 'في القطب الشمالي ❄️'].map((option, i) => (
                 <TouchableOpacity
                   key={i}
@@ -286,9 +306,15 @@ export default function ChildrenAreaScreen({ navigation }) {
                       alert('إجابة صحيحة! +50 نقطة');
                     }
                   }}
-                  style={styles.optionButton}
+                  style={[styles.optionButton, { 
+                    backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+                    shadowColor: shadowColor,
+                    shadowOpacity: isDark ? 0.4 : 0.05,
+                  }]}
                 >
-                  <Text style={styles.optionText}>{option}</Text>
+                  <Text style={[styles.optionText, { color: isDark ? colors.childrenArea.cardText : '#4b5563' }]}>
+                    {option}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -296,8 +322,14 @@ export default function ChildrenAreaScreen({ navigation }) {
 
           {/* Navigation */}
           <View style={styles.lessonNavigation}>
-            <TouchableOpacity style={styles.navButtonSecondary}>
-              <Text style={styles.navButtonSecondaryText}>السابق</Text>
+            <TouchableOpacity style={[styles.navButtonSecondary, { 
+              backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+              shadowColor: shadowColor,
+              shadowOpacity: isDark ? 0.4 : 0.1,
+            }]}>
+              <Text style={[styles.navButtonSecondaryText, { color: isDark ? colors.childrenArea.cardText : '#4b5563' }]}>
+                السابق
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.navButtonPrimary}>
               <LinearGradient colors={['#34d399', '#059669']} style={styles.navButtonGradient}>
@@ -313,7 +345,8 @@ export default function ChildrenAreaScreen({ navigation }) {
   // Games Screen
   const GamesScreen = () => (
     <View style={styles.container}>
-      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: 'white' }} />
+      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: isDark ? '#0f0a1f' : '#a78bfa' }} />
+      <StatusBar barStyle="light-content" />
       <LinearGradient colors={['#a78bfa', '#f472b6', '#f87171']} style={styles.fullScreen}>
         <View style={[styles.topBar, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
           <TouchableOpacity onPress={() => setScreen('home')} style={styles.backButton}>
@@ -325,14 +358,22 @@ export default function ChildrenAreaScreen({ navigation }) {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {games.map((game) => (
-            <View key={game.id} style={styles.gameCard}>
+            <View key={game.id} style={[styles.gameCard, { 
+              backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+              shadowColor: shadowColor,
+              shadowOpacity: isDark ? 0.4 : 0.1,
+            }]}>
               <View style={styles.gameCardInner}>
                 <LinearGradient colors={game.color} style={styles.gameIcon}>
                   <Feather name={game.icon} size={36} color="#fff" />
                 </LinearGradient>
                 <View style={styles.gameInfo}>
-                  <Text style={styles.gameTitle}>{game.title}</Text>
-                  <Text style={styles.gameLevels}>{game.levels} مستوى</Text>
+                  <Text style={[styles.gameTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+                    {game.title}
+                  </Text>
+                  <Text style={[styles.gameLevels, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>
+                    {game.levels} مستوى
+                  </Text>
                 </View>
               </View>
               <TouchableOpacity style={styles.playButton}>
@@ -350,7 +391,8 @@ export default function ChildrenAreaScreen({ navigation }) {
   // AI Tutor Screen
   const AITutorScreen = () => (
     <View style={styles.container}>
-      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: 'white' }} />
+      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: isDark ? '#0f0a1f' : '#34d399' }} />
+      <StatusBar barStyle="light-content" />
       <LinearGradient colors={['#34d399', '#10b981', '#059669']} style={styles.fullScreen}>
         <View style={[styles.topBar, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
           <TouchableOpacity onPress={() => setScreen('home')} style={styles.backButton}>
@@ -361,24 +403,34 @@ export default function ChildrenAreaScreen({ navigation }) {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.chatCard}>
+          <View style={[styles.chatCard, { 
+            backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+            shadowColor: shadowColor,
+            shadowOpacity: isDark ? 0.4 : 0.1,
+          }]}>
             <View style={styles.chatHeader}>
               <LinearGradient colors={['#34d399', '#059669']} style={styles.chatAvatar}>
                 <Feather name="cpu" size={28} color="#fff" />
               </LinearGradient>
               <View style={styles.chatHeaderInfo}>
-                <Text style={styles.chatHeaderTitle}>مرحباً بك!</Text>
-                <Text style={styles.chatHeaderSubtitle}>اسألني أي سؤال وسأساعدك</Text>
+                <Text style={[styles.chatHeaderTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+                  مرحباً بك!
+                </Text>
+                <Text style={[styles.chatHeaderSubtitle, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>
+                  اسألني أي سؤال وسأساعدك
+                </Text>
               </View>
             </View>
 
             {/* Messages */}
             <View style={styles.chatMessages}>
-              <View style={styles.userMessage}>
-                <Text style={styles.messageText}>كيف يطير الطائر؟ 🐦</Text>
+              <View style={[styles.userMessage, { backgroundColor: isDark ? '#2d1b69' : '#dcfce7' }]}>
+                <Text style={[styles.messageText, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+                  كيف يطير الطائر؟ 🐦
+                </Text>
               </View>
-              <View style={styles.aiMessage}>
-                <Text style={styles.messageText}>
+              <View style={[styles.aiMessage, { backgroundColor: isDark ? '#374151' : '#dbeafe' }]}>
+                <Text style={[styles.messageText, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
                   الطائر يطير بفضل أجنحته القوية! عندما يحرك جناحيه لأعلى وأسفل، يدفع الهواء ويرتفع في السماء. 🌤️
                 </Text>
               </View>
@@ -387,8 +439,13 @@ export default function ChildrenAreaScreen({ navigation }) {
             {/* Input */}
             <View style={styles.chatInput}>
               <TextInput
-                style={styles.chatTextInput}
+                style={[styles.chatTextInput, { 
+                  backgroundColor: isDark ? '#374151' : '#f3f4f6',
+                  borderColor: isDark ? '#4b5563' : '#e5e7eb',
+                  color: isDark ? colors.childrenArea.cardText : '#1f2937',
+                }]}
                 placeholder="اكتب سؤالك هنا..."
+                placeholderTextColor={isDark ? '#9ca3af' : '#9ca3af'}
                 value={chatInput}
                 onChangeText={setChatInput}
               />
@@ -403,8 +460,17 @@ export default function ChildrenAreaScreen({ navigation }) {
           {/* Quick Questions */}
           <View style={styles.quickQuestions}>
             {['ما هو الماء؟', 'لماذا السماء زرقاء؟', 'كيف ينمو النبات؟', 'ما هي الشمس؟'].map((q, i) => (
-              <TouchableOpacity key={i} style={styles.quickQuestionButton}>
-                <Text style={styles.quickQuestionText}>{q}</Text>
+              <TouchableOpacity 
+                key={i} 
+                style={[styles.quickQuestionButton, { 
+                  backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+                  shadowColor: shadowColor,
+                  shadowOpacity: isDark ? 0.4 : 0.1,
+                }]}
+              >
+                <Text style={[styles.quickQuestionText, { color: isDark ? colors.childrenArea.cardText : '#4b5563' }]}>
+                  {q}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -416,7 +482,8 @@ export default function ChildrenAreaScreen({ navigation }) {
   // Store Screen
   const StoreScreen = () => (
     <View style={styles.container}>
-      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: 'white' }} />
+      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: isDark ? '#0f0a1f' : '#fb923c' }} />
+      <StatusBar barStyle="light-content" />
       <LinearGradient colors={['#fb923c', '#f87171', '#f472b6']} style={styles.fullScreen}>
         <View style={[styles.topBar, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
           <TouchableOpacity onPress={() => setScreen('home')} style={styles.backButton}>
@@ -431,9 +498,15 @@ export default function ChildrenAreaScreen({ navigation }) {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {/* Character Preview */}
-          <View style={styles.characterPreview}>
+          <View style={[styles.characterPreview, { 
+            backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+            shadowColor: shadowColor,
+            shadowOpacity: isDark ? 0.4 : 0.1,
+          }]}>
             <Text style={styles.characterEmoji}>😊</Text>
-            <Text style={styles.characterTitle}>بطلك</Text>
+            <Text style={[styles.characterTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+              بطلك
+            </Text>
             <View style={styles.equippedItems}>
               {ownedSkins.map((skinId) => {
                 const skin = skins.find(s => s.id === skinId);
@@ -452,7 +525,11 @@ export default function ChildrenAreaScreen({ navigation }) {
               const canBuy = coins >= skin.price;
 
               return (
-                <View key={skin.id} style={styles.skinCard}>
+                <View key={skin.id} style={[styles.skinCard, { 
+                  backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff',
+                  shadowColor: shadowColor,
+                  shadowOpacity: isDark ? 0.4 : 0.1,
+                }]}>
                   <View style={[
                     styles.skinPreview,
                     { backgroundColor: skin.color },
@@ -460,19 +537,21 @@ export default function ChildrenAreaScreen({ navigation }) {
                   ]}>
                     <Feather name={skin.icon} size={48} color="#fff" />
                   </View>
-                  <Text style={styles.skinName}>{skin.name}</Text>
+                  <Text style={[styles.skinName, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+                    {skin.name}
+                  </Text>
                   
                   {owned ? (
                     <TouchableOpacity
                       onPress={() => setEquippedSkin(skin.id)}
                       style={[
                         styles.skinButton,
-                        equipped ? styles.skinButtonEquipped : styles.skinButtonOwned
+                        equipped ? styles.skinButtonEquipped : [styles.skinButtonOwned, { backgroundColor: isDark ? '#374151' : '#e5e7eb' }]
                       ]}
                     >
                       <Text style={[
                         styles.skinButtonText,
-                        equipped ? styles.skinButtonTextEquipped : styles.skinButtonTextOwned
+                        equipped ? styles.skinButtonTextEquipped : [styles.skinButtonTextOwned, { color: isDark ? colors.childrenArea.cardText : '#4b5563' }]
                       ]}>
                         {equipped ? '✓ مُجهَّز' : 'ارتداء'}
                       </Text>
@@ -660,7 +739,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   mainCardInner: {
-    backgroundColor: '#fff',
     borderRadius: 24,
     padding: 24,
     alignItems: 'center',
@@ -681,13 +759,11 @@ const styles = StyleSheet.create({
   mainCardTitle: {
     fontSize: 24,
     fontWeight: '900',
-    color: '#1f2937',
     marginBottom: 6,
   },
   mainCardSubtitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#6b7280',
   },
   topBar: {
     flexDirection: 'row',
@@ -711,13 +787,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   moduleCard: {
-    backgroundColor: '#fff',
     borderRadius: 24,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -741,17 +814,14 @@ const styles = StyleSheet.create({
   moduleTitle: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#1f2937',
     marginBottom: 4,
   },
   moduleLessons: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
   },
   progressBar: {
     height: 10,
-    backgroundColor: '#e5e7eb',
     borderRadius: 5,
     overflow: 'hidden',
   },
@@ -760,13 +830,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   lessonProgressCard: {
-    backgroundColor: '#fff',
     borderRadius: 20,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -779,19 +846,15 @@ const styles = StyleSheet.create({
   lessonProgressText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#4b5563',
   },
   lessonProgressEmoji: {
     fontSize: 24,
   },
   lessonContentCard: {
-    backgroundColor: '#fff',
     borderRadius: 24,
     padding: 24,
     marginBottom: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -803,13 +866,11 @@ const styles = StyleSheet.create({
   lessonTitle: {
     fontSize: 28,
     fontWeight: '900',
-    color: '#1f2937',
     textAlign: 'center',
     marginBottom: 12,
   },
   lessonText: {
     fontSize: 18,
-    color: '#4b5563',
     lineHeight: 28,
     textAlign: 'center',
     marginBottom: 24,
@@ -831,32 +892,26 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   questionBox: {
-    backgroundColor: '#faf5ff',
     borderRadius: 20,
     padding: 20,
   },
   questionText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
     textAlign: 'center',
     marginBottom: 16,
   },
   optionButton: {
-    backgroundColor: '#fff',
     padding: 16,
     borderRadius: 12,
     marginBottom: 10,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
   },
   optionText: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#4b5563',
     textAlign: 'center',
   },
   lessonNavigation: {
@@ -865,19 +920,15 @@ const styles = StyleSheet.create({
   },
   navButtonSecondary: {
     flex: 1,
-    backgroundColor: '#fff',
     paddingVertical: 16,
     borderRadius: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
   navButtonSecondaryText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#4b5563',
     textAlign: 'center',
   },
   navButtonPrimary: {
@@ -886,9 +937,7 @@ const styles = StyleSheet.create({
   navButtonGradient: {
     paddingVertical: 16,
     borderRadius: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -899,13 +948,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   gameCard: {
-    backgroundColor: '#fff',
     borderRadius: 24,
     padding: 20,
     marginBottom: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -929,13 +975,11 @@ const styles = StyleSheet.create({
   gameTitle: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#1f2937',
     marginBottom: 4,
   },
   gameLevels: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6b7280',
   },
   playButton: {
     overflow: 'hidden',
@@ -951,13 +995,10 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   chatCard: {
-    backgroundColor: '#fff',
     borderRadius: 24,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -979,29 +1020,24 @@ const styles = StyleSheet.create({
   chatHeaderTitle: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#1f2937',
   },
   chatHeaderSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
   },
   chatMessages: {
     marginBottom: 20,
   },
   userMessage: {
-    backgroundColor: '#dcfce7',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
   },
   aiMessage: {
-    backgroundColor: '#dbeafe',
     borderRadius: 16,
     padding: 16,
   },
   messageText: {
     fontSize: 15,
-    color: '#1f2937',
     lineHeight: 22,
   },
   chatInput: {
@@ -1010,13 +1046,11 @@ const styles = StyleSheet.create({
   },
   chatTextInput: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 15,
     borderWidth: 2,
-    borderColor: '#e5e7eb',
   },
   sendButton: {
     overflow: 'hidden',
@@ -1034,30 +1068,23 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   quickQuestionButton: {
-    backgroundColor: '#fff',
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
   quickQuestionText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#4b5563',
   },
   characterPreview: {
-    backgroundColor: '#fff',
     borderRadius: 24,
     padding: 32,
     alignItems: 'center',
     marginBottom: 24,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -1068,7 +1095,6 @@ const styles = StyleSheet.create({
   characterTitle: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#1f2937',
     marginBottom: 12,
   },
   equippedItems: {
@@ -1082,12 +1108,9 @@ const styles = StyleSheet.create({
   },
   skinCard: {
     width: (width - 60) / 2,
-    backgroundColor: '#fff',
     borderRadius: 20,
     padding: 16,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
   },
@@ -1106,7 +1129,6 @@ const styles = StyleSheet.create({
   skinName: {
     fontSize: 16,
     fontWeight: '900',
-    color: '#1f2937',
     textAlign: 'center',
     marginBottom: 12,
   },

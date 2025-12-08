@@ -15,6 +15,7 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
     people: useRef(new Animated.Value(1)).current,
     clipboard: useRef(new Animated.Value(1)).current,
     person: useRef(new Animated.Value(1)).current,
+    chat: useRef(new Animated.Value(1)).current,
   };
 
   // Animate the active icon on mount
@@ -55,11 +56,11 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
       case "home":
         navigation.navigate("HomeScreen");
         break;
+        case "chat":
+        navigation.navigate("ChatScreen");
+        break;
       case "people":
         navigation.navigate("ChildrenListScreen");
-        break;
-      case "clipboard":
-        alert("Tasks Screen coming soon!");
         break;
       case "person":
         navigation.navigate("ProfileScreen");
@@ -80,7 +81,7 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
             styles.iconWrapper,
             isActive && [
               styles.activeIconWrapper,
-              { backgroundColor: isDark ? "#7c3aed" : "#6F42C1" }
+              { backgroundColor: isDark ? "#000000" : "#6F42C1" }
             ],
             {
               transform: [
@@ -93,7 +94,7 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
           <Ionicons
             name={iconName}
             size={isActive ? 26 : 24}
-            color={isActive ? "white" : (isDark ? "#e0d4ff" : "#6F42C1")}
+            color={isActive ? "white" : (isDark ? "#000000" : "#6F42C1")}
           />
         </Animated.View>
       </TouchableOpacity>
@@ -105,14 +106,14 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
       style={[
         styles.container,
         { 
-          backgroundColor: isDark ? colors.cardHeavy : "#fbf7ff",
-          borderTopColor: isDark ? "rgba(255,255,255,0.1)" : "#eee",
+          backgroundColor: "#ffffff",
+          borderTopColor: isDark ? "rgba(0,0,0,0.1)" : "#eee",
         }
       ]}
     >
       {renderIcon("home", "home")}
+       {renderIcon("chat", "chatbubble")}
       {renderIcon("people", "people")}
-      {renderIcon("clipboard", "game-controller")}
       {renderIcon("person", "person")}
     </View>
   );

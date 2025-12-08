@@ -17,10 +17,14 @@ import ChildDetailScreen from './screens/ChildDetailsScreen';
 import MapScreen from './screens/MapScreen';
 import CalendarScreen from './screens/CalendarScreen';
 import PaymentsScreen from './screens/PaymentsScreen';
-import AppearanceScreen from './screens/AppearanceScreen';
 import LanguageScreen from './screens/LanguageScreen';
 import AboutUsScreen from './screens/AboutUsScreen';
 import ChildrenAreaScreen from './screens/ChildrenAreaScreen';
+import GalleryScreen from './screens/GalleryScreen';
+import PaidInvoiceScreen from "./screens/PaidInvoiceScreen";
+import InvoiceToPayScreen from "./screens/InvoiceToPayScreen";
+import ChatNavs from './navigation/ChatNavs';
+import ChatScreen from './screens/ChatScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -48,10 +52,13 @@ export default function App() {
             <Stack.Screen name="ChildrenListScreen" component={ChildrenListScreen} />
             <Stack.Screen name="ChildDetailScreen" component={ChildDetailScreen} />
             <Stack.Screen name="PaymentsScreen" component={PaymentsScreen} />
-            <Stack.Screen name="AppearanceScreen" component={AppearanceScreen} />
             <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
             <Stack.Screen name="AboutUsScreen" component={AboutUsScreen} />
             <Stack.Screen name="ChildrenAreaScreen" component={ChildrenAreaScreen} />
+            <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
+            <Stack.Screen name="PaidInvoiceScreen" component={PaidInvoiceScreen} />
+            <Stack.Screen name="InvoiceToPayScreen" component={InvoiceToPayScreen} />
+             <Stack.Screen name="ChatScreen" component={ChatScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

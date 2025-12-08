@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   StatusBar,
+  Dimensions,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -15,14 +16,15 @@ import { useTheme } from "../context/ThemeContext";
 // Import the reusable TopNavBar
 import TopNavBar from "../components/TopNavBar";
 
-// Import the PayMethodScreen bottom-sheet modal
-import PayMethodScreen from "./PayMethodScreen";
+
+const screenHeight = Dimensions.get("window").height;
+const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 
 export default function PaymentsScreen({ navigation }) {
   const { colors, theme } = useTheme();
   const isDark = theme === "dark";
 
-  const [showPaySheet, setShowPaySheet] = useState(false);
+  //const [showPaySheet, setShowPaySheet] = useState(false);
 
   const unpaidInvoices = [
     {
@@ -58,34 +60,59 @@ export default function PaymentsScreen({ navigation }) {
     },
   ];
 
-  const shadowColor = isDark ? "#2d1b69" : "#000";
-
   return (
-    <View style={styles.container}>
-      <View 
-        style={{ 
-          height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
-          backgroundColor: "white" 
-        }} 
+    <View style={[styles.container, { backgroundColor: isDark ? colors.background : "#ffffff" }]}>
+      <StatusBar 
+        barStyle="light-content"
+        backgroundColor={isDark 
+          ? (colors.bgGradient?.[0])
+          : (colors.headerGradient?.[0] || "#6F42C1")
+        } 
       />
-      <LinearGradient colors={colors.bgGradient} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+      
+      {/* TOP SECTION with gradient */}
+      <View style={[styles.topSection, { height: TOP_SECTION_HEIGHT }]}>
+        <LinearGradient 
+          colors={isDark 
+            ? (colors.bgGradient || ["#1a1a2e", "#0f0f1f"])
+            : (colors.headerGradient || ["#6F42C1", "#9b59b6"])
+          } 
+          style={StyleSheet.absoluteFill}
+        >
+          {isDark && (
+            <View style={{
+              ...StyleSheet.absoluteFillObject,
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            }} />
+          )}
+          
+          <View style={styles.safeArea} />
           <TopNavBar title="Payments" navigation={navigation} />
-
+        </LinearGradient>
+      </View>
+      
+      {/* WHITE BOTTOM SECTION */}
+      <View style={[
+        styles.bottomSection,
+        { 
+          backgroundColor: isDark ? colors.background : "#ffffff",
+          top: TOP_SECTION_HEIGHT 
+        }
+      ]}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 80, paddingTop: 20 }}>
           <View 
             style={[
               styles.card, 
               { 
-                backgroundColor: colors.card,
-                shadowColor: shadowColor,
-                shadowOpacity: isDark ? 0.4 : 0.1,
+                backgroundColor: isDark ? colors.card : "#FFFFFF",
+                shadowOpacity: isDark ? 0.4 : 0.08,
               }
             ]}
           >
             <View style={styles.cardHeader}>
-              <Feather name="alert-octagon" size={22} color={colors.primary} style={{ marginRight: 8 }} />
-              <View style={[styles.cardTitleBox, { backgroundColor: isDark ? colors.sidebarItemBg : "#f3e8ff" }]}>
-                <Text style={[styles.cardTitle, { color: colors.primary }]}>Unpaid invoices</Text>
+              <Feather name="alert-octagon" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
+              <View style={[styles.cardTitleBox, { backgroundColor: "#f3e8ff" }]}>
+                <Text style={[styles.cardTitle, { color: "#6F42C1" }]}>Unpaid invoices</Text>
               </View>
             </View>
 
@@ -93,23 +120,23 @@ export default function PaymentsScreen({ navigation }) {
               <TouchableOpacity
                 key={item.id}
                 style={[styles.subItemContainer, { backgroundColor: isDark ? colors.sidebarItemBg : "#f9f9f9" }]}
-                onPress={() => setShowPaySheet(true)}
+                onPress={() => navigation.navigate("InvoiceToPayScreen", { invoice: item })}
                 activeOpacity={0.7}
               >
                 <View style={styles.subItemLeft}>
-                  <View style={[styles.iconCircle, { backgroundColor: colors.primary }]}>
+                  <View style={[styles.iconCircle, { backgroundColor: "#6F42C1" }]}>
                     <Feather name="credit-card" size={20} color="white" />
                   </View>
 
                   <View style={{ flexShrink: 1 }}>
-                    <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
-                    <Text style={[styles.itemSubtitle, { color: colors.textSecondary }]}>{item.child}</Text>
-                    <Text style={[styles.itemSubtitle, { color: colors.textSecondary }]}>{item.dueDate}</Text>
-                    <Text style={[styles.priceBelow, { color: colors.primary }]}>{item.price}</Text>
+                    <Text style={[styles.itemTitle, { color: isDark ? "#ffffff" : "#2c2c2c" }]}>{item.title}</Text>
+                    <Text style={[styles.itemSubtitle, { color: isDark ? "#b0a8d9" : "#666" }]}>{item.child}</Text>
+                    <Text style={[styles.itemSubtitle, { color: isDark ? "#b0a8d9" : "#666" }]}>{item.dueDate}</Text>
+                    <Text style={[styles.priceBelow, { color: "#6F42C1" }]}>{item.price}</Text>
                   </View>
                 </View>
 
-                <Feather name="chevron-right" size={22} color={colors.primary} />
+                <Feather name="chevron-right" size={22} color="#6F42C1" />
               </TouchableOpacity>
             ))}
           </View>
@@ -118,16 +145,15 @@ export default function PaymentsScreen({ navigation }) {
             style={[
               styles.card, 
               { 
-                backgroundColor: colors.card,
-                shadowColor: shadowColor,
-                shadowOpacity: isDark ? 0.4 : 0.1,
+                backgroundColor: isDark ? colors.card : "#FFFFFF",
+                shadowOpacity: isDark ? 0.4 : 0.08,
               }
             ]}
           >
             <View style={styles.cardHeader}>
-              <Feather name="file-text" size={22} color={colors.primary} style={{ marginRight: 8 }} />
-              <View style={[styles.cardTitleBox, { backgroundColor: isDark ? colors.sidebarItemBg : "#f3e8ff" }]}>
-                <Text style={[styles.cardTitle, { color: colors.primary }]}>Payment history</Text>
+              <Feather name="file-text" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
+              <View style={[styles.cardTitleBox, { backgroundColor: "#f3e8ff" }]}>
+                <Text style={[styles.cardTitle, { color: "#6F42C1" }]}>Payment history</Text>
               </View>
             </View>
 
@@ -135,31 +161,27 @@ export default function PaymentsScreen({ navigation }) {
               <TouchableOpacity 
                 key={item.id} 
                 style={[styles.subItemContainer, { backgroundColor: isDark ? colors.sidebarItemBg : "#f9f9f9" }]}
+                onPress={() => navigation.navigate("PaidInvoiceScreen", { invoice: item })}
               >
                 <View style={styles.subItemLeft}>
-                  <View style={[styles.iconCircle, { backgroundColor: colors.primary }]}>
+                  <View style={[styles.iconCircle, { backgroundColor: "#4CAF50" }]}>
                     <Feather name="check-circle" size={20} color="white" />
                   </View>
 
                   <View style={{ flexShrink: 1 }}>
-                    <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
-                    <Text style={[styles.itemSubtitle, { color: colors.textSecondary }]}>{item.child}</Text>
-                    <Text style={[styles.itemSubtitle, { color: colors.textSecondary }]}>{item.paymentDate}</Text>
-                    <Text style={[styles.priceBelow, { color: colors.primary }]}>{item.price}</Text>
+                    <Text style={[styles.itemTitle, { color: isDark ? "#ffffff" : "#2c2c2c" }]}>{item.title}</Text>
+                    <Text style={[styles.itemSubtitle, { color: isDark ? "#b0a8d9" : "#666" }]}>{item.child}</Text>
+                    <Text style={[styles.itemSubtitle, { color: isDark ? "#b0a8d9" : "#666" }]}>{item.paymentDate}</Text>
+                    <Text style={[styles.priceBelow, { color: "#4CAF50" }]}>{item.price}</Text>
                   </View>
                 </View>
 
-                <Feather name="chevron-right" size={22} color={colors.primary} />
+                <Feather name="chevron-right" size={22} color={isDark ? "#b0a8d9" : "#666"} />
               </TouchableOpacity>
             ))}
           </View>
         </ScrollView>
-
-        <PayMethodScreen
-          visible={showPaySheet}
-          onClose={() => setShowPaySheet(false)}
-        />
-      </LinearGradient>
+      </View>
     </View>
   );
 }
@@ -168,12 +190,38 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1,
   },
+  topSection: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+  },
+  safeArea: {
+    height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight,
+  },
+  bottomSection: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   card: {
-    marginTop: 20,
+    marginTop: 0,
     marginHorizontal: 15,
+    marginBottom: 20,
     borderRadius: 14,
     padding: 15,
     elevation: 4,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
   },
