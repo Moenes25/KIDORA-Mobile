@@ -1,5 +1,11 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity, Image, Platform, StatusBar } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import LanguageSelector from "./LanguageSelector";
@@ -8,38 +14,20 @@ export default function TopBar({
   onMenuPress,
   onNotificationPress,
   onLanguageChange,
-  lang = 'en',
+  lang = "en",
   showMenu = true,
   showAvatar = true,
   showNotification = true,
   showLanguage = true,
   avatarSource = require("../assets/famGif.gif"),
+  notificationCount = 0,
 }) {
-  const { colors, theme } = useTheme();
-  const isDark = theme === "dark";
-
   return (
-    <View 
-      style={[
-        styles.header, 
-        { 
-          backgroundColor: colors.card,
-          shadowColor: isDark ? "#000" : "#000",
-          shadowOpacity: isDark ? 0.3 : 0.1,
-          paddingTop: Platform.OS === "android" ? (StatusBar.currentHeight || 0) + 16 : 16,
-        }
-      ]}
-    >
+    <View style={styles.header}>
       {/* Menu Button */}
       {showMenu && (
-        <TouchableOpacity 
-          style={[
-            styles.burgerButton, 
-            { backgroundColor: isDark ? colors.sidebarItemBg : "#f0f0f0" }
-          ]} 
-          onPress={onMenuPress}
-        >
-          <Feather name="menu" size={24} color={isDark ? "#fff" : colors.primary} />
+        <TouchableOpacity style={styles.burgerButton} onPress={onMenuPress}>
+          <Feather name="menu" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       )}
 
@@ -48,13 +36,7 @@ export default function TopBar({
         <View style={styles.headerLeft}>
           <Image
             source={avatarSource}
-            style={[
-              styles.userAvatar,
-              { 
-                borderColor: isDark ? "#fff" : colors.primary,
-                backgroundColor: isDark ? colors.sidebarItemBg : "#f0f0f0",
-              }
-            ]}
+            style={styles.userAvatar}
             resizeMode="cover"
           />
         </View>
@@ -62,23 +44,27 @@ export default function TopBar({
 
       {/* Right Side Icons */}
       <View style={styles.headerRight}>
-        {/* Notification Button */}
+        {/* Notification Bell */}
         {showNotification && (
           <TouchableOpacity
-            style={[
-              styles.iconButton,
-              { backgroundColor: isDark ? colors.sidebarItemBg : "#f0f0f0" }
-            ]}
+            style={styles.iconButton}
             onPress={onNotificationPress}
           >
-            <Feather name="bell" size={24} color={isDark ? "#fff" : colors.primary} />
+            <Feather name="bell" size={24} color="#FFFFFF" />
+
+            {/* Exact match to your desired image */}
+            {notificationCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <View style={styles.yellowDot} />
+              </View>
+            )}
           </TouchableOpacity>
         )}
 
         {/* Language Selector */}
         {showLanguage && (
           <View style={styles.languageSelectorContainer}>
-            <LanguageSelector 
+            <LanguageSelector
               onLanguageChange={onLanguageChange}
               initialLanguage={lang}
             />
@@ -95,15 +81,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingBottom: 16,
-    elevation: 2,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    paddingTop: Platform.OS === "android" ? 8 : 0,
+    paddingBottom: 12,
   },
   burgerButton: {
     padding: 8,
     marginRight: 12,
     borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   headerLeft: {
     flex: 1,
@@ -113,6 +98,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     borderWidth: 2,
+    borderColor: "#FFD700",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   headerRight: {
     flexDirection: "row",
@@ -122,7 +109,25 @@ const styles = StyleSheet.create({
     padding: 8,
     marginLeft: 16,
     borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    position: "relative",
   },
+
+  // Perfectly matches your first image
+  notificationBadge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+  },
+  yellowDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#FFD700",
+    borderWidth: 2.5,
+    borderColor: "#FFFFFF",
+  },
+
   languageSelectorContainer: {
     marginLeft: 16,
   },

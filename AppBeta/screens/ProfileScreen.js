@@ -1,4 +1,4 @@
-// ProfileScreen.js - Meaningful colors without dark theme
+// ProfileScreen.js - Fixed purple section with yellow highlights
 import React, { useState } from "react";
 import {
   View,
@@ -66,8 +66,7 @@ export default function ProfileScreen({ navigation, route }) {
 
   const fullName = user.firstname && user.lastname
     ? `${user.firstname} ${user.lastname}`
-    : user.name || user.fullname || "Omar Djebbi";
-  const username = user.username || "@omar.djebbi.94";
+    : user.name || user.fullname || "Tamer M";
 
   const toggleSidebar = () => setSidebarVisible(prev => !prev);
 
@@ -84,7 +83,7 @@ export default function ProfileScreen({ navigation, route }) {
     ]);
   };
 
-  const TOP_SECTION_HEIGHT = screenHeight * 0.45;
+  const TOP_SECTION_HEIGHT = screenHeight * 0.28;
 
   return (
     <View style={styles.container}>
@@ -99,42 +98,30 @@ export default function ProfileScreen({ navigation, route }) {
         onLogout={handleLogout} 
       />
 
-      {/* PURPLE GRADIENT TOP SECTION */}
+      {/* FIXED PURPLE TOP SECTION */}
       <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
         <LinearGradient colors={colors.headerGradient} style={StyleSheet.absoluteFill}>
           <View style={styles.safeArea} />
-          <TopBar onMenuPress={toggleSidebar} />
+          <TopBar 
+            onMenuPress={toggleSidebar} 
+            showAvatar={false}
+            notificationCount={3}
+          />
 
-          <View style={styles.heroContent}>
-            <View style={styles.hero}>
-              <View style={styles.avatarWrapper}>
-                <Image source={require("../assets/default_avatar.jpg")} style={styles.avatar} />
-                <TouchableOpacity
-                  style={styles.cameraBtn}
-                  onPress={() => navigation.navigate("EditProfileScreen", { user })}
-                >
-                  <Ionicons name="camera" size={18} color="#6F42C1" />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.name}>{fullName}</Text>
-              <Text style={styles.username}>{username}</Text>
+          {/* Profile Section */}
+          <View style={styles.profileSection}>
+            <View style={styles.avatarWrapper}>
+              <Image source={require("../assets/default_avatar.jpg")} style={styles.avatar} />
+              <TouchableOpacity
+                style={styles.cameraBtn}
+                onPress={() => navigation.navigate("EditProfileScreen", { user })}
+              >
+                <Ionicons name="camera" size={18} color="#6F42C1" />
+              </TouchableOpacity>
             </View>
-
-            {/* Security Alert Card */}
-            <TouchableOpacity style={styles.securityCardTop}>
-              <View style={styles.securityIconWrapper}>
-                <Ionicons name="shield-checkmark" size={24} color="#FF6B6B" />
-              </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.securityTitleTop}>Security Alerts</Text>
-                <Text style={styles.securitySubtitle}>2 items need attention</Text>
-              </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>2</Text>
-              </View>
-            </TouchableOpacity>
-            
-            <View style={{ height: 40 }} />
+            <Text style={styles.greeting}>
+              Hi, <Text style={styles.userName}>{fullName}</Text>
+            </Text>
           </View>
         </LinearGradient>
       </View>
@@ -253,34 +240,46 @@ const styles = StyleSheet.create({
     borderBottomStartRadius: 38,
   },
   safeArea: { height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight },
-  heroContent: { paddingHorizontal: 16, paddingVertical: 8, flex: 1, justifyContent: "center" },
-  hero: { alignItems: "center", paddingVertical: 20, paddingHorizontal: 20, borderRadius: 20, backgroundColor: "rgba(255, 255, 255, 0.15)" },
-  avatarWrapper: { position: "relative", marginBottom: 10 },
-  avatar: { width: 80, height: 80, borderRadius: 40, borderWidth: 3, borderColor: "#fff" },
-  cameraBtn: { position: "absolute", right: -2, bottom: 0, width: 28, height: 28, borderRadius: 14, backgroundColor: "#ffffff", justifyContent: "center", alignItems: "center", borderWidth: 2, borderColor: "#fff" },
-  name: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 2 },
-  username: { fontSize: 13, color: "#ffffff", opacity: 0.85 },
-
-  securityCardTop: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    padding: 14, 
-    borderRadius: 16,
-    marginTop: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-  },
-  securityIconWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
+  
+  profileSection: {
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
   },
-  securityTitleTop: { fontSize: 15, fontWeight: "600", color: "#ffffff" },
-  securitySubtitle: { fontSize: 12, color: "rgba(255, 255, 255, 0.8)", marginTop: 2 },
-  badge: { width: 26, height: 26, borderRadius: 13, justifyContent: "center", alignItems: "center", backgroundColor: "#FF6B6B" },
-  badgeText: { color: "#fff", fontWeight: "bold", fontSize: 13 },
+  avatarWrapper: { 
+    position: "relative", 
+    marginBottom: 12,
+  },
+  avatar: { 
+    width: 80, 
+    height: 80, 
+    borderRadius: 40, 
+    borderWidth: 3, 
+    borderColor: "#FFD700",
+  },
+  cameraBtn: { 
+    position: "absolute", 
+    right: -2, 
+    bottom: 0, 
+    width: 28, 
+    height: 28, 
+    borderRadius: 14, 
+    backgroundColor: "#FFD700", 
+    justifyContent: "center", 
+    alignItems: "center", 
+    borderWidth: 2, 
+    borderColor: "#6F42C1",
+  },
+  greeting: {
+    fontSize: 20,
+    color: "#FFFFFF",
+    textAlign: "center",
+  },
+  userName: {
+    color: "#FFD700",
+    fontWeight: "700",
+  },
 
   scrollableBottomSection: {
     position: "absolute",

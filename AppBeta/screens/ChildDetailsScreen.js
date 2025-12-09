@@ -156,6 +156,7 @@ export default function ChildDetailScreen({ route, navigation }) {
                 </View>
               </View>
             ))}
+
           </View>
 
           {/* Today's Tasks */}
@@ -207,6 +208,20 @@ export default function ChildDetailScreen({ route, navigation }) {
                 </View>
               </View>
             ))}
+
+            <TouchableOpacity
+              style={styles.improveButton}
+              onPress={() => navigation.navigate("ImprovementsScreen", { child })}
+            >
+              <Feather 
+                name="bar-chart-2"     // or "bar-chart-2"
+                size={20} 
+                color="#fff" 
+                style={{ marginRight: 8 }}
+              />
+              <Text style={styles.improveButtonText}>Check Child Improvements</Text>
+            </TouchableOpacity>
+
           </View>
 
           {/* Meals Today */}
@@ -369,6 +384,21 @@ const styles = StyleSheet.create({
   skillLabel: { fontSize: 16, fontWeight: "600" },
   progressBg: { height: 10, borderRadius: 5, overflow: "hidden", marginTop: 8 },
   progressFill: { height: "100%", borderRadius: 5 },
+
+  improveButton: {
+    marginTop: 18,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#9575CD",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  improveButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
   
   mealItem: { paddingVertical: 14, borderBottomWidth: 1 },
   mealType: { fontSize: 16.5, fontWeight: "600" },

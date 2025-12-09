@@ -23,8 +23,11 @@ import ChildrenAreaScreen from './screens/ChildrenAreaScreen';
 import GalleryScreen from './screens/GalleryScreen';
 import PaidInvoiceScreen from "./screens/PaidInvoiceScreen";
 import InvoiceToPayScreen from "./screens/InvoiceToPayScreen";
-import ChatNavs from './navigation/ChatNavs';
-import ChatScreen from './screens/ChatScreen';
+import ChatListScreen from './screens/ChatListScreen';
+import ImprovementsScreen from './screens/ImprovementsScreen';
+import ConversationScreen from './screens/ConversationScreen';
+import CallComponent from './components/CallComponent';
+import VideoCall from './screens/VideoCallScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -58,7 +61,13 @@ export default function App() {
             <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
             <Stack.Screen name="PaidInvoiceScreen" component={PaidInvoiceScreen} />
             <Stack.Screen name="InvoiceToPayScreen" component={InvoiceToPayScreen} />
-             <Stack.Screen name="ChatScreen" component={ChatScreen} />
+             <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
+             <Stack.Screen name="ImprovementsScreen" component={ImprovementsScreen} />
+              <Stack.Screen name="Conversation" component={ConversationScreen} />
+              <Stack.Screen name="VideoCall" component={VideoCall} options={{ presentation: 'modal', headerShown: false }} />
+              <Stack.Screen name="Call" component={CallComponent} options={{ presentation: 'modal', headerShown: false }} />
+
+             
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaProvider>

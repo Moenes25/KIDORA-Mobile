@@ -1,11 +1,12 @@
 // context/ThemeColors.js — Updated for wallet-style design
+
 export const LightTheme = {
   background: "#fbf7ff",
   card: "#ffffff",
   text: "#2c2c2c",
   textSecondary: "#666666",
   primary: "#6F42C1",
-  headerGradient: ["#6F42C1", "#9b59b6"],
+  headerGradient: ["#6F42C1", "#b300faff"], // Purple Gradient
   sidebarGradient: ["#010003ff", "#000000ff"],
   sidebarText: "#ffffff",
   sidebarIconBg: "#ffffff",
@@ -56,7 +57,11 @@ export const DarkTheme = {
   textSecondary: "#b0a8d9",
   bgGradient: ["#0a0a1a", "#0f0f1f"],
   primary: "#6F42C1",
-  headerGradient: ["#000000ff", "#000000ff"],
+  
+  // --- UPDATED: Forces Purple Gradient even in Dark Mode ---
+  headerGradient: ["#6F42C1", "#9b59b6"], 
+  // --------------------------------------------------------
+
   sidebarGradient: ["#1a1a2e", "#050017ff"],
   sidebarText: "#000000ff",
   sidebarIconBg: "rgba(255,255,255,0.15)",

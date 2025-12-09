@@ -22,7 +22,6 @@ import SideBar from "../components/Sidebar";
 
 const { height: screenHeight } = Dimensions.get("window");
 const TOP_SECTION_HEIGHT = screenHeight * 0.36;
-
 const childrenGif = require("../assets/children.gif");
 
 export default function ChildrenListScreen({ navigation, route }) {
@@ -34,7 +33,9 @@ export default function ChildrenListScreen({ navigation, route }) {
   const user = route?.params?.user || {};
   const username = user?.name || "User";
   const email = user?.email || "";
+  
 
+  // Mock data – replace with real API later
   const children = [
     {
       id: 1,
@@ -86,33 +87,45 @@ export default function ChildrenListScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar 
-        barStyle="light-content" 
-        backgroundColor={isDark 
-          ? (colors.bgGradient?.[0] || colors.topSectionBg)
-          : (colors.headerGradient?.[0] || "#6F42C1")
-        } 
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={
+          isDark
+            ? colors.bgGradient?.[0] || colors.topSectionBg
+            : colors.headerGradient?.[0] || "#6F42C1"
+        }
       />
 
-      {/* FIXED TOP SECTION */}
+      {/* FIXED TOP SECTION WITH GRADIENT */}
       <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
-        <LinearGradient 
-          colors={isDark 
-            ? (colors.bgGradient || [colors.topSectionBg, colors.topSectionBg])
-            : (colors.headerGradient || ["#6F42C1", "#9b59b6"])
-          } 
+        <LinearGradient
+          colors={
+            isDark
+              ? colors.bgGradient || [colors.topSectionBg, colors.topSectionBg]
+              : colors.headerGradient || ["#6F42C1", "#9b59b6"]
+          }
           style={StyleSheet.absoluteFill}
         >
-          {/* Dark overlay for more ambient depth - ONLY in dark mode */}
+          {/* Dark mode overlay */}
           {isDark && (
-            <View style={{
-              ...StyleSheet.absoluteFillObject,
-              backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            }} />
+            <View
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                backgroundColor: "rgba(0, 0, 0, 0.3)",
+              }}
+            />
           )}
-          
+
           <View style={styles.safeArea} />
-          <TopBar onMenuPress={toggleSidebar} />
+
+          {/* TopBar with perfect yellow notification dot */}
+          <TopBar
+            onMenuPress={toggleSidebar}
+            onNotificationPress={() => navigation.navigate("Notifications")}
+            notificationCount={5} // Change this dynamically in real app
+            showLanguage={true}
+          />
+
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>My Children</Text>
             <Image source={childrenGif} style={styles.gif} resizeMode="contain" />
@@ -120,7 +133,7 @@ export default function ChildrenListScreen({ navigation, route }) {
         </LinearGradient>
       </View>
 
-      {/* PURE WHITE BOTTOM SECTION */}
+      {/* WHITE CONTENT AREA */}
       <View style={[styles.whiteSection, { top: TOP_SECTION_HEIGHT }]}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {children.map((child) => (
@@ -131,7 +144,6 @@ export default function ChildrenListScreen({ navigation, route }) {
               activeOpacity={0.85}
             >
               {isDark ? (
-                /* DARK MODE: Solid black card + white text + purple icons */
                 <View style={styles.darkChildCard}>
                   <Image source={child.avatar} style={styles.childAvatar} />
                   <View style={styles.childInfo}>
@@ -156,7 +168,6 @@ export default function ChildrenListScreen({ navigation, route }) {
                   <Ionicons name="chevron-forward" size={28} color="#B794F4" />
                 </View>
               ) : (
-                /* LIGHT MODE: Performance gradient card (unchanged) */
                 <LinearGradient
                   colors={getPerformanceGradient(child.performance)}
                   style={styles.lightChildCard}
@@ -190,6 +201,7 @@ export default function ChildrenListScreen({ navigation, route }) {
         </ScrollView>
       </View>
 
+      {/* Sidebar & Bottom Navigation */}
       <SideBar
         visible={sidebarVisible}
         onClose={toggleSidebar}
@@ -207,26 +219,21 @@ export default function ChildrenListScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
+  container: { flex: 1, backgroundColor: "#ffffff" },
 
   fixedTopSection: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: TOP_SECTION_HEIGHT,
     zIndex: 1,
     overflow: "hidden",
-       overflow: "hidden",
-        borderEndEndRadius: 38,
-        borderBottomStartRadius: 38,
+    borderBottomLeftRadius: 38,
+    borderBottomRightRadius: 38,
   },
 
   safeArea: {
-    height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
+    height: Platform.OS === "android" ? StatusBar.currentHeight || 0 : 44,
   },
 
   headerContent: {
@@ -247,7 +254,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    top: TOP_SECTION_HEIGHT,
     bottom: 0,
     backgroundColor: "#ffffff",
     borderTopLeftRadius: 38,
@@ -277,7 +283,6 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
   },
 
-  // DARK MODE CARD
   darkChildCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -290,7 +295,6 @@ const styles = StyleSheet.create({
   darkChildDetails: { fontSize: 14, color: "#cccccc", marginTop: 4 },
   darkStatText: { color: "#ffffff", fontSize: 14.5, fontWeight: "600", marginLeft: 8 },
 
-  // LIGHT MODE CARD (unchanged gradient)
   lightChildCard: {
     flexDirection: "row",
     alignItems: "center",

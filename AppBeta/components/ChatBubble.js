@@ -5,7 +5,7 @@ import { View, Text } from 'react-native';
 export default function ChatBubble({ message, isMine }) {
   const containerStyle = {
     alignSelf: isMine ? 'flex-end' : 'flex-start',
-    backgroundColor: isMine ? '#0b93f6' : '#e5e5ea',
+    backgroundColor: isMine ? '#6F42C1' : '#e5e5ea',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 16,
@@ -20,7 +20,7 @@ export default function ChatBubble({ message, isMine }) {
 
   const timeStyle = {
     fontSize: 11,
-    color: isMine ? '#e0f0ff' : '#666',
+    color: isMine ? '#c7c4c4ff' : '#666',
     marginTop: 4,
     alignSelf: 'flex-end',
   };

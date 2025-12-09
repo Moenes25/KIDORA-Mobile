@@ -13,16 +13,18 @@ import {
 import { Ionicons, Feather } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const screenWidth = Dimensions.get("window").width;
 
 export default function SideBar({ visible, onClose, username, email, navigation, onLogout }) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [pressedShortcut, setPressedShortcut] = React.useState(null);
   const [pressedRecommend, setPressedRecommend] = React.useState(null);
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
       <View style={styles.fullScreen}>
         {/* Purple Gradient Top Section */}
         <LinearGradient colors={colors.headerGradient} style={styles.topSection}>
@@ -33,10 +35,12 @@ export default function SideBar({ visible, onClose, username, email, navigation,
 
           {/* Profile Section */}
           <View style={styles.profileSection}>
-            <Image 
-              source={require("../assets/default_avatar.jpg")} 
-              style={styles.avatar} 
-            />
+            <View style={styles.avatarContainer}>
+              <Image 
+                source={require("../assets/default_avatar.jpg")} 
+                style={styles.avatar} 
+              />
+            </View>
             <Text style={styles.username}>{username || "User Name"}</Text>
             <Text style={styles.email}>{email || "user@example.com"}</Text>
           </View>
@@ -44,7 +48,10 @@ export default function SideBar({ visible, onClose, username, email, navigation,
 
         {/* White Bottom Section */}
         <View style={styles.whiteSection}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: Math.max(insets.bottom, 20) + 80 }}
+          >
             {/* Shortcuts Section - PURPLE */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>SHORTCUTS</Text>
@@ -76,7 +83,7 @@ export default function SideBar({ visible, onClose, username, email, navigation,
                         <Ionicons 
                           name={item.icon} 
                           size={28} 
-                          color={isPressed ? "#ffffff" : "#6F42C1"} 
+                          color="#ffffff"
                         />
                       </View>
                       <Text style={styles.shortcutLabel}>{item.label}</Text>
@@ -142,7 +149,7 @@ export default function SideBar({ visible, onClose, username, email, navigation,
                       <Ionicons 
                         name={item.icon} 
                         size={24} 
-                        color={isPressed ? "#ffffff" : "#FFC75F"} 
+                        color="#ffffff"
                       />
                     </View>
                     <Text style={styles.recommendLabel}>{item.label}</Text>
@@ -157,8 +164,6 @@ export default function SideBar({ visible, onClose, username, email, navigation,
               <Ionicons name="log-out-outline" size={22} color="#E53935" />
               <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
-
-            <View style={{ height: 40 }} />
           </ScrollView>
         </View>
       </View>
@@ -170,6 +175,7 @@ const styles = StyleSheet.create({
   fullScreen: {
     flex: 1,
     backgroundColor: "#ffffff",
+    paddingBottom: 0,
   },
   
   // Purple Top Section
@@ -193,13 +199,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 20,
   },
+  avatarContainer: {
+    width: 116,
+    height: 116,
+    borderRadius: 58,
+    backgroundColor: "#FFC75F",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+    shadowColor: "#FFC75F",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 16,
-    borderWidth: 4,
-    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   username: {
     fontSize: 24,
@@ -220,6 +237,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     marginTop: -20,
     paddingTop: 24,
+    paddingBottom: 0,
   },
   section: {
     paddingHorizontal: 20,
@@ -233,7 +251,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-  // Purple Shortcuts
+  // Purple Shortcuts - DEFAULT: PURPLE CONTAINER WITH WHITE ICONS
   shortcutGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -248,15 +266,13 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: "rgba(111, 66, 193, 0.15)",
+    backgroundColor: "#6F42C1", // FILLED PURPLE
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
-    borderWidth: 2,
-    borderColor: "#6F42C1",
   },
   purpleIconCirclePressed: {
-    backgroundColor: "#6F42C1",
+    backgroundColor: "#4CAF50", // GREEN WHEN PRESSED
   },
   shortcutLabel: {
     fontSize: 12,
@@ -311,7 +327,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Yellow Recommend
+  // Yellow Recommend - DEFAULT: FILLED YELLOW WITH WHITE ICONS
   recommendItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -325,15 +341,13 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "rgba(255, 199, 95, 0.2)",
+    backgroundColor: "#FFC75F", // FILLED YELLOW
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
-    borderWidth: 2,
-    borderColor: "#FFC75F",
   },
   yellowIconCirclePressed: {
-    backgroundColor: "#FFC75F",
+    backgroundColor: "#FFB84D", // SLIGHTLY DARKER YELLOW WHEN PRESSED
   },
   recommendLabel: {
     flex: 1,

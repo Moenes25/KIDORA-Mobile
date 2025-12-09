@@ -57,7 +57,7 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
         navigation.navigate("HomeScreen");
         break;
         case "chat":
-        navigation.navigate("ChatScreen");
+        navigation.navigate("ChatListScreen");
         break;
       case "people":
         navigation.navigate("ChildrenListScreen");

@@ -1,4 +1,4 @@
-// screens/HomeScreen.js - Performance-based colors
+// screens/HomeScreen.js - Calendar Grid with Children Details
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -29,9 +29,13 @@ export default function HomeScreen({ navigation, route }) {
 
   const [pressedCard, setPressedCard] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedPeriod, setSelectedPeriod] = useState('Daily');
+  const [calendarExpanded, setCalendarExpanded] = useState(true);
 
   const user = route.params?.user;
-  const username = user?.name || "User";
+  const username = user?.name || "Mohamed";
   const email = user?.email || "";
 
   const children = [
@@ -40,27 +44,54 @@ export default function HomeScreen({ navigation, route }) {
     { id: 3, name: "Liam Brown", age: 9, grade: 4, present: true, completedTasks: 12, totalTasks: 15, performance: 25, avatar: require("../assets/child2.jpg") },
   ];
 
-  const today = new Date();
-  const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const scrollRef = useRef(null);
-  const currentDayIndex = (today.getDay() + 6) % 7;
+  // Activity data for calendar dates
+  const activityData = {
+    '2024-12-08': { attendance: 3, tasks: 15, performance: 82 },
+    '2024-12-09': { attendance: 2, tasks: 12, performance: 75 },
+    '2024-12-10': { attendance: 3, tasks: 18, performance: 90 },
+    '2024-12-05': { attendance: 2, tasks: 14, performance: 78 },
+  };
 
-  const weekDays = dayNames.map((day, index) => {
-    const d = new Date(today);
-    const diff = index - currentDayIndex;
-    d.setDate(today.getDate() + diff);
-    return { name: day, date: d.getDate() };
-  });
+  const getDateKey = (date) => {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (scrollRef.current) {
-        const cardWidth = 80;
-        const offset = cardWidth * currentDayIndex - screenWidth / 2 + cardWidth / 2;
-        scrollRef.current.scrollTo({ x: Math.max(offset, 0), animated: true });
-      }
-    }, 100);
-  }, []);
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    return days;
+  };
+
+  const isToday = (date) => {
+    if (!date) return false;
+    const today = new Date();
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
+  };
+
+  const isSameDay = (date1, date2) => {
+    if (!date1 || !date2) return false;
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
+  };
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
 
@@ -78,14 +109,14 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   const getPerformanceColors = (performance) => {
-    if (performance >= 75) return { gradient: ["#6FCF97", "#27AE60"], icon: "#27AE60" }; // Green - Good
-    if (performance >= 45) return { gradient: ["#F2C94C", "#F2994A"], icon: "#F2994A" }; // Yellow - Neutral
-    return { gradient: ["#EB5757", "#E53935"], icon: "#E53935" }; // Red - Needs attention
+    if (performance >= 75) return { gradient: ["#6FCF97", "#27AE60"], icon: "#27AE60" };
+    if (performance >= 45) return { gradient: ["#F2C94C", "#F2994A"], icon: "#F2994A" };
+    return { gradient: ["#EB5757", "#E53935"], icon: "#E53935" };
   };
 
   const renderChildCard = ({ item }) => {
     const isPressed = pressedCard === item.id;
-    const { gradient, icon } = getPerformanceColors(item.performance);
+    const { gradient } = getPerformanceColors(item.performance);
     
     return (
       <TouchableOpacity 
@@ -138,7 +169,18 @@ export default function HomeScreen({ navigation, route }) {
     );
   };
 
-  const TOP_SECTION_HEIGHT = screenHeight * 0.45;
+  const previousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+  };
+
+  const days = getDaysInMonth(currentMonth);
+  const currentActivity = activityData[getDateKey(selectedDate)];
+
+  const TOP_SECTION_HEIGHT = calendarExpanded ? screenHeight * 0.72 : screenHeight * 0.48;
 
   return (
     <View style={styles.container}>
@@ -153,87 +195,179 @@ export default function HomeScreen({ navigation, route }) {
         onLogout={handleLogout} 
       />
 
-      {/* FIXED TOP SECTION */}
+      {/* FIXED PURPLE TOP SECTION */}
       <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
         <LinearGradient colors={colors.headerGradient} style={StyleSheet.absoluteFill}>
           <View style={styles.safeArea} />
-          <TopBar onMenuPress={toggleSidebar} />
+          <TopBar onMenuPress={toggleSidebar} notificationCount={2} />
           
-          <ScrollView 
-            style={styles.topScrollView}
-            contentContainerStyle={styles.topContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.headerContent}>
-              <Text style={styles.headerTitle}>My Children</Text>
-              <Image source={require("../assets/famGif.gif")} style={styles.gif} resizeMode="contain" />
-            </View>
-
-            <View style={styles.metricBigCard}>
-              <View style={styles.metricContainer}>
-                <View style={styles.metricCard}>
-                  <View style={styles.metricTop}>
-                    <Feather name="users" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
-                    <Text style={styles.metricNumber}>3</Text>
-                  </View>
-                  <Text style={styles.metricText}>Children</Text>
-                </View>
-                <View style={styles.metricCard}>
-                  <View style={styles.metricTop}>
-                    <Feather name="check-circle" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
-                    <Text style={styles.metricNumber}>15</Text>
-                  </View>
-                  <Text style={styles.metricText}>Completed Tasks</Text>
-                </View>
-                <View style={styles.metricCard}>
-                  <View style={styles.metricTop}>
-                    <Feather name="bar-chart-2" size={22} color="#FFFFFF" style={{ marginRight: 8 }} />
-                    <Text style={styles.metricNumber}>82%</Text>
-                  </View>
-                  <Text style={styles.metricText}>Average performance</Text>
+          {/* Profile Section */}
+          <View style={styles.profileSection}>
+            <Image 
+              source={require("../assets/default_avatar.jpg")} 
+              style={styles.profileAvatar} 
+            />
+            <View style={styles.greetingContainer}>
+              <Text style={styles.greeting}>
+                Hi, <Text style={styles.userName}>{username}</Text>
+              </Text>
+              <View style={styles.pointsContainer}>
+                <View style={styles.pointBadge}>
+                  <Text style={styles.starIcon}>⭐</Text>
+                  <Text style={styles.pointText}>10</Text>
                 </View>
               </View>
-
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false} 
-                ref={scrollRef} 
-                contentContainerStyle={{ paddingHorizontal: 8 }}
-              >
-                <View style={{ flexDirection: "row" }}>
-                  {weekDays.map((day, index) => {
-                    const isToday = index === currentDayIndex;
-                    return (
-                      <View
-                        key={index}
-                        style={{
-                          backgroundColor: isToday ? "white" : "rgba(255,255,255,0.2)",
-                          paddingVertical: 6,
-                          paddingHorizontal: 10,
-                          borderRadius: 8,
-                          marginRight: 8,
-                        }}
-                      >
-                        <Text style={{
-                          color: isToday ? "#6F42C1" : "#FFFFFF",
-                          fontWeight: isToday ? "700" : "500",
-                          fontSize: 14,
-                        }}>
-                          {day.name} {day.date}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                </View>
-              </ScrollView>
             </View>
-            
-            <View style={{ height: 20 }} />
-          </ScrollView>
+          </View>
+
+          {/* Activity Stats Cards - Above Calendar */}
+          <View style={styles.activityStatsRow}>
+            <View style={styles.statCard}>
+              <LinearGradient colors={['#EC4899', '#DB2777']} style={styles.statCardGradient}>
+                <View style={styles.statIconCircle}>
+                  <Feather name="users" size={16} color="#FFFFFF" />
+                </View>
+                <Text style={styles.statCardValue}>{currentActivity?.attendance || 0}</Text>
+                <Text style={styles.statCardLabel}>Attendance</Text>
+              </LinearGradient>
+            </View>
+
+            <View style={styles.statCard}>
+              <LinearGradient colors={['#A855F7', '#9333EA']} style={styles.statCardGradient}>
+                <View style={styles.statIconCircle}>
+                  <Feather name="check-circle" size={16} color="#FFFFFF" />
+                </View>
+                <Text style={styles.statCardValue}>{currentActivity?.tasks || 0}</Text>
+                <Text style={styles.statCardLabel}>Completed Tasks</Text>
+              </LinearGradient>
+            </View>
+
+            <View style={styles.statCard}>
+              <LinearGradient colors={['#6366F1', '#4F46E5']} style={styles.statCardGradient}>
+                <View style={styles.statIconCircle}>
+                  <Feather name="trending-up" size={16} color="#FFFFFF" />
+                </View>
+                <Text style={styles.statCardValue}>{currentActivity?.performance || 0}%</Text>
+                <Text style={styles.statCardLabel}>Overall Performance</Text>
+              </LinearGradient>
+              <View style={styles.incompleteShadow}>
+                <Text style={styles.incompleteText}>
+                  {currentActivity ? (20 - currentActivity.tasks) : 20} Incomplete
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Calendar Section */}
+          <View style={styles.calendarSection}>
+            <TouchableOpacity 
+              style={styles.selectDateRow}
+              onPress={() => setCalendarExpanded(!calendarExpanded)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.selectDateText}>Select Date</Text>
+              <View style={styles.headerRight}>
+                <View style={styles.calendarIconContainer}>
+                  <Feather name="calendar" size={18} color="#6F42C1" />
+                </View>
+                <View style={styles.toggleIconContainer}>
+                  <Feather 
+                    name={calendarExpanded ? "chevron-up" : "chevron-down"} 
+                    size={18} 
+                    color="#FFFFFF" 
+                  />
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            {calendarExpanded && (
+              <>
+                {/* Month Navigation */}
+                <View style={styles.monthNavigation}>
+                  <TouchableOpacity onPress={previousMonth} style={styles.monthNavBtn}>
+                    <Feather name="chevron-left" size={18} color="#FFFFFF" />
+                  </TouchableOpacity>
+                  <Text style={styles.monthText}>
+                    {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                  </Text>
+                  <TouchableOpacity onPress={nextMonth} style={styles.monthNavBtn}>
+                    <Feather name="chevron-right" size={18} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Calendar Grid */}
+                <View style={styles.calendarGrid}>
+                  {/* Day Headers */}
+                  <View style={styles.dayHeaderRow}>
+                    {dayNames.map((day, idx) => (
+                      <Text key={idx} style={styles.dayHeader}>{day}</Text>
+                    ))}
+                  </View>
+
+                  {/* Calendar Days */}
+                  <View style={styles.daysGrid}>
+                    {days.map((day, index) => {
+                      if (!day) {
+                        return <View key={`empty-${index}`} style={styles.dayCell} />;
+                      }
+
+                      const isSelected = isSameDay(day, selectedDate);
+                      const isTodayDate = isToday(day);
+                      const hasActivity = activityData[getDateKey(day)];
+
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => setSelectedDate(day)}
+                          style={[
+                            styles.dayCell,
+                            isSelected && styles.dayCellSelected,
+                            isTodayDate && !isSelected && styles.dayCellToday,
+                          ]}
+                        >
+                          <Text style={[
+                            styles.dayText,
+                            isSelected && styles.dayTextSelected,
+                            isTodayDate && !isSelected && styles.dayTextToday,
+                          ]}>
+                            {day.getDate()}
+                          </Text>
+                          {hasActivity && !isSelected && (
+                            <View style={styles.activityDot} />
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+
+                {/* Period Selector */}
+                <View style={styles.periodSelector}>
+                  {['Daily', 'Weekly', 'Monthly'].map((period) => (
+                    <TouchableOpacity
+                      key={period}
+                      onPress={() => setSelectedPeriod(period)}
+                      style={[
+                        styles.periodBtn,
+                        selectedPeriod === period && styles.periodBtnSelected
+                      ]}
+                    >
+                      <Text style={[
+                        styles.periodText,
+                        selectedPeriod === period && styles.periodTextSelected
+                      ]}>
+                        {period}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
+          </View>
         </LinearGradient>
       </View>
 
-      {/* WHITE BOTTOM SECTION */}
+      {/* WHITE BOTTOM SECTION - Children Details */}
       <View style={[styles.scrollableBottomSection, { top: TOP_SECTION_HEIGHT }]}>
         <ScrollView contentContainerStyle={styles.bottomScroll} showsVerticalScrollIndicator={false}>
           <Text style={styles.childrenTitle}>Children Details</Text>
@@ -266,24 +400,256 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderBottomEndRadius: 38,
     borderBottomStartRadius: 38,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
   },
   safeArea: { height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight },
-  topScrollView: { flex: 1 },
-  topContent: { paddingHorizontal: 16, paddingBottom: 16 },
-  headerContent: {
+  
+  // Profile Section
+  profileSection: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 4,
-    marginTop: 12,
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    marginTop: 6,
+    marginBottom: 8,
   },
-  headerTitle: { fontSize: 28, fontWeight: "700", color: "#ffffff" },
-  gif: { width: 80, height: 80 },
+  profileAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: "#FFD700",
+    backgroundColor: "#FFD700",
+    marginRight: 12,
+  },
+  greetingContainer: {
+    flex: 1,
+  },
+  greeting: {
+    fontSize: 20,
+    color: "#FFFFFF",
+    marginBottom: 8,
+  },
+  userName: {
+    color: "#FFD700",
+    fontWeight: "700",
+  },
+  pointsContainer: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  pointBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  starIcon: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  pointText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+
+  // Calendar Section
+  calendarSection: {
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  selectDateRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  selectDateText: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  calendarIconContainer: {
+    width: 36,
+    height: 36,
+    backgroundColor: "#A5F3B4",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  toggleIconContainer: {
+    width: 36,
+    height: 36,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  
+  // Month Navigation
+  monthNavigation: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+    paddingHorizontal: 4,
+  },
+  monthNavBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  monthText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+
+  // Calendar Grid
+  calendarGrid: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 8,
+  },
+  dayHeaderRow: {
+    flexDirection: "row",
+    marginBottom: 8,
+  },
+  dayHeader: {
+    flex: 1,
+    textAlign: "center",
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  daysGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  dayCell: {
+    width: `${100 / 7}%`,
+    aspectRatio: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+    marginVertical: 3,
+  },
+  dayCellSelected: {
+    backgroundColor: "#FFD700",
+  },
+  dayCellToday: {
+    borderWidth: 2,
+    borderColor: "#FFD700",
+  },
+  dayText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  dayTextSelected: {
+    color: "#6F42C1",
+    fontWeight: "700",
+  },
+  dayTextToday: {
+    color: "#FFD700",
+  },
+  activityDot: {
+    position: "absolute",
+    bottom: 3,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#FFD700",
+  },
+
+  // Activity Stats Cards (Above Calendar)
+  activityStatsRow: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    gap: 8,
+    marginBottom: 10,
+  },
+  statCard: {
+    flex: 1,
+    borderRadius: 16,
+    overflow: "visible",
+  },
+  statCardGradient: {
+    padding: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
+  },
+  statIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(165, 243, 180, 0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  statCardValue: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    marginBottom: 4,
+  },
+  statCardLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "rgba(255, 255, 255, 0.95)",
+    textAlign: "center",
+  },
+  incompleteShadow: {
+    backgroundColor: "rgba(79, 70, 229, 0.5)",
+    paddingVertical: 4,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    alignItems: "center",
+  },
+  incompleteText: {
+    fontSize: 10,
+    color: "rgba(255, 255, 255, 0.85)",
+    fontWeight: "500",
+  },
+
+  periodSelector: {
+    flexDirection: "row",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 20,
+    padding: 3,
+  },
+  periodBtn: {
+    flex: 1,
+    paddingVertical: 6,
+    alignItems: "center",
+    borderRadius: 17,
+  },
+  periodBtnSelected: {
+    backgroundColor: "#FFD700",
+  },
+  periodText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  periodTextSelected: {
+    color: "#6F42C1",
+    fontWeight: "700",
+  },
+
+  // Bottom Section
   scrollableBottomSection: {
     position: "absolute",
     left: 0,
@@ -300,19 +666,14 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   bottomScroll: { paddingHorizontal: 16, paddingTop: 32, paddingBottom: 100 },
-  bottomNavContainer: { position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 10, backgroundColor: "#ffffff" },
-  metricBigCard: { 
-    borderRadius: 16, 
-    paddingVertical: 16, 
-    paddingHorizontal: 10, 
-    marginBottom: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+  bottomNavContainer: { 
+    position: "absolute", 
+    bottom: 0, 
+    left: 0, 
+    right: 0, 
+    zIndex: 10, 
+    backgroundColor: "#ffffff" 
   },
-  metricContainer: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 0, marginBottom: 12 },
-  metricCard: { width: 100, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 10, backgroundColor: "rgba(255, 255, 255, 0.15)" },
-  metricTop: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
-  metricNumber: { fontSize: 18, fontWeight: "700", color: "#FFFFFF" },
-  metricText: { fontSize: 12, color: "#FFFFFF", opacity: 0.9 },
   childrenTitle: { fontSize: 20, fontWeight: "700", marginBottom: 12, color: "#1a1a2e" },
   childCardWrapper: { 
     width: "100%", 
@@ -324,7 +685,7 @@ const styles = StyleSheet.create({
   },
   childCard: { borderRadius: 20, padding: 18 },
   childHeader: { flexDirection: "row", alignItems: "flex-start", marginBottom: 16 },
-  childAvatar: { width: 56, height: 56, borderRadius: 28, marginRight: 12, borderWidth: 3, borderColor: "rgba(255,255,255,0.5)" },
+  childAvatar: { width: 56, height: 56, borderRadius: 28, marginRight: 12, borderWidth: 3, borderColor: "#FFD700" },
   childName: { fontSize: 18, fontWeight: "700", marginBottom: 2, color: "#ffffff" },
   childInfo: { fontSize: 13, fontWeight: "500", color: "rgba(255,255,255,0.9)" },
   statusText: { fontSize: 13, fontWeight: "600", color: "#ffffff" },

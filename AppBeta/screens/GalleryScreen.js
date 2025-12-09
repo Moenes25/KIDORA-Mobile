@@ -7,10 +7,16 @@ import {
   Image,
   ScrollView,
   Animated,
+  Dimensions,
+  Platform,
+  StatusBar,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import PhotoScreen from "./PhotoScreen";
+
+const { width, height: screenHeight } = Dimensions.get("window");
+const TOP_SECTION_HEIGHT = screenHeight * 0.15;
 
 export default function GalleryScreen({ navigation }) {
   const [visible, setVisible] = useState(false);
@@ -81,27 +87,53 @@ export default function GalleryScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
-      <LinearGradient colors={["#6F42C1", "#9b59b6"]} style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Feather name="chevron-left" size={28} color="#fff" />
-        </TouchableOpacity>
+      <StatusBar barStyle="light-content" backgroundColor="#9b59b6" />
 
-        <Text style={styles.headerTitle}>My Gallery</Text>
+      {/* FIXED TOP SECTION - Gradient (Same style as ImprovementsScreen) */}
+      <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
+        <LinearGradient 
+          colors={["#9b59b6", "#8e44ad"]} 
+          style={StyleSheet.absoluteFill}
+        >
+          <View style={styles.safeArea} />
 
-        <View style={{ width: 28 }} />
-      </LinearGradient>
+          {/* Header with Back Button and Title */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Feather name="chevron-left" size={28} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>My Gallery</Text>
+          </View>
+          
+          {/* Spacer for rounded section */}
+          <View style={{ height: 20 }} />
+        </LinearGradient>
+      </View>
 
-      {/* BODY */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        {galleryData.map((monthBlock, index) => (
-          <MonthCard
-            key={index}
-            monthBlock={monthBlock}
-            openPhoto={openPhoto}
-          />
-        ))}
-      </ScrollView>
+      {/* WHITE BOTTOM SECTION with rounded top (Same style as ImprovementsScreen) */}
+      <View style={[
+        styles.whiteSection, 
+        { 
+          top: TOP_SECTION_HEIGHT,
+        }
+      ]}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {galleryData.map((monthBlock, index) => (
+            <MonthCard
+              key={index}
+              monthBlock={monthBlock}
+              openPhoto={openPhoto}
+              index={index}
+            />
+          ))}
+          
+          {/* Bottom padding */}
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </View>
 
       {/* PHOTO SCREEN MODAL */}
       <PhotoScreen
@@ -119,43 +151,104 @@ export default function GalleryScreen({ navigation }) {
 
 /* ---------------------- MONTH CARD COMPONENT ---------------------- */
 
-function MonthCard({ monthBlock, openPhoto }) {
+function MonthCard({ monthBlock, openPhoto, index }) {
   const scrollX = useRef(new Animated.Value(0)).current;
+  
+  // Alternate gradient colors for visual variety - more vibrant
+  const gradients = [
+    ["#e8d5ff", "#f0e5ff"],
+    ["#d4edff", "#e6f7ff"],
+    ["#ffd9a6", "#ffe9c7"],
+    ["#ffc2d9", "#ffe0ed"],
+  ];
+  
+  const currentGradient = gradients[index % gradients.length];
 
   return (
-    <View style={styles.monthCard}>
-      <Text style={styles.monthTitle}>{monthBlock.month}</Text>
+    <View style={styles.monthCardWrapper}>
+      <LinearGradient 
+        colors={currentGradient}
+        style={styles.monthCard}
+      >
+        {/* Month Header */}
+        <View style={styles.monthHeader}>
+          <View style={styles.monthTitleContainer}>
+            <View style={styles.monthIconCircle}>
+              <Feather name="calendar" size={18} color="#9b59b6" />
+            </View>
+            <Text style={styles.monthTitle}>{monthBlock.month}</Text>
+          </View>
+          <View style={styles.countBadge}>
+            <Text style={styles.countBadgeText}>
+              {monthBlock.photos.length} {monthBlock.photos.length === 1 ? "photo" : "photos"}
+              </Text>
+            
+          </View>
+        </View>
 
-      <Animated.FlatList
-        data={monthBlock.photos}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(_, i) => i.toString()}
-        contentContainerStyle={{ paddingVertical: 10 }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
-        )}
-        renderItem={({ item, index }) => {
-          const inputRange = [(index - 1) * 130, index * 130, (index + 1) * 130];
+        {/* Photos Carousel */}
+        <Animated.FlatList
+          data={monthBlock.photos}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, i) => i.toString()}
+          contentContainerStyle={styles.photosContainer}
+          snapToInterval={130}
+          decelerationRate="fast"
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: true }
+          )}
+          renderItem={({ item, index: photoIndex }) => {
+            const inputRange = [
+              (photoIndex - 1) * 130, 
+              photoIndex * 130, 
+              (photoIndex + 1) * 130
+            ];
 
-          const scale = scrollX.interpolate({
-            inputRange,
-            outputRange: [0.75, 1.35, 0.75],
-            extrapolate: "clamp",
-          });
+            const scale = scrollX.interpolate({
+              inputRange,
+              outputRange: [0.8, 1.1, 0.8],
+              extrapolate: "clamp",
+            });
 
-          return (
-            <TouchableOpacity onPress={() => openPhoto(item, monthBlock.photos, index)}>
-              <Animated.View style={{ transform: [{ scale }], marginRight: 10 }}>
-                <Image source={item} style={styles.photo} />
-              </Animated.View>
-            </TouchableOpacity>
-          );
-        }}
-      />
+            const opacity = scrollX.interpolate({
+              inputRange,
+              outputRange: [0.6, 1, 0.6],
+              extrapolate: "clamp",
+            });
 
-      <Text style={styles.countText}>{monthBlock.photos.length} photos</Text>
+            return (
+              <TouchableOpacity 
+                onPress={() => openPhoto(item, monthBlock.photos, photoIndex)}
+                activeOpacity={0.9}
+              >
+                <Animated.View 
+                  style={[
+                    styles.photoWrapper,
+                    { 
+                      transform: [{ scale }],
+                      opacity,
+                    }
+                  ]}
+                >
+                  <Image source={item} style={styles.photo} />
+                  
+                  {/* Photo overlay gradient */}
+                  <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.4)"]}
+                    style={styles.photoOverlay}
+                  >
+                    <Feather name="maximize-2" size={16} color="#fff" />
+                  </LinearGradient>
+                </Animated.View>
+              </TouchableOpacity>
+            );
+          }}
+        />
+
+    
+      </LinearGradient>
     </View>
   );
 }
@@ -163,58 +256,154 @@ function MonthCard({ monthBlock, openPhoto }) {
 /* ---------------------- STYLES ---------------------- */
 
 const styles = StyleSheet.create({
-  container: {
+  container: { 
     flex: 1,
-    backgroundColor: "#fbf7ff",
+    backgroundColor: "#f8f9fa",
+  },
+
+  fixedTopSection: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    overflow: "hidden",
+    borderBottomEndRadius: 38,
+    borderBottomStartRadius: 38,
+  },
+
+  safeArea: {
+    height: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 16,
     paddingHorizontal: 16,
-    elevation: 5,
+    paddingTop: 12,
+    paddingBottom: 20,
   },
 
-  backBtn: {
-    paddingRight: 10,
-    paddingVertical: 4,
+  backButton: { 
+    padding: 8,
+    marginRight: 8,
   },
 
-  headerTitle: {
+  headerTitle: { 
+    fontSize: 22, 
+    fontWeight: "700", 
+    color: "#fff",
     flex: 1,
     textAlign: "center",
-    fontSize: 20,
-    color: "#fff",
-    fontWeight: "700",
+    marginRight: 40, // Balance the back button width
+  },
+
+  whiteSection: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 38,
+    borderTopRightRadius: 38,
+    overflow: "hidden",
+    backgroundColor: "#ffffff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+
+  scrollContent: {
+    paddingTop: 32,
+    paddingBottom: 40,
+  },
+
+  monthCardWrapper: {
+    marginHorizontal: 16,
+    marginBottom: 24,
   },
 
   monthCard: {
-    backgroundColor: "white",
-    marginHorizontal: 16,
-    marginTop: 18,
-    padding: 16,
-    borderRadius: 16,
-    elevation: 2,
+    borderRadius: 24,
+    padding: 20,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+  },
+
+  monthHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  monthTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  monthIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(155, 89, 182, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
 
   monthTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#4a2c82",
-    marginBottom: 10,
+    color: "#2d3436",
+  },
+
+  countBadge: {
+    backgroundColor: "rgba(155, 89, 182, 0.15)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+
+  countBadgeText: {
+    color: "#9b59b6",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+
+  photosContainer: {
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+  },
+
+  photoWrapper: {
+    marginRight: 16,
+    position: "relative",
   },
 
   photo: {
-    width: 110,
-    height: 110,
-    borderRadius: 12,
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: "#fff",
   },
 
-  countText: {
-    marginTop: 10,
-    fontSize: 13,
-    color: "#777",
-    textAlign: "right",
+  photoOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    padding: 8,
   },
+
 });
