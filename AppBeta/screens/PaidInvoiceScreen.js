@@ -1,35 +1,57 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from "react-native";
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  Image, 
+  Alert,
+  Platform,
+  StatusBar,
+  Dimensions 
+} from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from "../context/ThemeContext";
+
+import TopNavBar from "../components/TopNavBar";
+
+const { height: screenHeight } = Dimensions.get("window");
+const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 
 export default function PaidInvoiceScreen({ navigation, route }) {
-  //const invoice = route.params?.invoice || {};
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
 
   // Example invoice object for testing:
-const invoice = {
-  title: "Registration Fee - December",
-  reference: "INV-00123",
-  issueDate: "Dec 1, 2024",
-  paymentDate: "Dec 5, 2024",
-  status: "Paid",
-  framesMonthly: "120 TND",
-  additionalServices: [
-    { name: "Transport", price: "30 TND" },
-    { name: "Canteen", price: "50 TND" },
-    { name: "Activities Extras", price: "20 TND" },
-  ],
-  total: "220 TND",
-  paymentMethod: "Mastercard",
-  child: { name: "Adam Ben Ali", age: 8, class: "Class 1" },
-};
-
+  const invoice = {
+    title: "Registration Fee - December",
+    reference: "INV-00123",
+    issueDate: "Dec 1, 2024",
+    paymentDate: "Dec 5, 2024",
+    status: "Paid",
+    framesMonthly: "120 TND",
+    additionalServices: [
+      { name: "Transport", price: "30 TND" },
+      { name: "Canteen", price: "50 TND" },
+      { name: "Activities Extras", price: "20 TND" },
+    ],
+    total: "220 TND",
+    paymentMethod: "Mastercard",
+    child: { 
+      name: "Adam Ben Ali", 
+      age: 8, 
+      class: "Class 1",
+      avatar: require("../assets/child1.jpg") // Add your child avatar image
+    },
+  };
 
   const handleDownload = () => {
     Alert.alert("Download", "Invoice PDF download initiated!");
   };
 
-  // Map payment methods to logos (ensure you have these images in your assets folder)
+  // Map payment methods to logos
   const paymentLogos = {
     Mastercard: require("../assets/mastercard.png"),
     Visa: require("../assets/visa.png"),
@@ -40,199 +62,382 @@ const invoice = {
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
-      <LinearGradient colors={["#6F42C1", "#9b59b6"]} style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Feather name="chevron-left" size={28} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Invoice Details</Text>
-        <TouchableOpacity onPress={handleDownload}>
-          <Feather name="download" size={24} color="white" />
-        </TouchableOpacity>
-      </LinearGradient>
+      <StatusBar 
+        barStyle="light-content"
+        backgroundColor={isDark 
+          ? (colors.bgGradient?.[0])
+          : (colors.headerGradient?.[0] || "#6F42C1")
+        } 
+      />
+    {/* TOP SECTION with gradient */}
+      <View style={[styles.topSection, { height: TOP_SECTION_HEIGHT }]}>
+        <LinearGradient 
+          colors={isDark 
+            ? (colors.bgGradient || ["#1a1a2e", "#0f0f1f"])
+            : (colors.headerGradient || ["#6F42C1", "#9b59b6"])
+          } 
+          style={StyleSheet.absoluteFill}
+        >
+          {isDark && (
+            <View style={{
+              ...StyleSheet.absoluteFillObject,
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            }} />
+          )}
+          
+          <View style={styles.safeArea} />
+          <TopNavBar title="Invoice details" navigation={navigation} />
+        </LinearGradient>
+      </View>
 
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        {/* 1- Invoice Info Subcard */}
-        <View style={styles.subCard}>
-          <Text style={styles.subCardTitle}>{invoice.title || "Invoice Title"}</Text>
+      {/* WHITE BOTTOM SECTION with rounded top */}
+      <View style={[styles.whiteSection, { top: TOP_SECTION_HEIGHT }]}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Main Invoice Card */}
+          <View style={styles.mainCard}>
+            {/* Child Info Corner */}
+            <View style={styles.childCorner}>
+              <Image 
+                source={invoice.child?.avatar} 
+                style={styles.childAvatar} 
+              />
+            </View>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Invoice Reference:</Text>
-            <Text style={styles.value}>{invoice.reference || "INV-00123"}</Text>
-          </View>
+            {/* Invoice Title */}
+            <Text style={styles.invoiceTitle}>{invoice.title}</Text>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Date of Issue:</Text>
-            <Text style={styles.value}>{invoice.issueDate || "Jan 1, 2025"}</Text>
-          </View>
+            {/* Invoice Info Section */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <MaterialIcons name="receipt" size={20} color="#9b59b6" />
+                <Text style={styles.sectionTitle}>Invoice Information</Text>
+              </View>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Payment Date:</Text>
-            <Text style={styles.value}>{invoice.paymentDate || "Jan 5, 2025"}</Text>
-          </View>
+              <View style={styles.infoGrid}>
+                <View style={styles.infoItem}>
+                  <Text style={styles.label}>Reference</Text>
+                  <Text style={styles.value}>{invoice.reference}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Text style={styles.label}>Status</Text>
+                  <View style={[styles.statusBadge, invoice.status === "Paid" ? styles.paid : styles.cancelled]}>
+                    <Feather name="check-circle" size={14} color="#fff" />
+                    <Text style={styles.statusText}>{invoice.status}</Text>
+                  </View>
+                </View>
+              </View>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Invoice Status:</Text>
-            <View style={[styles.statusTag, invoice.status === "Paid" ? styles.paid : styles.cancelled]}>
-              <Feather name="check" size={16} color="white" style={{ marginRight: 4 }} />
-              <Text style={styles.statusText}>{invoice.status || "Paid"}</Text>
+              <View style={styles.infoGrid}>
+                <View style={styles.infoItem}>
+                  <Text style={styles.label}>Issue Date</Text>
+                  <Text style={styles.value}>{invoice.issueDate}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Text style={styles.label}>Payment Date</Text>
+                  <Text style={styles.value}>{invoice.paymentDate}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider} />
+
+            {/* Invoice Details Section */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <MaterialIcons name="description" size={20} color="#9b59b6" />
+                <Text style={styles.sectionTitle}>Charges Breakdown</Text>
+              </View>
+
+              <View style={styles.chargeRow}>
+                <Text style={styles.chargeLabel}>Monthly Frames</Text>
+                <Text style={styles.chargeValue}>{invoice.framesMonthly}</Text>
+              </View>
+
+              {invoice.additionalServices?.map((service, index) => (
+                <View key={index} style={styles.chargeRow}>
+                  <Text style={styles.chargeLabel}>{service.name}</Text>
+                  <Text style={styles.chargeValue}>{service.price}</Text>
+                </View>
+              ))}
+
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Total Amount</Text>
+                <Text style={styles.totalValue}>{invoice.total}</Text>
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider} />
+
+            {/* Payment Method Section */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <MaterialIcons name="payment" size={20} color="#9b59b6" />
+                <Text style={styles.sectionTitle}>Payment Method</Text>
+              </View>
+
+              <View style={styles.paymentRow}>
+                {invoice.paymentMethod && paymentLogos[invoice.paymentMethod] && (
+                  <View style={styles.paymentLogoContainer}>
+                    <Image 
+                      source={paymentLogos[invoice.paymentMethod]} 
+                      style={styles.paymentLogo} 
+                    />
+                  </View>
+                )}
+                <Text style={styles.paymentMethodText}>{invoice.paymentMethod}</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* 2- Invoice Details Subcard */}
-        <View style={styles.subCard}>
-          <View style={styles.subCardHeader}>
-            <MaterialIcons name="description" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
-            <Text style={styles.subCardTitle}>Invoice Details</Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Monthly Frames:</Text>
-            <Text style={styles.value}>{invoice.framesMonthly || "120 TND"}</Text>
-          </View>
-
-          <Text style={[styles.label, { marginTop: 12 }]}>Additional Services:</Text>
-          {invoice.additionalServices?.map((service, index) => (
-            <View key={index} style={styles.serviceRow}>
-              <Text style={styles.value}>{service.name}</Text>
-              <Text style={styles.value}>{service.price}</Text>
-            </View>
-          ))}
-
-          <View style={styles.detailRow}>
-            <Text style={[styles.label, { marginTop: 12 }]}>Total Amount:</Text>
-            <Text style={styles.value}>{invoice.total || "200 TND"}</Text>
-          </View>
-        </View>
-
-        {/* Payment Method Subcard */}
-        <View style={styles.subCard}>
-        <View style={styles.subCardHeader}>
-            <MaterialIcons name="payment" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
-            <Text style={styles.subCardTitle}>Payment Method</Text>
-        </View>
-
-        <View style={styles.paymentRow}>
-            {invoice.paymentMethod && paymentLogos[invoice.paymentMethod] && (
-            <Image source={paymentLogos[invoice.paymentMethod]} style={styles.paymentLogo} />
-            )}
-            <Text style={styles.value}>{invoice.paymentMethod || "Credit Card"}</Text>
-        </View>
-        </View>
-
-        {/* Child Concerned Subcard */}
-        <View style={styles.subCard}>
-        <View style={styles.subCardHeader}>
-            <MaterialIcons name="child-care" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
-            <Text style={styles.subCardTitle}>Child Concerned</Text>
-        </View>
-
-        <View style={styles.childRow}>
-            <Text style={styles.label}>Name:</Text>
-            <Text style={styles.value}>{invoice.child?.name || "Adam Ben Ali"}</Text>
-        </View>
-
-        <View style={styles.childRow}>
-            <Text style={styles.label}>Age:</Text>
-            <Text style={styles.value}>{invoice.child?.age || "8"}</Text>
-        </View>
-
-        <View style={styles.childRow}>
-            <Text style={styles.label}>Class:</Text>
-            <Text style={styles.value}>{invoice.child?.class || "Class 1"}</Text>
-        </View>
-        </View>
-
-      </ScrollView>
+          {/* Bottom spacing */}
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fbf7ff" },
-
-  header: {
-    paddingTop: 55,
-    paddingBottom: 25,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
+  container: { 
+    flex: 1, 
+    backgroundColor: "#f8f9fa" 
   },
 
-  headerTitle: { color: "white", fontSize: 22, fontWeight: "700" },
-
-  contentContainer: {
-    padding: 20,
-    paddingBottom: 50,
+  topSection: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+  },
+  safeArea: {
+    height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight,
   },
 
-  subCard: {
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 16,
-    marginBottom: 20,
+
+  
+
+  headerTitle: { 
+    fontSize: 22, 
+    fontWeight: "700", 
+    color: "#fff",
+    flex: 1,
+    textAlign: "center",
+  },
+
+  downloadButton: {
+    padding: 8,
+  },
+
+  whiteSection: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 38,
+    borderTopRightRadius: 38,
+    overflow: "hidden",
+    backgroundColor: "#ffffff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+
+  scrollContent: {
+    paddingTop: 32,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+
+  mainCard: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 6,
+    position: "relative",
   },
 
-  subCardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
+  childCorner: {
+    position: "absolute",
+    top: 24,
+    right: 10,
+    alignItems: "center",
+    zIndex: 10,
+  },
 
-  subCardTitle: {
-    fontSize: 18,
+  childAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: "#fed703",
+    marginBottom: 8,
+  },
+
+
+
+  invoiceTitle: {
+    fontSize: 20,
     fontWeight: "700",
-    color: "#6F42C1",
+    color: "#2d3436",
+    marginBottom: 20,
+    paddingRight: 100, // Space for child corner
   },
 
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
+  section: {
+    marginBottom: 20,
   },
 
-  serviceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingLeft: 16,
-    marginTop: 4,
-  },
-
-  label: { fontSize: 14, fontWeight: "600", color: "#666" },
-  value: { fontSize: 16, fontWeight: "700", color: "#333" },
-
-  statusTag: {
+  sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    marginBottom: 16,
   },
-  statusText: { color: "white", fontWeight: "700" },
 
-  paid: { backgroundColor: "green" },
-  cancelled: { backgroundColor: "red" },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#2d3436",
+    marginLeft: 8,
+  },
 
-  paymentLogo: { width: 40, height: 24, marginRight: 10, resizeMode: "contain" },
+  infoGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+
+  infoItem: {
+    flex: 1,
+  },
+
+  label: {
+    fontSize: 12,
+    color: "#636e72",
+    marginBottom: 4,
+    fontWeight: "600",
+  },
+
+  value: {
+    fontSize: 15,
+    color: "#2d3436",
+    fontWeight: "700",
+  },
+
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+    gap: 4,
+  },
+
+  statusText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "700",
+    marginLeft: 4,
+  },
+
+  paid: { 
+    backgroundColor: "#27ae60" 
+  },
+
+  cancelled: { 
+    backgroundColor: "#e74c3c" 
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#e1e8ed",
+    marginVertical: 16,
+  },
+
+  chargeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+
+  chargeLabel: {
+    fontSize: 14,
+    color: "#636e72",
+    fontWeight: "500",
+  },
+
+  chargeValue: {
+    fontSize: 15,
+    color: "#2d3436",
+    fontWeight: "700",
+  },
+
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 16,
+    marginTop: 8,
+    borderTopWidth: 2,
+    borderTopColor: "#9b59b6",
+  },
+
+  totalLabel: {
+    fontSize: 16,
+    color: "#2d3436",
+    fontWeight: "700",
+  },
+
+  totalValue: {
+    fontSize: 20,
+    color: "#9b59b6",
+    fontWeight: "700",
+  },
 
   paymentRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginTop: 8,
-},
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
+    padding: 16,
+    borderRadius: 12,
+  },
 
-childRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "flex-start",
-  marginTop: 8,
-},
+  paymentLogoContainer: {
+    backgroundColor: "#fff",
+    padding: 8,
+    borderRadius: 8,
+    marginRight: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
 
-value: { fontSize: 16, fontWeight: "700", color: "#333", marginLeft: 6 },
+  paymentLogo: {
+    width: 50,
+    height: 30,
+    resizeMode: "contain",
+  },
 
+  paymentMethodText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#2d3436",
+  },
 });

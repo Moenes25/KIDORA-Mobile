@@ -9,11 +9,11 @@ export default function AgeSelectionScreen({ setScreen, setSelectedAge }) {
   const isPortrait = height > width;
 
   // Dynamic Card sizing
-  // In Portrait, cards take about 1/3 of width.
-  // In Landscape, cards take about 1/3 of the RIGHT HALF of the screen (smaller relative to total width, but physically similar).
+  // In Portrait, cards take about 1/4 of width (now 4 cards).
+  // In Landscape, cards take about 1/4 of the RIGHT HALF of the screen.
   const cardWidth = isPortrait 
-    ? (width - 60) / 3  // 60 = gap(20*2) + padding(20) roughly
-    : (width * 0.5 - 60) / 3; // Use half screen width for grid calculation
+    ? (width - 80) / 4  // 80 = gap(20*3) + padding(20*2) roughly
+    : (width * 0.5 - 80) / 4; // Use half screen width for grid calculation
 
   return (
     <SpaceBackground theme="purple" isPortrait={isPortrait}>
@@ -24,13 +24,12 @@ export default function AgeSelectionScreen({ setScreen, setSelectedAge }) {
         <ScrollView 
           contentContainerStyle={[
             styles.centerContent, 
-            !isPortrait && styles.centerContentLandscape // Switch layout direction
+            !isPortrait && styles.centerContentLandscape
           ]} 
           showsVerticalScrollIndicator={false}
         >
           
           {/* HEADER SECTION */}
-          {/* Landscape: Moves to Left Side */}
           <View style={[
             styles.headerSection, 
             !isPortrait && styles.headerSectionLandscape
@@ -38,7 +37,7 @@ export default function AgeSelectionScreen({ setScreen, setSelectedAge }) {
             <View style={[
               styles.iconCircle, 
               { backgroundColor: 'rgba(255,255,255,0.2)' },
-              !isPortrait && { width: 80, height: 80, borderRadius: 40, marginBottom: 16 } // Smaller icon in landscape
+              !isPortrait && { width: 80, height: 80, borderRadius: 40, marginBottom: 16 }
             ]}>
               <Feather name="star" size={isPortrait ? 60 : 40} color="#fff" />
             </View>
@@ -46,31 +45,30 @@ export default function AgeSelectionScreen({ setScreen, setSelectedAge }) {
             <Text style={[styles.subtitle, !isPortrait && { fontSize: 16 }]}>اختر عمرك لنبدأ المغامرة!</Text>
           </View>
 
-          {/* GRID SECTION */}
-          {/* Landscape: Moves to Right Side */}
+          {/* GRID SECTION - Now includes age 3 */}
           <View style={[
             styles.ageGrid,
             !isPortrait && styles.ageGridLandscape
           ]}>
-            {[4, 5, 6].map((age) => (
+            {[3, 4, 5, 6].map((age) => (
               <TouchableOpacity
                 key={age}
                 onPress={() => {
                   setSelectedAge(age);
                   setScreen('home');
                 }}
-                style={{ width: Math.max(90, cardWidth) }} // Dynamic Width with safety minimum
+                style={{ width: Math.max(80, cardWidth) }} // Dynamic Width with safety minimum
               >
                 <LinearGradient 
                   colors={['#fef3c7', '#fde68a']} 
                   style={[
                     styles.ageCardGradient,
-                    !isPortrait && { padding: 16 } // Slightly tighter padding in landscape
+                    !isPortrait && { padding: 14 }
                   ]}
                 >
-                  <Text style={[styles.ageEmoji, !isPortrait && { fontSize: 36 }]}>🎈</Text>
-                  <Text style={[styles.ageNumber, !isPortrait && { fontSize: 40 }]}>{age}</Text>
-                  <Text style={[styles.ageLabel, !isPortrait && { fontSize: 14 }]}>سنوات</Text>
+                  <Text style={[styles.ageEmoji, !isPortrait && { fontSize: 32 }]}>🎈</Text>
+                  <Text style={[styles.ageNumber, !isPortrait && { fontSize: 36 }]}>{age}</Text>
+                  <Text style={[styles.ageLabel, !isPortrait && { fontSize: 13 }]}>سنوات</Text>
                 </LinearGradient>
               </TouchableOpacity>
             ))}
@@ -89,7 +87,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     padding: 20 
   },
-  // Switch to Row layout in Landscape
   centerContentLandscape: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -103,8 +100,8 @@ const styles = StyleSheet.create({
   },
   headerSectionLandscape: {
     marginBottom: 0,
-    alignItems: 'center', // Keep text centered relative to itself
-    flex: 1, // Take up left side space
+    alignItems: 'center',
+    flex: 1,
     paddingRight: 20,
   },
   
@@ -134,36 +131,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     flexWrap: 'wrap', 
     justifyContent: 'center', 
-    gap: 20 
+    gap: 16 
   },
   ageGridLandscape: {
-    flex: 1.5, // Grid takes slightly more width than header
+    flex: 1.5,
     justifyContent: 'center',
-    gap: 16
+    gap: 14
   },
   
   ageCardGradient: { 
-    borderRadius: 24, 
-    padding: 20, 
+    borderRadius: 20, 
+    padding: 16, 
     alignItems: 'center', 
     elevation: 8,
-    // Add shadow props for iOS consistency
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
   },
   ageEmoji: { 
-    fontSize: 48, 
-    marginBottom: 10 
+    fontSize: 40, 
+    marginBottom: 8 
   },
   ageNumber: { 
-    fontSize: 48, 
+    fontSize: 42, 
     fontWeight: '900', 
     color: '#8b5cf6' 
   },
   ageLabel: { 
-    fontSize: 18, 
+    fontSize: 16, 
     fontWeight: '700', 
     color: '#6b7280' 
   },

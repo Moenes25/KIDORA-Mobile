@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Platform, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import SpaceBackground from '../../components/SpaceBackground';
 import { skins } from '../../data/ChildrenData';
 
 export default function StoreScreen({ setScreen, coins, setCoins, ownedSkins, setOwnedSkins, equippedSkin, setEquippedSkin, isDark, colors }) {
@@ -12,16 +13,15 @@ export default function StoreScreen({ setScreen, coins, setCoins, ownedSkins, se
   const numColumns = isPortrait ? 2 : 3;
   const padding = 20;
   const gap = 16;
-  // If portrait, width is full screen. If landscape, grid takes 60% of screen
   const containerWidth = isPortrait ? width : width * 0.6; 
   const skinCardWidth = (containerWidth - (padding * 2) - (gap * (numColumns - 1))) / numColumns;
   const shadowColor = isDark ? '#2d1b69' : '#000';
 
   return (
-    <View style={styles.container}>
-      <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44, backgroundColor: isDark ? '#0f0a1f' : '#fb923c' }} />
-      <StatusBar barStyle="light-content" />
-      <LinearGradient colors={['#fb923c', '#f87171', '#f472b6']} style={styles.fullScreen}>
+    <SpaceBackground theme="orange" isPortrait={isPortrait}>
+      <View style={styles.container}>
+        <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44 }} />
+        <StatusBar barStyle="light-content" />
         
         <View style={[styles.topBar, !isPortrait && { paddingVertical: 8 }, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
           <TouchableOpacity onPress={() => setScreen('home')} style={styles.backButton}>
@@ -37,10 +37,10 @@ export default function StoreScreen({ setScreen, coins, setCoins, ownedSkins, se
         {/* Content Wrapper */}
         <View style={{ flex: 1, flexDirection: isPortrait ? 'column' : 'row' }}>
           
-          {/* LEFT SIDE (Landscape): Character Preview */}
+          {/* LEFT SIDE: Character Preview */}
           <View style={[
             styles.previewContainer, 
-            !isPortrait && { width: '40%', padding: 20, justifyContent: 'center' } // Sidebar style
+            !isPortrait && { width: '40%', padding: 20, justifyContent: 'center' }
           ]}>
             <View style={[styles.characterPreview, { backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff', shadowColor }]}>
               <Text style={styles.characterEmoji}>😊</Text>
@@ -54,7 +54,7 @@ export default function StoreScreen({ setScreen, coins, setCoins, ownedSkins, se
             </View>
           </View>
 
-          {/* RIGHT SIDE (Landscape): Scrollable Store */}
+          {/* RIGHT SIDE: Scrollable Store */}
           <ScrollView 
             showsVerticalScrollIndicator={false} 
             contentContainerStyle={[styles.scrollContent, !isPortrait && { paddingLeft: 0 }]}
@@ -73,7 +73,6 @@ export default function StoreScreen({ setScreen, coins, setCoins, ownedSkins, se
                     </View>
                     <Text style={[styles.skinName, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>{skin.name}</Text>
                     
-                    {/* Buttons... */}
                     {owned ? (
                       <TouchableOpacity onPress={() => setEquippedSkin(skin.id)} style={[styles.skinButton, equipped ? styles.skinButtonEquipped : styles.skinButtonOwned]}>
                         <Text style={[styles.skinButtonText, equipped ? styles.skinButtonTextEquipped : styles.skinButtonTextOwned]}>
@@ -94,14 +93,13 @@ export default function StoreScreen({ setScreen, coins, setCoins, ownedSkins, se
           </ScrollView>
         </View>
 
-      </LinearGradient>
-    </View>
+      </View>
+    </SpaceBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  fullScreen: { flex: 1 },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
   backButton: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
   topBarTitle: { fontSize: 20, fontWeight: '900', color: '#fff' },

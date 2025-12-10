@@ -23,7 +23,7 @@ export default function EditProfileScreen({ navigation, route }) {
   const user = route.params?.user || {};
 
   const [avatar, setAvatar] = useState(
-    user.avatar || require("../assets/default_avatar.jpg")
+    user.avatar || require("../assets/default_avatar.jpeg")
   );
   const [form, setForm] = useState({
     fullname: user.fullname || user.firstname && user.lastname

@@ -45,9 +45,21 @@ export default function CalendarScreenV1({ navigation }) {
     if (isExpanded) {
       generateMonth();
     } else {
-      generateMonth();
+      generateWeek();
     }
   }, [currentDate, isExpanded]);
+
+  const generateWeek = () => {
+    const dates = [];
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 1; i <= daysInMonth; i++) {
+      dates.push({ date: new Date(year, month, i), isCurrentMonth: true });
+    }
+    setVisibleDates(dates);
+  };
 
   const generateMonth = () => {
     const year = currentDate.getFullYear();
@@ -55,6 +67,9 @@ export default function CalendarScreenV1({ navigation }) {
     const firstDayOfMonth = new Date(year, month, 1).getDay(); 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const dates = [];
+
+    console.log('First day of month:', firstDayOfMonth); // Debug: 0=Sun, 1=Mon, 2=Tue...
+    console.log('Days in month:', daysInMonth);
 
     // Add empty cells for days before the 1st of the month
     for (let i = 0; i < firstDayOfMonth; i++) {
@@ -65,6 +80,10 @@ export default function CalendarScreenV1({ navigation }) {
     for (let i = 1; i <= daysInMonth; i++) {
       dates.push({ date: new Date(year, month, i), isCurrentMonth: true });
     }
+    
+    console.log('Total cells:', dates.length); // Should be 32 (1 empty + 31 days)
+    console.log('Position of Dec 1:', firstDayOfMonth); // Should be index 1 (Monday)
+    console.log('Position of Dec 6:', firstDayOfMonth + 5); // Should be index 6 (Saturday)
     
     setVisibleDates(dates);
   };
@@ -103,17 +122,20 @@ export default function CalendarScreenV1({ navigation }) {
   // --- DYNAMIC HEIGHT CALCULATION ---
   const numRows = Math.ceil(visibleDates.length / 7);
   
-  // Component heights - adjusted for better mobile experience
+  // Component heights
   const STATUS_BAR = Platform.OS === 'android' ? StatusBar.currentHeight : 44;
   const TOP_NAV = 60;
-  const MONTH_PICKER = 70;
-  const WEEK_DAYS = 35;
-  const DATE_ROW_HEIGHT = 50;
-  const PADDING = 20;
+  const MONTH_PICKER = 60;
+  const WEEK_DAYS = 28;
+  const DATE_ROW_HEIGHT = 47; // 45px cell + 2px margin
+  const TOGGLE_BUTTON = 40; // Reduced
+  const PADDING = 8; // Reduced bottom padding
   
   // Calculate heights
-  const expandedHeight = STATUS_BAR + TOP_NAV + MONTH_PICKER + WEEK_DAYS + (numRows * DATE_ROW_HEIGHT) + PADDING;
-  const COLLAPSED_HEIGHT = STATUS_BAR + TOP_NAV + MONTH_PICKER + PADDING + 20;
+  const expandedHeight = STATUS_BAR + TOP_NAV + MONTH_PICKER + WEEK_DAYS + (numRows * DATE_ROW_HEIGHT) + TOGGLE_BUTTON + PADDING;
+  
+  // Collapsed: only month picker + minimal padding
+  const COLLAPSED_HEIGHT = STATUS_BAR + TOP_NAV + MONTH_PICKER + 10; // Just 10px bottom padding
   const currentHeight = isExpanded ? expandedHeight : COLLAPSED_HEIGHT;
 
   // --- MOCK DATA ---
@@ -149,7 +171,7 @@ export default function CalendarScreenV1({ navigation }) {
             {/* Month Picker */}
             <View style={styles.monthPicker}>
               <TouchableOpacity style={styles.navIcon} onPress={() => changeMonth(-1)}>
-                <Feather name="chevron-left" size={22} color="#fff" />
+                <Feather name="chevron-left" size={24} color="#fff" />
               </TouchableOpacity>
               
               <View style={styles.monthLabelContainer}>
@@ -160,15 +182,15 @@ export default function CalendarScreenV1({ navigation }) {
 
               <View style={styles.monthRightSide}>
                 <TouchableOpacity style={styles.navIcon} onPress={() => changeMonth(1)}>
-                  <Feather name="chevron-right" size={22} color="#fff" />
+                  <Feather name="chevron-right" size={24} color="#fff" />
                 </TouchableOpacity>
                 
-                {/* Toggle Arrow */}
+                {/* Toggle Arrow - always visible next to month navigation */}
                 <TouchableOpacity onPress={toggleCalendar} style={styles.monthToggleButton}>
                   <Feather 
                     name={isExpanded ? "chevron-up" : "chevron-down"} 
-                    size={22} 
-                    color="rgba(255,255,255,0.95)" 
+                    size={24} 
+                    color="rgba(255,255,255,0.9)" 
                   />
                 </TouchableOpacity>
               </View>
@@ -183,36 +205,57 @@ export default function CalendarScreenV1({ navigation }) {
               </View>
             )}
 
-            {/* Date Grid - Only show in expanded mode */}
-            {isExpanded && (
-              <View style={styles.dateGridContainer}>
+            {/* Date Grid */}
+            {isExpanded ? (
+              <>
+                <View style={styles.dateGridContainer}>
+                  {visibleDates.map((item, index) => {
+                    if (!item.date) return <View key={`empty-${index}`} style={styles.dateCell} />;
+                    const isSelected = isSameDay(item.date, selectedDate);
+                    
+                    return (
+                      <TouchableOpacity 
+                        key={index} 
+                        style={[styles.dateCell, isSelected && styles.dateCellActive]}
+                        activeOpacity={0.7}
+                        onPress={() => onDatePress(item)}
+                      >
+                        <View style={isSelected ? styles.selectedCircle : styles.normalCircle}>
+                          <Text style={isSelected ? styles.selectedDateText : styles.normalDateText}>
+                            {item.date.getDate()}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </>
+            ) : (
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.horizontalDateScroll}
+              >
                 {visibleDates.map((item, index) => {
-                  if (!item.date) return <View key={`empty-${index}`} style={styles.dateCell} />;
+                  if (!item.date) return null; // Skip null dates
                   const isSelected = isSameDay(item.date, selectedDate);
-                  const isToday = isSameDay(item.date, new Date());
                   
                   return (
                     <TouchableOpacity 
                       key={index} 
-                      style={[styles.dateCell, isSelected && styles.dateCellActive]}
+                      style={[styles.horizontalDateCell, isSelected && styles.dateCellActive]}
                       activeOpacity={0.7}
                       onPress={() => onDatePress(item)}
                     >
-                      <View style={[
-                        isSelected ? styles.selectedCircle : styles.normalCircle,
-                        isToday && !isSelected && styles.todayCircle
-                      ]}>
-                        <Text style={[
-                          isSelected ? styles.selectedDateText : styles.normalDateText,
-                          isToday && !isSelected && styles.todayDateText
-                        ]}>
+                      <View style={isSelected ? styles.selectedCircle : styles.normalCircle}>
+                        <Text style={isSelected ? styles.selectedDateText : styles.normalDateText}>
                           {item.date.getDate()}
                         </Text>
                       </View>
                     </TouchableOpacity>
                   );
                 })}
-              </View>
+              </ScrollView>
             )}
           </View>
           
@@ -254,20 +297,21 @@ export default function CalendarScreenV1({ navigation }) {
                 <View style={styles.eventContent}>
                   <View style={styles.topRow}>
                     <View style={styles.timeRow}>
-                      <View style={[styles.timeContainer, { backgroundColor: event.color + '20' }]}>
-                        <Text style={[styles.time, { color: event.color }]}>{event.time}</Text>
+                      <View style={[styles.timeContainer, { backgroundColor: "#6F42C11A" }]}>
+                        <Text style={[styles.time, { color: "#6F42C1" }]}>{event.time}</Text>
                       </View>
-                      <Feather name="chevron-right" size={20} color={event.color} />
+                      <Feather name="chevron-right" size={22} color="#6F42C1" />
                     </View>
                     {event.childImage && <View style={styles.childImageContainer}><Image source={{ uri: event.childImage }} style={styles.childImage} /></View>}
                   </View>
-                  <View style={[styles.iconCircle, { backgroundColor: event.color }]}><Feather name={event.icon} size={22} color="#FFFFFF" /></View>
+                  <View style={[styles.iconCircle, { backgroundColor: event.color }]}><Feather name={event.icon} size={24} color="#FFFFFF" /></View>
                   <Text style={styles.title}>{event.title}</Text>
                   <Text style={styles.subtitle}>{event.subtitle}</Text>
                 </View>
               </View>
             </TouchableOpacity>
           ))}
+          {/* Add extra padding at the bottom of scrollview so last item isn't cut off */}
           <View style={{ height: 250 }} />
         </ScrollView>
       </View>
@@ -284,113 +328,133 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
     overflow: "hidden",
-    borderBottomEndRadius: 35,
-    borderBottomStartRadius: 35,
+    borderBottomEndRadius: 38,
+    borderBottomStartRadius: 38,
   },
   safeArea: { height: Platform.OS === "android" ? StatusBar.currentHeight : 44 },
   
-  calendarHeader: { paddingHorizontal: 18, paddingTop: 10, paddingBottom: 18 },
-  monthPicker: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 18 },
-  monthLabelContainer: { 
-    backgroundColor: 'rgba(255,255,255,0.2)', 
-    paddingHorizontal: 18, 
-    paddingVertical: 10, 
-    borderRadius: 22,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  monthText: { fontSize: 17, fontWeight: "700", color: "#fff", letterSpacing: 0.3 },
-  monthRightSide: { flexDirection: "row", alignItems: "center", gap: 10 },
-  navIcon: { 
-    padding: 10, 
-    backgroundColor: 'rgba(255,255,255,0.15)', 
-    borderRadius: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
+  calendarHeader: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 5 },
+  monthPicker: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  monthLabelContainer: { backgroundColor: 'rgba(255,255,255,0.15)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 },
+  monthText: { fontSize: 18, fontWeight: "700", color: "#fff", letterSpacing: 0.5 },
+  monthRightSide: { flexDirection: "row", alignItems: "center", gap: 8 },
+  navIcon: { padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 12 },
   monthToggleButton: {
-    padding: 10,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 12,
   },
   
-  weekDays: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12, paddingHorizontal: 2 },
+  weekDays: { flexDirection: "row", justifyContent: "space-between", marginBottom: 10 },
   weekDayText: { 
-    width: (screenWidth - 40) / 7, 
+    width: (screenWidth - 32) / 7, 
     textAlign: "center", 
-    fontSize: 13, 
-    color: "rgba(255,255,255,0.85)", 
-    fontWeight: "700", 
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    fontSize: 12, 
+    color: "rgba(255,255,255,0.7)", 
+    fontWeight: "600", 
+    textTransform: "uppercase" 
   },
   
   dateGridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "flex-start",
-    paddingHorizontal: 2,
   },
-  dateCell: {
-    width: (screenWidth - 40) / 7,
-    height: 48,
+  collapsedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 10,
+  },
+  horizontalDateScroll: {
+    paddingRight: 10,
+  },
+  horizontalDateCell: {
+    width: 50,
+    height: 50,
     alignItems: "center",
     justifyContent: 'center',
-    marginBottom: 4,
+    marginRight: 8,
   },
-  dateCellActive: { 
-    transform: [{scale: 1.05}],
+  collapsedToggleButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 20,
+    marginLeft: 10,
   },
+  collapsedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingRight: 10,
+  },
+  horizontalDateScroll: {
+    paddingRight: 10,
+  },
+  horizontalDateCell: {
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  collapsedToggleButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 20,
+    marginLeft: 10,
+  },
+  dateCell: {
+    width: (screenWidth - 32) / 7,
+    height: 45,
+    alignItems: "center",
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  dateCellActive: { transform: [{translateY: -2}] },
   
   selectedCircle: { 
-    width: 40, 
-    height: 40, 
-    borderRadius: 12, 
+    width: 36, 
+    height: 36, 
+    borderRadius: 10, 
     backgroundColor: "#FFD700", 
     justifyContent: "center", 
-    alignItems: "center",
-    shadowColor: "#FFD700",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 5,
+    alignItems: "center", 
   },
   normalCircle: { 
-    width: 40, 
-    height: 40, 
+    width: 36, 
+    height: 36, 
     justifyContent: "center", 
     alignItems: "center",
-    borderRadius: 12,
-  },
-  todayCircle: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.5)',
   },
   selectedDateText: { 
-    fontSize: 16, 
+    fontSize: 15, 
     fontWeight: "800", 
     color: "#6F42C1", 
   },
   normalDateText: { 
-    fontSize: 16, 
-    color: "rgba(255,255,255,0.95)", 
-    fontWeight: "600",
+    fontSize: 15, 
+    color: "rgba(255,255,255,0.9)", 
+    fontWeight: "500",
   },
-  todayDateText: {
-    color: "#fff",
-    fontWeight: "800",
+  fadedDateText: {
+    color: "rgba(255,255,255,0.3)",
+  },
+
+  toggleContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    marginTop: 5,
+  },
+  expandedToggleContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 5,
+    marginTop: 3,
+  },
+  toggleButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 20,
   },
 
   whiteSection: { 
@@ -399,69 +463,41 @@ const styles = StyleSheet.create({
     right: 0, 
     bottom: 0, 
     backgroundColor: "#ffffff", 
-    borderTopLeftRadius: 35, 
-    borderTopRightRadius: 35, 
+    borderTopLeftRadius: 38, 
+    borderTopRightRadius: 38, 
     overflow: "hidden", 
     shadowColor: "#000", 
-    shadowOffset: { width: 0, height: -5 }, 
-    shadowOpacity: 0.12, 
-    shadowRadius: 12, 
-    elevation: 12,
+    shadowOffset: { width: 0, height: -6 }, 
+    shadowOpacity: 0.1, 
+    shadowRadius: 10, 
+    elevation: 10 
   },
-  scrollContent: { paddingTop: 28, paddingHorizontal: 18, paddingBottom: 120 },
+  scrollContent: { paddingTop: 32, paddingHorizontal: 20, paddingBottom: 120 },
   eventHeader: { marginBottom: 20 },
-  eventCount: { fontSize: 14, color: "#999999", marginBottom: 6, fontWeight: "500" },
-  eventDate: { fontSize: 24, fontWeight: "700", color: "#1a1a2e", letterSpacing: 0.3 },
+  eventCount: { fontSize: 15, color: "#888888", marginBottom: 6 },
+  eventDate: { fontSize: 26, fontWeight: "700", color: "#1a1a2e" },
   
-  filterSection: { marginBottom: 22 },
-  filterTitle: { fontSize: 14, fontWeight: "700", color: "#555555", marginBottom: 12 },
-  filterScroll: { marginHorizontal: -18 },
-  filterContent: { paddingHorizontal: 18, gap: 10 },
-  filterChip: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    paddingVertical: 10, 
-    paddingHorizontal: 16, 
-    backgroundColor: "#F0F0F0", 
-    borderRadius: 20, 
-    marginRight: 10,
-    borderWidth: 1.5,
-    borderColor: "transparent",
-  },
-  filterChipActive: { 
-    backgroundColor: "#6F42C1",
-    borderColor: "#6F42C1",
-  },
+  filterSection: { marginBottom: 24 },
+  filterTitle: { fontSize: 14, fontWeight: "600", color: "#666666", marginBottom: 12 },
+  filterScroll: { marginHorizontal: -20 },
+  filterContent: { paddingHorizontal: 20, gap: 10 },
+  filterChip: { flexDirection: "row", alignItems: "center", paddingVertical: 10, paddingHorizontal: 16, backgroundColor: "#F5F5F5", borderRadius: 20, marginRight: 10 },
+  filterChipActive: { backgroundColor: "#6F42C1" },
   filterChipText: { fontSize: 14, fontWeight: "600", color: "#666666" },
-  filterChipTextActive: { color: "#FFFFFF", fontWeight: "700" },
-  filterChildImage: { width: 26, height: 26, borderRadius: 13, marginRight: 8, borderWidth: 1.5, borderColor: "#fff" },
+  filterChipTextActive: { color: "#FFFFFF" },
+  filterChildImage: { width: 24, height: 24, borderRadius: 12, marginRight: 8 },
   
-  eventCardWrapper: { 
-    marginBottom: 16, 
-    borderRadius: 22, 
-    overflow: "hidden", 
-    elevation: 4, 
-    shadowColor: "#000", 
-    shadowOffset: { width: 0, height: 3 }, 
-    shadowOpacity: 0.08, 
-    shadowRadius: 6,
-  },
-  eventCard: { backgroundColor: "#ffffff", borderRadius: 22 },
-  eventGradientBar: { height: 5, width: "100%" },
-  eventContent: { padding: 20 },
-  topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 14 },
+  eventCardWrapper: { marginBottom: 18, borderRadius: 24, overflow: "hidden", elevation: 5, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
+  eventCard: { backgroundColor: "#ffffff", borderRadius: 24 },
+  eventGradientBar: { height: 6, width: "100%" },
+  eventContent: { padding: 22 },
+  topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
   timeRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  timeContainer: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10 },
-  time: { fontSize: 13, fontWeight: "700" },
-  childImageContainer: { 
-    shadowColor: "#000", 
-    shadowOffset: { width: 0, height: 2 }, 
-    shadowOpacity: 0.15, 
-    elevation: 4,
-    borderRadius: 25,
-  },
-  childImage: { width: 46, height: 46, borderRadius: 23, borderWidth: 2.5, borderColor: "#FFD700" },
-  iconCircle: { width: 48, height: 48, borderRadius: 24, justifyContent: "center", alignItems: "center", marginBottom: 14 },
-  title: { fontSize: 19, fontWeight: "700", color: "#1a1a2e", marginBottom: 5, letterSpacing: 0.2 },
-  subtitle: { fontSize: 14, color: "#777777", fontWeight: "500" },
+  timeContainer: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12 },
+  time: { fontSize: 14, fontWeight: "700" },
+  childImageContainer: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, elevation: 4 },
+  childImage: { width: 50, height: 50, borderRadius: 25, borderWidth: 3, borderColor: "#FFD700" },
+  iconCircle: { width: 52, height: 52, borderRadius: 26, justifyContent: "center", alignItems: "center", marginBottom: 16 },
+  title: { fontSize: 20, fontWeight: "700", color: "#1a1a2e", marginBottom: 6 },
+  subtitle: { fontSize: 15, color: "#666666" },
 });

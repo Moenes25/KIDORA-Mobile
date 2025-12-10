@@ -1,20 +1,28 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { 
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Dimensions 
+} from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from "../context/ThemeContext";
 
-// Import the bottom-sheet PayMethodScreen
+import TopNavBar from "../components/TopNavBar";
 import PayMethodScreen from "./PayMethodScreen";
 
+const { height: screenHeight } = Dimensions.get("window");
+const TOP_SECTION_HEIGHT = screenHeight * 0.20;
+
 export default function InvoiceToPayScreen({ navigation, route }) {
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
   const [showPaySheet, setShowPaySheet] = useState(false);
 
-  // Use the invoice passed via route.params or fallback to example
-  const invoice = /*route.params?.invoice || */{
+  const invoice = /*route.params?.invoice ||*/ {
     title: "Registration Fee - December",
     reference: "INV-00123",
     issueDate: "Dec 1, 2024",
     dueDate: "Dec 15, 2024",
+    status: "Unpaid",
     framesMonthly: "120 TND",
     additionalServices: [
       { name: "Transport", price: "30 TND" },
@@ -22,199 +30,328 @@ export default function InvoiceToPayScreen({ navigation, route }) {
       { name: "Activities Extras", price: "20 TND" },
     ],
     total: "220 TND",
-    child: { name: "Adam Ben Ali", age: 8, class: "Class 1" },
+    child: { 
+      name: "Adam Ben Ali", 
+      age: 8, 
+      class: "Class 1",
+      avatar: require("../assets/child1.jpg") 
+    },
+    paymentMethod: null,
+  };
+
+  const paymentLogos = {
+    Mastercard: require("../assets/mastercard.png"),
+    Visa: require("../assets/visa.png"),
+    D17: require("../assets/D17.png"),
+    Flouci: require("../assets/flouci.png"),
+    Payoneer: require("../assets/payoneer.png"),
   };
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
-      <LinearGradient colors={["#6F42C1", "#9b59b6"]} style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Feather name="chevron-left" size={28} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Invoice Details</Text>
-        <View style={{ width: 24 }} />
-      </LinearGradient>
-
-      <ScrollView contentContainerStyle={styles.contentContainer}>
-        {/* 1- Invoice Info Subcard */}
-        <View style={styles.subCard}>
-          <Text style={styles.subCardTitle}>{invoice.title}</Text>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Invoice Reference:</Text>
-            <Text style={styles.value}>{invoice.reference}</Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Date of Issue:</Text>
-            <Text style={styles.value}>{invoice.issueDate}</Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Due Date:</Text>
-            <Text style={styles.value}>{invoice.dueDate}</Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Invoice Status:</Text>
-            <View style={[styles.statusTag, styles.unpaid]}>
-              <Feather name="x" size={16} color="white" style={{ marginRight: 4 }} />
-              <Text style={styles.statusText}>Unpaid</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* 2- Invoice Details Subcard */}
-        <View style={styles.subCard}>
-          <View style={styles.subCardHeader}>
-            <MaterialIcons name="description" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
-            <Text style={styles.subCardTitle}>Invoice Details</Text>
-          </View>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.label}>Monthly Frames:</Text>
-            <Text style={styles.value}>{invoice.framesMonthly}</Text>
-          </View>
-
-          <Text style={[styles.label, { marginTop: 12 }]}>Additional Services:</Text>
-          {invoice.additionalServices?.map((service, index) => (
-            <View key={index} style={styles.serviceRow}>
-              <Text style={styles.value}>{service.name}</Text>
-              <Text style={styles.value}>{service.price}</Text>
-            </View>
-          ))}
-
-          <View style={styles.detailRow}>
-            <Text style={[styles.label, { marginTop: 12 }]}>Total Amount:</Text>
-            <Text style={styles.value}>{invoice.total}</Text>
-          </View>
-        </View>
-
-        {/* Child Concerned Subcard */}
-        <View style={styles.subCard}>
-          <View style={styles.subCardHeader}>
-            <MaterialIcons name="child-care" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
-            <Text style={styles.subCardTitle}>Child Concerned</Text>
-          </View>
-
-          <View style={styles.childRow}>
-            <Text style={styles.label}>Name:</Text>
-            <Text style={styles.value}>{invoice.child?.name}</Text>
-          </View>
-
-          <View style={styles.childRow}>
-            <Text style={styles.label}>Age:</Text>
-            <Text style={styles.value}>{invoice.child?.age}</Text>
-          </View>
-
-          <View style={styles.childRow}>
-            <Text style={styles.label}>Class:</Text>
-            <Text style={styles.value}>{invoice.child?.class}</Text>
-          </View>
-        </View>
-
-        {/* Confirm Payment Button */}
-        <TouchableOpacity
-          style={styles.confirmButton}
-          onPress={() => setShowPaySheet(true)}
-        >
-          <Text style={styles.confirmButtonText}>Pay</Text>
-        </TouchableOpacity>
-      </ScrollView>
-
-      {/* PayMethodScreen Bottom Sheet */}
-      <PayMethodScreen
-        visible={showPaySheet}
-        onClose={() => setShowPaySheet(false)}
+      <StatusBar 
+        barStyle="light-content"
+        backgroundColor={isDark 
+          ? (colors.bgGradient?.[0])
+          : (colors.headerGradient?.[0] || "#6F42C1")
+        } 
       />
+
+      {/* TOP SECTION with gradient */}
+      <View style={[styles.topSection, { height: TOP_SECTION_HEIGHT }]}>
+        <LinearGradient 
+          colors={isDark 
+            ? (colors.bgGradient || ["#1a1a2e", "#0f0f1f"])
+            : (colors.headerGradient || ["#6F42C1", "#9b59b6"])
+          } 
+          style={StyleSheet.absoluteFill}
+        >
+          {isDark && <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' }} />}
+          <View style={styles.safeArea} />
+          <TopNavBar title="Invoice details" navigation={navigation} />
+        </LinearGradient>
+      </View>
+
+      {/* WHITE BOTTOM SECTION */}
+      <View style={[styles.whiteSection, { top: TOP_SECTION_HEIGHT }]}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {/* Main Invoice Card */}
+          <View style={styles.mainCard}>
+            <View style={styles.childCorner}>
+              <Image source={invoice.child?.avatar} style={styles.childAvatar} />
+            </View>
+
+            <Text style={styles.invoiceTitle}>{invoice.title}</Text>
+
+            {/* Invoice Information */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <MaterialIcons name="receipt" size={20} color="#6F42C1" />
+                <Text style={styles.sectionTitle}>Invoice Information</Text>
+              </View>
+
+              <View style={styles.infoGrid}>
+                <View style={styles.infoItem}>
+                  <Text style={styles.label}>Reference</Text>
+                  <Text style={styles.value}>{invoice.reference}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Text style={styles.label}>Status</Text>
+                  <View style={[styles.statusBadge, invoice.status === "Unpaid" ? styles.unpaid : styles.paid]}>
+                    <Feather name={invoice.status === "Unpaid" ? "x" : "check-circle"} size={14} color="#fff" />
+                    <Text style={styles.statusText}>{invoice.status}</Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.infoGrid}>
+                <View style={styles.infoItem}>
+                  <Text style={styles.label}>Issue Date</Text>
+                  <Text style={styles.value}>{invoice.issueDate}</Text>
+                </View>
+                <View style={styles.infoItem}>
+                  <Text style={styles.label}>Due Date</Text>
+                  <Text style={styles.value}>{invoice.dueDate}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider} />
+
+            {/* Charges Breakdown */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <MaterialIcons name="description" size={20} color="#6F42C1" />
+                <Text style={styles.sectionTitle}>Charges Breakdown</Text>
+              </View>
+
+              <View style={styles.chargeRow}>
+                <Text style={styles.chargeLabel}>Monthly Frames</Text>
+                <Text style={styles.chargeValue}>{invoice.framesMonthly}</Text>
+              </View>
+
+              {invoice.additionalServices?.map((service, index) => (
+                <View key={index} style={styles.chargeRow}>
+                  <Text style={styles.chargeLabel}>{service.name}</Text>
+                  <Text style={styles.chargeValue}>{service.price}</Text>
+                </View>
+              ))}
+
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Total Amount</Text>
+                <Text style={styles.totalValue}>{invoice.total}</Text>
+              </View>
+            </View>
+
+            
+            {/* Confirm Payment Button */}
+            <TouchableOpacity style={styles.confirmButton} onPress={() => setShowPaySheet(true)}>
+              <Text style={styles.confirmButtonText}>Pay</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </View>
+
+      <PayMethodScreen visible={showPaySheet} onClose={() => setShowPaySheet(false)} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fbf7ff" },
+  container: { flex: 1, backgroundColor: "#f8f9fa" },
 
-  header: {
-    paddingTop: 55,
-    paddingBottom: 25,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
+  topSection: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
   },
 
-  headerTitle: { color: "white", fontSize: 22, fontWeight: "700" },
-
-  contentContainer: {
-    padding: 20,
-    paddingBottom: 50,
+  safeArea: {
+    height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight,
   },
 
-  subCard: {
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 16,
-    marginBottom: 20,
+  whiteSection: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 38,
+    borderTopRightRadius: 38,
+    overflow: "hidden",
+    backgroundColor: "#ffffff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+
+  scrollContent: {
+    paddingTop: 32,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+
+  mainCard: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 6,
+    position: "relative",
   },
 
-  subCardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
+  childCorner: {
+    position: "absolute",
+    top: 24,
+    right: 10,
+    alignItems: "center",
+    zIndex: 10,
+  },
 
-  subCardTitle: {
-    fontSize: 18,
+  childAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: "#fed703",
+    marginBottom: 8,
+  },
+
+  invoiceTitle: {
+    fontSize: 20,
     fontWeight: "700",
+    color: "#2d3436",
+    marginBottom: 20,
+    paddingRight: 100,
+  },
+
+  section: {
+    marginBottom: 20,
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#2d3436",
+    marginLeft: 8,
+  },
+
+  infoGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+
+  infoItem: { flex: 1 },
+
+  label: {
+    fontSize: 12,
+    color: "#636e72",
+    marginBottom: 4,
+    fontWeight: "600",
+  },
+
+  value: {
+    fontSize: 15,
+    color: "#2d3436",
+    fontWeight: "700",
+  },
+
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 16,
+    gap: 4,
+  },
+
+  statusText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "700",
+    marginLeft: 4,
+  },
+
+  unpaid: { backgroundColor: "#e74c3c" },
+  paid: { backgroundColor: "#27ae60" },
+
+  divider: {
+    height: 1,
+    backgroundColor: "#e1e8ed",
+    marginVertical: 16,
+  },
+
+  chargeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+
+  chargeLabel: {
+    fontSize: 14,
+    color: "#636e72",
+    fontWeight: "500",
+  },
+
+  chargeValue: {
+    fontSize: 15,
+    color: "#2d3436",
+    fontWeight: "700",
+  },
+
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 16,
+    marginTop: 8,
+    borderTopWidth: 2,
+    borderTopColor: "#6F42C1",
+  },
+
+  totalLabel: {
+    fontSize: 16,
+    color: "#2d3436",
+    fontWeight: "700",
+  },
+
+  totalValue: {
+    fontSize: 20,
     color: "#6F42C1",
+    fontWeight: "700",
   },
-
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-
-  serviceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingLeft: 16,
-    marginTop: 4,
-  },
-
-  label: { fontSize: 14, fontWeight: "600", color: "#666" },
-  value: { fontSize: 16, fontWeight: "700", color: "#333" },
-
-  statusTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-  },
-  statusText: { color: "white", fontWeight: "700" },
-
-  unpaid: { backgroundColor: "red" },
-
-  childRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    marginTop: 8,
-  },
-
-  value: { fontSize: 16, fontWeight: "700", color: "#333", marginLeft: 6 },
 
   confirmButton: {
     backgroundColor: "#6F42C1",
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
   },
-  confirmButtonText: { color: "white", fontSize: 16, fontWeight: "700" },
+
+  confirmButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+  },
 });

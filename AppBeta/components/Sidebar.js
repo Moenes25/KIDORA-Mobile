@@ -37,12 +37,11 @@ export default function SideBar({ visible, onClose, username, email, navigation,
           <View style={styles.profileSection}>
             <View style={styles.avatarContainer}>
               <Image 
-                source={require("../assets/default_avatar.jpg")} 
+                source={require("../assets/default_avatar.jpeg")} 
                 style={styles.avatar} 
               />
             </View>
             <Text style={styles.username}>{username || "User Name"}</Text>
-            <Text style={styles.email}>{email || "user@example.com"}</Text>
           </View>
         </LinearGradient>
 
@@ -58,7 +57,7 @@ export default function SideBar({ visible, onClose, username, email, navigation,
               <View style={styles.shortcutGrid}>
                 {[
                   { icon: "home-outline", label: "Home", screen: "HomeScreen" },
-                  { icon: "people-outline", label: "Children", screen: "ChildrenList" },
+
                   { icon: "calendar-outline", label: "Calendar", screen: "Calendar" },
                   { icon: "location-outline", label: "Map", screen: "MapScreen" },
                   { icon: "image-outline", label: "Galerie", screen: "GalleryScreen" },
@@ -124,10 +123,8 @@ export default function SideBar({ visible, onClose, username, email, navigation,
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>RECOMMEND</Text>
               {[
-                { icon: "color-palette-outline", label: "Appearance", screen: "AppearanceScreen" },
-                { icon: "notifications-outline", label: "Notifications" },
                 { icon: "help-circle-outline", label: "Help & Support", screen: "HelpSupport" },
-                { icon: "settings-outline", label: "Settings" },
+                { icon: "settings-outline", label: "Settings", screen: "ProfileScreen" },
               ].map((item, index) => {
                 const isPressed = pressedRecommend === index;
                 return (
@@ -139,7 +136,11 @@ export default function SideBar({ visible, onClose, username, email, navigation,
                     onPressOut={() => setPressedRecommend(null)}
                     onPress={() => {
                       onClose();
-                      if (item.screen) navigation.navigate(item.screen);
+                      if (item.screen === "HelpSupport") {
+                        alert("L'interface Help & Support est en train d'être développée.");
+                      } else {
+                        navigation.navigate(item.screen);
+                      }
                     }}
                   >
                     <View style={[
@@ -161,7 +162,7 @@ export default function SideBar({ visible, onClose, username, email, navigation,
 
             {/* Logout Button */}
             <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
-              <Ionicons name="log-out-outline" size={22} color="#E53935" />
+              <Ionicons name="log-out-outline" size={22} color="white" />
               <Text style={styles.logoutText}>Logout</Text>
             </TouchableOpacity>
           </ScrollView>
@@ -221,13 +222,10 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#ffffff",
+    color: "#FFC75F",
     marginBottom: 4,
   },
-  email: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.8)",
-  },
+
 
   // White Bottom Section
   whiteSection: {
@@ -363,14 +361,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "#FFEBEE",
+    backgroundColor: "#E53935",
     borderRadius: 16,
     marginTop: 10,
   },
   logoutText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#E53935",
+    color: "white",
     marginLeft: 10,
   },
 });

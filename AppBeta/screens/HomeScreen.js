@@ -203,20 +203,16 @@ export default function HomeScreen({ navigation, route }) {
           
           {/* Profile Section */}
           <View style={styles.profileSection}>
-            <Image 
-              source={require("../assets/default_avatar.jpg")} 
+            {/* <Image 
+              source={require("../assets/default_avatar.jpeg")} 
               style={styles.profileAvatar} 
-            />
+            /> */}
             <View style={styles.greetingContainer}>
+             
               <Text style={styles.greeting}>
                 Hi, <Text style={styles.userName}>{username}</Text>
               </Text>
-              <View style={styles.pointsContainer}>
-                <View style={styles.pointBadge}>
-                  <Text style={styles.starIcon}>⭐</Text>
-                  <Text style={styles.pointText}>10</Text>
-                </View>
-              </View>
+
             </View>
           </View>
 
@@ -224,7 +220,7 @@ export default function HomeScreen({ navigation, route }) {
           <View style={styles.activityStatsRow}>
             <View style={styles.statCard}>
               <LinearGradient colors={['#EC4899', '#DB2777']} style={styles.statCardGradient}>
-                <View style={styles.statIconCircle}>
+                <View style={styles.statIconCirclered}>
                   <Feather name="users" size={16} color="#FFFFFF" />
                 </View>
                 <Text style={styles.statCardValue}>{currentActivity?.attendance || 0}</Text>
@@ -234,7 +230,7 @@ export default function HomeScreen({ navigation, route }) {
 
             <View style={styles.statCard}>
               <LinearGradient colors={['#A855F7', '#9333EA']} style={styles.statCardGradient}>
-                <View style={styles.statIconCircle}>
+                <View style={styles.statIconCirclepurple}>
                   <Feather name="check-circle" size={16} color="#FFFFFF" />
                 </View>
                 <Text style={styles.statCardValue}>{currentActivity?.tasks || 0}</Text>
@@ -591,8 +587,27 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   statIconCircle: {
-    width: 40,
-    height: 40,
+    width: 35,
+    height: 35,
+    borderRadius: 20,
+    backgroundColor: "rgba(165, 243, 180, 0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+   
+   statIconCirclepurple: {
+    width: 45,
+    height: 45,
+    borderRadius: 20,
+    backgroundColor: "rgba(165, 243, 180, 0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+   statIconCirclered: {
+    width: 45,
+    height: 45,
     borderRadius: 20,
     backgroundColor: "rgba(165, 243, 180, 0.35)",
     justifyContent: "center",

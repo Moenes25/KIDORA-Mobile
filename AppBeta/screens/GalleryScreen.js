@@ -13,10 +13,13 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from "../context/ThemeContext";
+
+import TopNavBar from "../components/TopNavBar";
 import PhotoScreen from "./PhotoScreen";
 
 const { width, height: screenHeight } = Dimensions.get("window");
-const TOP_SECTION_HEIGHT = screenHeight * 0.15;
+const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 
 export default function GalleryScreen({ navigation }) {
   const [visible, setVisible] = useState(false);
@@ -24,6 +27,8 @@ export default function GalleryScreen({ navigation }) {
   const [photoDetails, setPhotoDetails] = useState({});
   const [currentPhotos, setCurrentPhotos] = useState([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const { colors, theme } = useTheme();
+  const isDark = theme === "dark";
 
   // Example data
   const galleryData = [
@@ -87,26 +92,32 @@ export default function GalleryScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#9b59b6" />
+      <StatusBar 
+        barStyle="light-content"
+        backgroundColor={isDark 
+          ? (colors.bgGradient?.[0])
+          : (colors.headerGradient?.[0] || "#6F42C1")
+        } 
+      />
 
-      {/* FIXED TOP SECTION - Gradient (Same style as ImprovementsScreen) */}
-      <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
+      {/* TOP SECTION with gradient */}
+      <View style={[styles.topSection, { height: TOP_SECTION_HEIGHT }]}>
         <LinearGradient 
-          colors={["#9b59b6", "#8e44ad"]} 
+          colors={isDark 
+            ? (colors.bgGradient || ["#1a1a2e", "#0f0f1f"])
+            : (colors.headerGradient || ["#6F42C1", "#9b59b6"])
+          } 
           style={StyleSheet.absoluteFill}
         >
-          <View style={styles.safeArea} />
-
-          {/* Header with Back Button and Title */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Feather name="chevron-left" size={28} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>My Gallery</Text>
-          </View>
+          {isDark && (
+            <View style={{
+              ...StyleSheet.absoluteFillObject,
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            }} />
+          )}
           
-          {/* Spacer for rounded section */}
-          <View style={{ height: 20 }} />
+          <View style={styles.safeArea} />
+          <TopNavBar title="Gallerie" navigation={navigation} />
         </LinearGradient>
       </View>
 
@@ -261,42 +272,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
   },
 
-  fixedTopSection: {
+  topSection: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     zIndex: 1,
-    overflow: "hidden",
-    borderBottomEndRadius: 38,
-    borderBottomStartRadius: 38,
   },
-
   safeArea: {
-    height: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight,
   },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 20,
-  },
 
-  backButton: { 
-    padding: 8,
-    marginRight: 8,
-  },
-
-  headerTitle: { 
-    fontSize: 22, 
-    fontWeight: "700", 
-    color: "#fff",
-    flex: 1,
-    textAlign: "center",
-    marginRight: 40, // Balance the back button width
-  },
 
   whiteSection: {
     position: "absolute",

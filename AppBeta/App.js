@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ThemeProvider } from './context/ThemeContext';
 // Import all screens
+import SplashScreen from './screens/SplashScreen';
 import Login from './screens/LoginSc';
 import Registerv1 from './screens/Registerv1';
 import ProfileEdit from './screens/ProfileEdit';
@@ -33,16 +34,17 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <SafeAreaProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="Login"
+            initialRouteName="SplashScreen"
             screenOptions={{
-              headerShown: false, // Keeps your full-screen design
-              animation: 'slide_from_right' // Optional: smooth transitions
+              headerShown: false,
+              animation: 'slide_from_right'
             }}
           >
+            <Stack.Screen name="SplashScreen" component={SplashScreen} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Registerv1" component={Registerv1} />
             <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
@@ -61,16 +63,14 @@ export default function App() {
             <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
             <Stack.Screen name="PaidInvoiceScreen" component={PaidInvoiceScreen} />
             <Stack.Screen name="InvoiceToPayScreen" component={InvoiceToPayScreen} />
-             <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
-             <Stack.Screen name="ImprovementsScreen" component={ImprovementsScreen} />
-              <Stack.Screen name="Conversation" component={ConversationScreen} />
-              <Stack.Screen name="VideoCall" component={VideoCall} options={{ presentation: 'modal', headerShown: false }} />
-              <Stack.Screen name="Call" component={CallComponent} options={{ presentation: 'modal', headerShown: false }} />
-
-             
+            <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
+            <Stack.Screen name="ImprovementsScreen" component={ImprovementsScreen} />
+            <Stack.Screen name="Conversation" component={ConversationScreen} />
+            <Stack.Screen name="VideoCall" component={VideoCall} options={{ presentation: 'modal', headerShown: false }} />
+            <Stack.Screen name="Call" component={CallComponent} options={{ presentation: 'modal', headerShown: false }} />
           </Stack.Navigator>
         </NavigationContainer>
-      </SafeAreaProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

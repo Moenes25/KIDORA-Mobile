@@ -7,7 +7,9 @@ import {
   Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from "../context/ThemeContext";
+
 import LanguageSelector from "./LanguageSelector";
 
 export default function TopBar({
@@ -22,6 +24,8 @@ export default function TopBar({
   avatarSource = require("../assets/famGif.gif"),
   notificationCount = 0,
 }) {
+  const { colors } = useTheme();
+
   return (
     <View style={styles.header}>
       {/* Menu Button */}
@@ -31,16 +35,7 @@ export default function TopBar({
         </TouchableOpacity>
       )}
 
-      {/* Avatar */}
-      {showAvatar && (
-        <View style={styles.headerLeft}>
-          <Image
-            source={avatarSource}
-            style={styles.userAvatar}
-            resizeMode="cover"
-          />
-        </View>
-      )}
+
 
       {/* Right Side Icons */}
       <View style={styles.headerRight}>
@@ -48,14 +43,20 @@ export default function TopBar({
         {showNotification && (
           <TouchableOpacity
             style={styles.iconButton}
-            onPress={onNotificationPress}
+            onPress={() => alert("L'interface Notification est en train d'être développée")}
           >
             <Feather name="bell" size={24} color="#FFFFFF" />
 
-            {/* Exact match to your desired image */}
+            {/* Notification Badge */}
             {notificationCount > 0 && (
               <View style={styles.notificationBadge}>
-                <View style={styles.yellowDot} />
+                <LinearGradient
+                  // FILL: High Intensity Yellow -> Deep Gold
+                  colors={['rgba(255, 234, 0, 1)', '#FFC400']}
+                  style={styles.yellowDot}
+                  start={{ x: 0.1, y: 0.1 }} 
+                  end={{ x: 0.9, y: 0.9 }}
+                />
               </View>
             )}
           </TouchableOpacity>
@@ -112,22 +113,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     position: "relative",
   },
-
-  // Perfectly matches your first image
   notificationBadge: {
     position: "absolute",
     top: 6,
     right: 6,
   },
   yellowDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: "#FFD700",
-    borderWidth: 2.5,
-    borderColor: "#FFFFFF",
+    width: 13,
+    height: 13,
+    borderRadius: 8,
+    // CHANGED: Border width 1.5 and Orange Color creates the "container" effect
+    borderWidth: 1.5,
+    borderColor: '#db703aff', // Deep Orange Border
   },
-
   languageSelectorContainer: {
     marginLeft: 16,
   },

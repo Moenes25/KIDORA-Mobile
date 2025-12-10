@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
-import * as ScreenOrientation from 'expo-screen-orientation'; // 1. Import Orientation
+import * as ScreenOrientation from 'expo-screen-orientation'; 
 import { useTheme } from '../context/ThemeContext';
 
 // Import Sub-Screens
 import AgeSelectionScreen from './children/AgeSelectionScreen';
 import ChildrenHomeScreen from './children/ChildrenHomeScreen';
 import ModulesScreen from './children/ModulesScreen';
-import LessonScreen from './children/LessonScreen'; // 2. Fixed Typo (was LessonScreren)
+import LessonScreen from './children/LessonScreen'; 
 import GamesScreen from './children/GamesScreen';
 import AiTutorScreen from './children/AiTutorScreen';
 import StoreScreen from './children/StoreScreen';
 
 export default function ChildrenAreaScreen({ navigation }) {
-  const { colors } = useTheme(); // Kept 'colors' for basic palette, ignored 'theme'
+  const { colors } = useTheme(); 
   
   // Shared State
   const [screen, setScreen] = useState('age-select');
@@ -24,20 +24,22 @@ export default function ChildrenAreaScreen({ navigation }) {
   const [equippedSkin, setEquippedSkin] = useState(1);
   const [selectedModule, setSelectedModule] = useState(null);
 
-  // 3. Orientation Logic: Unlock on mount, Lock on unmount
+  // --- UPDATED ORIENTATION LOGIC ---
   useEffect(() => {
-    async function enableRotation() {
-      // Allows both Portrait and Landscape
-      await ScreenOrientation.unlockAsync(); 
+    async function lockToLandscape() {
+      // This forces the screen to be Horizontal (Landscape)
+      // It applies to all sub-screens rendered below
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
     }
 
-    enableRotation();
+    lockToLandscape();
 
-    // Cleanup: Lock back to Portrait when leaving this screen
+    // Cleanup: Lock back to Portrait when the user leaves this area entirely
     return () => {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
   }, []);
+  // ---------------------------------
 
   // Force Light Mode
   const isDark = false;
@@ -57,7 +59,7 @@ export default function ChildrenAreaScreen({ navigation }) {
           setScreen={setScreen}
           coins={coins}
           level={level}
-          isDark={isDark} // Forced to false
+          isDark={isDark} 
           colors={colors}
         />
       );

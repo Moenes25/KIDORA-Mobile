@@ -19,7 +19,7 @@ export default function TopNav({ user, navigation }) {
 
   const userName = user?.name || "Parent";
   const userEmail = user?.email || "user@example.com";
-  const userAvatar = user?.avatar || require("../assets/default_avatar.jpg");
+  const userAvatar = user?.avatar || require("../assets/default_avatar.jpeg");
 
   const handleNotifications = () => {
     console.log("Notifications pressed");

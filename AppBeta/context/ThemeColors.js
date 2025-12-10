@@ -26,6 +26,7 @@ export const LightTheme = {
   bottomCardPressedBg: "#ffffff",
   bottomCardText: "#2c2c2c",
   bottomCardPressedText: "#2c2c2c",
+  dotColor: ["#fff700ff", "#945429ff"],
   
   childrenArea: {
     gradient1: ['#a78bfa', '#f472b6', '#fb923c'],
@@ -40,6 +41,7 @@ export const LightTheme = {
     cardText: '#1f2937',
     cardTextSecondary: '#6b7280',
   },
+
 
   map: {
     pinColor: "#E91E63",

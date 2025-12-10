@@ -111,7 +111,7 @@ export default function ProfileScreen({ navigation, route }) {
           {/* Profile Section */}
           <View style={styles.profileSection}>
             <View style={styles.avatarWrapper}>
-              <Image source={require("../assets/default_avatar.jpg")} style={styles.avatar} />
+              <Image source={require("../assets/default_avatar.jpeg")} style={styles.avatar} />
               <TouchableOpacity
                 style={styles.cameraBtn}
                 onPress={() => navigation.navigate("EditProfileScreen", { user })}
@@ -171,7 +171,7 @@ export default function ProfileScreen({ navigation, route }) {
 
           {/* Logout */}
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={22} color="#E53935" />
+            <Ionicons name="log-out-outline" size={22} color="white" />
             <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
 
@@ -327,11 +327,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 16,
-    backgroundColor: "#FFEBEE",
+    backgroundColor: "#E53935",
     borderRadius: 16,
     marginTop: 20,
   },
-  logoutText: { fontSize: 16, fontWeight: "600", color: "#E53935", marginLeft: 10 },
+  logoutText: { fontSize: 16, fontWeight: "600", color: "white", marginLeft: 10 },
 
   version: { textAlign: "center", fontSize: 14, color: "#999999", marginVertical: 40 },
 
