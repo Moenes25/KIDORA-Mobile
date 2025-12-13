@@ -1,5 +1,5 @@
-// screens/HomeScreen.js - Calendar Grid with Children Details
-import React, { useState, useRef, useEffect } from "react";
+// screens/HomeScreen.js
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,40 +11,64 @@ import {
   Alert,
   Platform,
   StatusBar,
+  Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
+import { useNotifications } from "../context/NotificationContext";
 
 import BottomNav from "../components/BottomNav";
 import SideBar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
+import NotificationPanel from "../components/NotificationPanel";
 
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
+const TOP_SECTION_HEIGHT_RATIO = 0.42; 
+
 export default function HomeScreen({ navigation, route }) {
   const { colors } = useTheme();
+  const { t, isRTL, getMonthName, getDayName } = useTranslation();
+  const { sendChildAlert, unreadCount } = useNotifications();
 
   const [pressedCard, setPressedCard] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [notificationPanelVisible, setNotificationPanelVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedPeriod, setSelectedPeriod] = useState('Daily');
-  const [calendarExpanded, setCalendarExpanded] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState('daily');
+  const [calendarModalVisible, setCalendarModalVisible] = useState(false);
 
   const user = route.params?.user;
   const username = user?.name || "Mohamed";
   const email = user?.email || "";
 
+  const handleTestTrigger = () => {
+    const scenarios = [
+      { name: "John", status: "Left School 🏫", location: "the Main Gate" },
+      { name: "Emma", status: "Arrived Home 🏠", location: "Home" },
+      { name: "Liam", status: "Is Nearby 📍", location: "the Playground" },
+    ];
+    
+    const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+    
+    if (sendChildAlert) {
+      sendChildAlert(randomScenario.name, randomScenario.status, randomScenario.location);
+    } else {
+      console.warn("sendChildAlert function is missing from NotificationContext");
+    }
+  };
+
   const children = [
-    { id: 1, name: "John Doe", age: 8, grade: 3, present: true, completedTasks: 10, totalTasks: 15, performance: 85, avatar: require("../assets/child1.jpg") },
-    { id: 2, name: "Emma Smith", age: 7, grade: 2, present: false, completedTasks: 7, totalTasks: 12, performance: 50, avatar: require("../assets/child3.jpg") },
-    { id: 3, name: "Liam Brown", age: 9, grade: 4, present: true, completedTasks: 12, totalTasks: 15, performance: 25, avatar: require("../assets/child2.jpg") },
+    { id: 1, name: "John Doe", age: 8, grade: 3, present: true, completedTasks: 10, totalTasks: 15, performance: 85, avatar: require("../assets/child1.png") },
+    { id: 2, name: "Emma Smith", age: 7, grade: 2, present: false, completedTasks: 7, totalTasks: 12, performance: 50, avatar: require("../assets/child3.png") },
+    { id: 3, name: "Liam Brown", age: 9, grade: 4, present: true, completedTasks: 12, totalTasks: 15, performance: 25, avatar: require("../assets/child2.png") },
   ];
 
-  // Activity data for calendar dates
   const activityData = {
     '2024-12-08': { attendance: 3, tasks: 15, performance: 82 },
     '2024-12-09': { attendance: 2, tasks: 12, performance: 75 },
@@ -89,17 +113,14 @@ export default function HomeScreen({ navigation, route }) {
            date1.getFullYear() === date2.getFullYear();
   };
 
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
+  const toggleNotificationPanel = () => setNotificationPanelVisible(!notificationPanelVisible);
 
   const handleLogout = async () => {
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t('logoutTitle'), t('logoutMessage'), [
+      { text: t('cancel'), style: "cancel" },
       {
-        text: "Yes",
+        text: t('yes'),
         onPress: async () => {
           await AsyncStorage.removeItem("user");
           navigation.reset({ index: 0, routes: [{ name: "Login" }] });
@@ -132,36 +153,58 @@ export default function HomeScreen({ navigation, route }) {
         onPressOut={() => setPressedCard(null)}
       >
         <LinearGradient colors={gradient} style={styles.childCard}>
-          <View style={styles.childHeader}>
-            <Image source={item.avatar} style={styles.childAvatar} />
+          <View style={[styles.childHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+            <Image 
+              source={item.avatar} 
+              style={[
+                styles.childAvatar,
+                isRTL ? { marginLeft: 12, marginRight: 0 } : { marginRight: 12, marginLeft: 0 }
+              ]} 
+            />
             <View style={{ flex: 1 }}>
-              <Text style={styles.childName}>{item.name}</Text>
-              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
-                <Text style={styles.childInfo}>Age: {item.age} | Grade: {item.grade}</Text>
+              <Text style={[styles.childName, isRTL && { textAlign: 'right' }]}>{item.name}</Text>
+              <View style={[{ flexDirection: "row", alignItems: "center", marginTop: 4 }, isRTL && { flexDirection: 'row-reverse' }]}>
+                <Text style={[styles.childInfo, isRTL && { textAlign: 'right' }]}>
+                  {t('age')}: {item.age} | {t('grade')}: {item.grade}
+                </Text>
               </View>
-              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
+              <View style={[{ flexDirection: "row", alignItems: "center", marginTop: 6 }, isRTL && { flexDirection: 'row-reverse' }]}>
                 <Feather 
                   name={item.present ? "check-circle" : "x-circle"} 
                   size={16} 
                   color="#ffffff"
-                  style={{ marginRight: 4 }} 
+                  style={isRTL ? { marginLeft: 4 } : { marginRight: 4 }} 
                 />
                 <Text style={styles.statusText}>
-                  {item.present ? "Present" : "Absent"}
+                  {item.present ? t('present') : t('absent')}
                 </Text>
               </View>
             </View>
           </View>
 
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Feather name="clipboard" size={16} color="#ffffff" style={{ marginRight: 4 }} />
-              <Text style={styles.statText}>Tasks: {item.completedTasks}/{item.totalTasks}</Text>
+          <View style={[styles.statsRow, isRTL && { flexDirection: 'row-reverse' }]}>
+            <View style={[styles.statItem, isRTL && { flexDirection: 'row-reverse' }]}>
+              <Feather 
+                name="clipboard" 
+                size={16} 
+                color="#ffffff" 
+                style={isRTL ? { marginLeft: 4 } : { marginRight: 4 }} 
+              />
+              <Text style={styles.statText}>
+                {t('tasks')}: {item.completedTasks}/{item.totalTasks}
+              </Text>
             </View>
             
-            <View style={styles.statItem}>
-              <Feather name="bar-chart-2" size={16} color="#ffffff" style={{ marginRight: 4 }} />
-              <Text style={styles.statText}>Performance: {item.performance}%</Text>
+            <View style={[styles.statItem, isRTL && { flexDirection: 'row-reverse' }]}>
+              <Feather 
+                name="bar-chart-2" 
+                size={16} 
+                color="#ffffff" 
+                style={isRTL ? { marginLeft: 4 } : { marginRight: 4 }} 
+              />
+              <Text style={styles.statText}>
+                {t('performance')}: {item.performance}%
+              </Text>
             </View>
           </View>
         </LinearGradient>
@@ -177,10 +220,13 @@ export default function HomeScreen({ navigation, route }) {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
   };
 
+  const handleDateSelect = (day) => {
+    setSelectedDate(day);
+    setCalendarModalVisible(false);
+  };
+
   const days = getDaysInMonth(currentMonth);
   const currentActivity = activityData[getDateKey(selectedDate)];
-
-  const TOP_SECTION_HEIGHT = calendarExpanded ? screenHeight * 0.72 : screenHeight * 0.48;
 
   return (
     <View style={styles.container}>
@@ -195,46 +241,68 @@ export default function HomeScreen({ navigation, route }) {
         onLogout={handleLogout} 
       />
 
-      {/* FIXED PURPLE TOP SECTION */}
-      <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
-        <LinearGradient colors={colors.headerGradient} style={StyleSheet.absoluteFill}>
-          <View style={styles.safeArea} />
-          <TopBar onMenuPress={toggleSidebar} notificationCount={2} />
-          
-          {/* Profile Section */}
-          <View style={styles.profileSection}>
-            {/* <Image 
-              source={require("../assets/default_avatar.jpeg")} 
-              style={styles.profileAvatar} 
-            /> */}
-            <View style={styles.greetingContainer}>
-             
-              <Text style={styles.greeting}>
-                Hi, <Text style={styles.userName}>{username}</Text>
-              </Text>
+      <NotificationPanel 
+        visible={notificationPanelVisible}
+        onClose={toggleNotificationPanel}
+      />
 
+      <View style={styles.fixedTopSection}>
+        <LinearGradient colors={colors.headerGradient} style={[StyleSheet.absoluteFill, { borderBottomEndRadius: 38, borderBottomStartRadius: 38, overflow: 'hidden' }]}>
+
+          <View style={styles.safeArea} />
+          
+          <TopBar 
+            onMenuPress={toggleSidebar} 
+            notificationCount={unreadCount}
+            onNotificationPress={toggleNotificationPanel}
+          />
+          
+          <View style={[styles.profileSection, isRTL && { flexDirection: 'row-reverse' }]}>
+            <Image 
+              source={require("../assets/human.jpg")} 
+              style={[styles.profileAvatar, isRTL && { marginLeft: 12, marginRight: 0 }]} 
+            />
+            <View style={styles.greetingContainer}>
+              <Text style={[styles.greeting, isRTL && { textAlign: 'right' }]}>
+                {t('greeting')}, <Text style={styles.userName}>{username}</Text>
+              </Text>
             </View>
+            <TouchableOpacity 
+              style={styles.calendarIconButton}
+              onPress={() => setCalendarModalVisible(true)}
+              activeOpacity={0.7}
+            >
+              <Feather name="calendar" size={22} color="#6F42C1" />
+            </TouchableOpacity>
           </View>
 
-          {/* Activity Stats Cards - Above Calendar */}
-          <View style={styles.activityStatsRow}>
+          <TouchableOpacity 
+            style={styles.testNotificationBtn}
+            onPress={handleTestTrigger}
+          >
+            <Feather name="alert-circle" size={16} color="#6F42C1" />
+            <Text style={styles.testNotificationText}>Simulate Child Alert</Text>
+          </TouchableOpacity>
+
+          <View style={[styles.activityStatsRow, isRTL && { flexDirection: 'row-reverse' }]}>
+            
             <View style={styles.statCard}>
               <LinearGradient colors={['#EC4899', '#DB2777']} style={styles.statCardGradient}>
-                <View style={styles.statIconCirclered}>
+                <View style={styles.statIconCircle}>
                   <Feather name="users" size={16} color="#FFFFFF" />
                 </View>
                 <Text style={styles.statCardValue}>{currentActivity?.attendance || 0}</Text>
-                <Text style={styles.statCardLabel}>Attendance</Text>
+                <Text style={styles.statCardLabel}>{t('attendance')}</Text>
               </LinearGradient>
             </View>
 
             <View style={styles.statCard}>
               <LinearGradient colors={['#A855F7', '#9333EA']} style={styles.statCardGradient}>
-                <View style={styles.statIconCirclepurple}>
+                <View style={styles.statIconCircle}>
                   <Feather name="check-circle" size={16} color="#FFFFFF" />
                 </View>
                 <Text style={styles.statCardValue}>{currentActivity?.tasks || 0}</Text>
-                <Text style={styles.statCardLabel}>Completed Tasks</Text>
+                <Text style={styles.statCardLabel}>{t('completed')}</Text>
               </LinearGradient>
             </View>
 
@@ -244,129 +312,122 @@ export default function HomeScreen({ navigation, route }) {
                   <Feather name="trending-up" size={16} color="#FFFFFF" />
                 </View>
                 <Text style={styles.statCardValue}>{currentActivity?.performance || 0}%</Text>
-                <Text style={styles.statCardLabel}>Overall Performance</Text>
+                <Text style={styles.statCardLabel}>{t('performance')}</Text>
+                
+                <View style={styles.incompleteBadge}>
+                  <Text style={styles.incompleteText}>
+                    {currentActivity ? (20 - currentActivity.tasks) : 20} {t('incomplete')}
+                  </Text>
+                </View>
               </LinearGradient>
-              <View style={styles.incompleteShadow}>
-                <Text style={styles.incompleteText}>
-                  {currentActivity ? (20 - currentActivity.tasks) : 20} Incomplete
-                </Text>
-              </View>
             </View>
           </View>
 
-          {/* Calendar Section */}
-          <View style={styles.calendarSection}>
-            <TouchableOpacity 
-              style={styles.selectDateRow}
-              onPress={() => setCalendarExpanded(!calendarExpanded)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.selectDateText}>Select Date</Text>
-              <View style={styles.headerRight}>
-                <View style={styles.calendarIconContainer}>
-                  <Feather name="calendar" size={18} color="#6F42C1" />
-                </View>
-                <View style={styles.toggleIconContainer}>
-                  <Feather 
-                    name={calendarExpanded ? "chevron-up" : "chevron-down"} 
-                    size={18} 
-                    color="#FFFFFF" 
-                  />
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            {calendarExpanded && (
-              <>
-                {/* Month Navigation */}
-                <View style={styles.monthNavigation}>
-                  <TouchableOpacity onPress={previousMonth} style={styles.monthNavBtn}>
-                    <Feather name="chevron-left" size={18} color="#FFFFFF" />
-                  </TouchableOpacity>
-                  <Text style={styles.monthText}>
-                    {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                  </Text>
-                  <TouchableOpacity onPress={nextMonth} style={styles.monthNavBtn}>
-                    <Feather name="chevron-right" size={18} color="#FFFFFF" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Calendar Grid */}
-                <View style={styles.calendarGrid}>
-                  {/* Day Headers */}
-                  <View style={styles.dayHeaderRow}>
-                    {dayNames.map((day, idx) => (
-                      <Text key={idx} style={styles.dayHeader}>{day}</Text>
-                    ))}
-                  </View>
-
-                  {/* Calendar Days */}
-                  <View style={styles.daysGrid}>
-                    {days.map((day, index) => {
-                      if (!day) {
-                        return <View key={`empty-${index}`} style={styles.dayCell} />;
-                      }
-
-                      const isSelected = isSameDay(day, selectedDate);
-                      const isTodayDate = isToday(day);
-                      const hasActivity = activityData[getDateKey(day)];
-
-                      return (
-                        <TouchableOpacity
-                          key={index}
-                          onPress={() => setSelectedDate(day)}
-                          style={[
-                            styles.dayCell,
-                            isSelected && styles.dayCellSelected,
-                            isTodayDate && !isSelected && styles.dayCellToday,
-                          ]}
-                        >
-                          <Text style={[
-                            styles.dayText,
-                            isSelected && styles.dayTextSelected,
-                            isTodayDate && !isSelected && styles.dayTextToday,
-                          ]}>
-                            {day.getDate()}
-                          </Text>
-                          {hasActivity && !isSelected && (
-                            <View style={styles.activityDot} />
-                          )}
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </View>
-
-                {/* Period Selector */}
-                <View style={styles.periodSelector}>
-                  {['Daily', 'Weekly', 'Monthly'].map((period) => (
-                    <TouchableOpacity
-                      key={period}
-                      onPress={() => setSelectedPeriod(period)}
-                      style={[
-                        styles.periodBtn,
-                        selectedPeriod === period && styles.periodBtnSelected
-                      ]}
-                    >
-                      <Text style={[
-                        styles.periodText,
-                        selectedPeriod === period && styles.periodTextSelected
-                      ]}>
-                        {period}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </>
-            )}
-          </View>
         </LinearGradient>
       </View>
 
-      {/* WHITE BOTTOM SECTION - Children Details */}
-      <View style={[styles.scrollableBottomSection, { top: TOP_SECTION_HEIGHT }]}>
+      <Modal
+        visible={calendarModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setCalendarModalVisible(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setCalendarModalVisible(false)}
+        >
+          <View style={styles.calendarModalContent} onStartShouldSetResponder={() => true}>
+            <LinearGradient colors={colors.headerGradient || ["#6f42c1", "#8e44ad"]} style={styles.popupGradient}>
+              
+              <TouchableOpacity 
+                style={[styles.modalCloseButton, isRTL && { left: 15, right: 'auto' }]}
+                onPress={() => setCalendarModalVisible(false)}
+              >
+                <Feather name="x" size={24} color="#fff" />
+              </TouchableOpacity>
+
+              <View style={[styles.modalMonthNavigation, isRTL && { flexDirection: 'row-reverse' }]}>
+                <TouchableOpacity onPress={isRTL ? nextMonth : previousMonth} style={styles.modalMonthNavBtn}>
+                  <Feather name={isRTL ? "chevron-right" : "chevron-left"} size={22} color="#fff" />
+                </TouchableOpacity>
+                <View style={styles.monthLabelContainer}>
+                  <Text style={styles.modalMonthText}>
+                    {getMonthName(currentMonth.getMonth())} {currentMonth.getFullYear()}
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={isRTL ? previousMonth : nextMonth} style={styles.modalMonthNavBtn}>
+                  <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={22} color="#fff" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={[styles.modalDayHeaderRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                {[0,1,2,3,4,5,6].map((idx) => (
+                  <Text key={idx} style={styles.modalDayHeader}>{getDayName(idx)}</Text>
+                ))}
+              </View>
+
+              <View style={styles.modalDaysGrid}>
+                {days.map((day, index) => {
+                  if (!day) {
+                    return <View key={`empty-${index}`} style={styles.modalDayCell} />;
+                  }
+
+                  const isSelected = isSameDay(day, selectedDate);
+                  const isTodayDate = isToday(day);
+
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => handleDateSelect(day)}
+                      style={[styles.modalDayCell, isSelected && styles.modalDayCellActive]}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[
+                        isSelected ? styles.selectedCircle : styles.normalCircle,
+                        isTodayDate && !isSelected && styles.todayCircle
+                      ]}>
+                        <Text style={[
+                          isSelected ? styles.selectedDateText : styles.normalDateText,
+                          isTodayDate && !isSelected && styles.todayDateText
+                        ]}>
+                          {day.getDate()}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              <View style={styles.modalPeriodSelector}>
+                {['daily', 'weekly', 'monthly'].map((period) => (
+                  <TouchableOpacity
+                    key={period}
+                    onPress={() => setSelectedPeriod(period)}
+                    style={[
+                      styles.modalPeriodBtn,
+                      selectedPeriod === period && styles.modalPeriodBtnSelected
+                    ]}
+                  >
+                    <Text style={[
+                      styles.modalPeriodText,
+                      selectedPeriod === period && styles.modalPeriodTextSelected
+                    ]}>
+                      {t(period)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </LinearGradient>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <View style={styles.scrollableBottomSection}>
         <ScrollView contentContainerStyle={styles.bottomScroll} showsVerticalScrollIndicator={false}>
-          <Text style={styles.childrenTitle}>Children Details</Text>
+          <Text style={[styles.childrenTitle, isRTL && { textAlign: 'right' }]}>
+            {t('childrenDetails')}
+          </Text>
           
           {children.map((child) => (
             <View key={child.id} style={{ marginBottom: 16 }}>
@@ -377,7 +438,7 @@ export default function HomeScreen({ navigation, route }) {
           <View style={{ height: 20 }} />
         </ScrollView>
       </View>
-
+      
       <View style={styles.bottomNavContainer}>
         <BottomNav navigation={navigation} activeScreen="home" />
       </View>
@@ -387,33 +448,33 @@ export default function HomeScreen({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f5f5" },
+  
   fixedTopSection: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
+    height: screenHeight * TOP_SECTION_HEIGHT_RATIO,
     zIndex: 1,
-    overflow: "hidden",
     borderBottomEndRadius: 38,
     borderBottomStartRadius: 38,
   },
   safeArea: { height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight },
   
-  // Profile Section
   profileSection: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
     marginTop: 6,
-    marginBottom: 8,
+    marginBottom: 12,
   },
   profileAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     borderWidth: 3,
-    borderColor: "#FFD700",
-    backgroundColor: "#FFD700",
+    borderColor: "white",
+    backgroundColor: "white",
     marginRight: 12,
   },
   greetingContainer: {
@@ -422,251 +483,263 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 20,
     color: "#FFFFFF",
-    marginBottom: 8,
   },
   userName: {
     color: "#FFD700",
     fontWeight: "700",
   },
-  pointsContainer: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  pointBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  starIcon: {
-    fontSize: 16,
-    marginRight: 4,
-  },
-  pointText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 14,
-  },
-
-  // Calendar Section
-  calendarSection: {
-    paddingHorizontal: 20,
-    marginBottom: 10,
-  },
-  selectDateRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  selectDateText: {
-    fontSize: 16,
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  calendarIconContainer: {
-    width: 36,
-    height: 36,
-    backgroundColor: "#A5F3B4",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  toggleIconContainer: {
-    width: 36,
-    height: 36,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  
-  // Month Navigation
-  monthNavigation: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 6,
-    paddingHorizontal: 4,
-  },
-  monthNavBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  monthText: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-
-  // Calendar Grid
-  calendarGrid: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 8,
-  },
-  dayHeaderRow: {
-    flexDirection: "row",
-    marginBottom: 8,
-  },
-  dayHeader: {
-    flex: 1,
-    textAlign: "center",
-    color: "rgba(255, 255, 255, 0.7)",
-    fontSize: 11,
-    fontWeight: "600",
-  },
-  daysGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  dayCell: {
-    width: `${100 / 7}%`,
-    aspectRatio: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 8,
-    marginVertical: 3,
-  },
-  dayCellSelected: {
+  calendarIconButton: {
+    width: 44,
+    height: 44,
     backgroundColor: "#FFD700",
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  dayCellToday: {
-    borderWidth: 2,
-    borderColor: "#FFD700",
+  testNotificationBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: '#FFD700',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+    gap: 6,
   },
-  dayText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-  dayTextSelected: {
-    color: "#6F42C1",
-    fontWeight: "700",
-  },
-  dayTextToday: {
-    color: "#FFD700",
-  },
-  activityDot: {
-    position: "absolute",
-    bottom: 3,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#FFD700",
+  testNotificationText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#6F42C1',
   },
 
-  // Activity Stats Cards (Above Calendar)
   activityStatsRow: {
     flexDirection: "row",
     paddingHorizontal: 20,
-    gap: 8,
-    marginBottom: 10,
+    gap: 9,
+    marginBottom: 16,
+    alignItems: 'stretch', 
   },
   statCard: {
     flex: 1,
     borderRadius: 16,
-    overflow: "visible",
+    overflow: "hidden",
+    minHeight: 130,
   },
   statCardGradient: {
-    padding: 14,
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "start-end", 
     borderRadius: 16,
   },
   statIconCircle: {
-    width: 35,
-    height: 35,
-    borderRadius: 20,
-    backgroundColor: "rgba(165, 243, 180, 0.35)",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
-  },
-   
-   statIconCirclepurple: {
-    width: 45,
-    height: 45,
-    borderRadius: 20,
-    backgroundColor: "rgba(165, 243, 180, 0.35)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-   statIconCirclered: {
-    width: 45,
-    height: 45,
-    borderRadius: 20,
-    backgroundColor: "rgba(165, 243, 180, 0.35)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 6,
   },
   statCardValue: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: "700",
     color: "#FFFFFF",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   statCardLabel: {
     fontSize: 11,
     fontWeight: "600",
-    color: "rgba(255, 255, 255, 0.95)",
+    color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
+    marginTop: 2,
   },
-  incompleteShadow: {
-    backgroundColor: "rgba(79, 70, 229, 0.5)",
+  incompleteBadge: {
+    marginTop: 6,
+    backgroundColor: "rgba(0, 0, 0, 0.15)",
     paddingVertical: 4,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
-    alignItems: "center",
+    paddingHorizontal: 6,
+    borderRadius: 8,
   },
   incompleteText: {
-    fontSize: 10,
-    color: "rgba(255, 255, 255, 0.85)",
-    fontWeight: "500",
+    fontSize: 9,
+    color: "rgba(255, 255, 255, 0.95)",
+    fontWeight: "900",
+    textAlign: "center",
   },
 
-  periodSelector: {
-    flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 20,
-    padding: 3,
-  },
-  periodBtn: {
+  modalOverlay: {
     flex: 1,
-    paddingVertical: 6,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
     alignItems: "center",
-    borderRadius: 17,
   },
-  periodBtnSelected: {
+  calendarModalContent: {
+    width: screenWidth * 0.9,
+    maxWidth: 400,
+    borderRadius: 25,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    backgroundColor: "transparent",
+  },
+  popupGradient: {
+    padding: 20,
+    paddingBottom: 30,
+    borderRadius: 25,
+  },
+  modalCloseButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 10,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 20,
+    padding: 8,
+  },
+  modalMonthNavigation: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  modalMonthNavBtn: {
+    padding: 10,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  monthLabelContainer: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 22,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  modalMonthText: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: 0.3,
+  },
+  modalDayHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    paddingHorizontal: 2,
+  },
+  modalDayHeader: {
+    width: (screenWidth * 0.9 - 40) / 7,
+    textAlign: "center",
+    fontSize: 13,
+    color: "rgba(255,255,255,0.85)",
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  modalDaysGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    paddingHorizontal: 2,
+  },
+  modalDayCell: {
+    width: (screenWidth * 0.9 - 40) / 7,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+  modalDayCellActive: {
+    transform: [{ scale: 1.05 }],
+  },
+  selectedCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#FFD700",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#FFD700",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  normalCircle: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 12,
+  },
+  todayCircle: {
+    backgroundColor: "rgba(255,255,255,0.25)",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.5)",
+  },
+  selectedDateText: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#6F42C1",
+  },
+  normalDateText: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.95)",
+    fontWeight: "600",
+  },
+  todayDateText: {
+    color: "#fff",
+    fontWeight: "800",
+  },
+  modalPeriodSelector: {
+    flexDirection: "row",
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 12,
+    padding: 4,
+    marginTop: 16,
+  },
+  modalPeriodBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10,
+  },
+  modalPeriodBtnSelected: {
     backgroundColor: "#FFD700",
   },
-  periodText: {
-    color: "#FFFFFF",
-    fontSize: 13,
+  modalPeriodText: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 14,
     fontWeight: "500",
   },
-  periodTextSelected: {
+  modalPeriodTextSelected: {
     color: "#6F42C1",
     fontWeight: "700",
   },
 
-  // Bottom Section
   scrollableBottomSection: {
     position: "absolute",
+    top: screenHeight * TOP_SECTION_HEIGHT_RATIO, 
     left: 0,
     right: 0,
     bottom: 0,
@@ -680,7 +753,11 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  bottomScroll: { paddingHorizontal: 16, paddingTop: 32, paddingBottom: 100 },
+  bottomScroll: { 
+    paddingHorizontal: 16, 
+    paddingTop: 32, 
+    paddingBottom: 100 
+  },
   bottomNavContainer: { 
     position: "absolute", 
     bottom: 0, 
@@ -689,7 +766,12 @@ const styles = StyleSheet.create({
     zIndex: 10, 
     backgroundColor: "#ffffff" 
   },
-  childrenTitle: { fontSize: 20, fontWeight: "700", marginBottom: 12, color: "#1a1a2e" },
+  childrenTitle: { 
+    fontSize: 20, 
+    fontWeight: "700", 
+    marginBottom: 12, 
+    color: "#1a1a2e" 
+  },
   childCardWrapper: { 
     width: "100%", 
     borderRadius: 20, 
@@ -698,19 +780,55 @@ const styles = StyleSheet.create({
     shadowRadius: 8, 
     shadowOffset: { width: 0, height: 4 },
   },
-  childCard: { borderRadius: 20, padding: 18 },
-  childHeader: { flexDirection: "row", alignItems: "flex-start", marginBottom: 16 },
-  childAvatar: { width: 56, height: 56, borderRadius: 28, marginRight: 12, borderWidth: 3, borderColor: "#FFD700" },
-  childName: { fontSize: 18, fontWeight: "700", marginBottom: 2, color: "#ffffff" },
-  childInfo: { fontSize: 13, fontWeight: "500", color: "rgba(255,255,255,0.9)" },
-  statusText: { fontSize: 13, fontWeight: "600", color: "#ffffff" },
+  childCard: { 
+    borderRadius: 20, 
+    padding: 18 
+  },
+  childHeader: { 
+    flexDirection: "row", 
+    alignItems: "flex-start", 
+    marginBottom: 16 
+  },
+  childAvatar: { 
+    width: 56, 
+    height: 56, 
+    borderRadius: 28, 
+    borderWidth: 3, 
+    borderColor: "white" 
+  },
+  childName: { 
+    fontSize: 18, 
+    fontWeight: "700", 
+    marginBottom: 2, 
+    color: "#ffffff" 
+  },
+  childInfo: { 
+    fontSize: 13, 
+    fontWeight: "500", 
+    color: "rgba(255,255,255,0.9)" 
+  },
+  statusText: { 
+    fontSize: 13, 
+    fontWeight: "600", 
+    color: "#ffffff" 
+  },
   statsRow: { 
     flexDirection: "row", 
     justifyContent: "space-between",
     paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: "rgba(255,255,255,0.3)",
+    gap: 8,
   },
-  statItem: { flexDirection: "row", alignItems: "center" },
-  statText: { fontSize: 13, fontWeight: "600", color: "#ffffff" },
+  statItem: { 
+    flexDirection: "row", 
+    alignItems: "center",
+    flex: 1,
+  },
+  statText: { 
+    fontSize: 13, 
+    fontWeight: "600", 
+    color: "#ffffff",
+    flexShrink: 1,
+  },
 });

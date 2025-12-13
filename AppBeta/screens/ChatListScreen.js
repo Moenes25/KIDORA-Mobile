@@ -14,9 +14,13 @@ import BottomNav from '../components/BottomNav';
 import SideBar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 
+// ✅ IMPORTS FOR NOTIFICATION
+import { useNotifications } from "../context/NotificationContext"; 
+import NotificationPanel from "../components/NotificationPanel";
+
 const { width, height } = Dimensions.get('window');
 
-// Story bubble component
+// ... (StoryBubble and ConversationItem components remain unchanged) ...
 const StoryBubble = ({ story, onPress }) => {
   if (!story.user) return null;
   return (
@@ -31,7 +35,6 @@ const StoryBubble = ({ story, onPress }) => {
   );
 };
 
-// Conversation item for list
 const ConversationItem = ({ user, lastMessage, onPress, onVideoCall, onAudioCall }) => {
   return (
     <TouchableOpacity style={styles.conversationItem} onPress={() => onPress(user)}>
@@ -71,6 +74,12 @@ const ConversationItem = ({ user, lastMessage, onPress, onVideoCall, onAudioCall
 
 export default function ChatListScreen({ navigation, route }) {
   const { colors } = useTheme();
+  
+  // ✅ 1. SETUP NOTIFICATION LOGIC
+  const { unreadCount } = useNotifications();
+  const [notificationPanelVisible, setNotificationPanelVisible] = useState(false);
+  const toggleNotificationPanel = () => setNotificationPanelVisible(!notificationPanelVisible);
+
   const [sidebarVisible, setSidebarVisible] = useState(false);
 
   // Story state
@@ -163,7 +172,7 @@ export default function ChatListScreen({ navigation, route }) {
       })
     : null;
 
-  const TOP_SECTION_HEIGHT = height * 0.42;
+  const TOP_SECTION_HEIGHT = height * 0.45;
 
   return (
     <View style={styles.container}>
@@ -178,14 +187,22 @@ export default function ChatListScreen({ navigation, route }) {
         onLogout={handleLogout} 
       />
 
+      {/* ✅ 2. ADD NOTIFICATION PANEL */}
+      <NotificationPanel 
+        visible={notificationPanelVisible}
+        onClose={toggleNotificationPanel}
+      />
+
       {/* FIXED TOP SECTION */}
       <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
         <LinearGradient colors={colors.headerGradient} style={StyleSheet.absoluteFill}>
           <View style={styles.safeArea} />
+          
+          {/* ✅ 3. CONNECT TOPBAR TO REAL DATA */}
           <TopBar 
             onMenuPress={toggleSidebar}
-            onNotificationPress={() => navigation.navigate("Notifications")}
-            notificationCount={5}   
+            onNotificationPress={toggleNotificationPanel}
+            notificationCount={unreadCount}   
           />
 
           <View style={styles.fixedTopContent}>

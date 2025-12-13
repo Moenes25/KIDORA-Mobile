@@ -15,12 +15,13 @@ import {
   ScrollView,
 } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useTranslation } from "../context/TranslationContext";
 import D17Logo from "../assets/D17.png";
 
 // Official La Poste Tunisienne colors
-const LAPOSTE_BLUE = "#005EB8";        // Primary deep blue
-const LAPOSTE_LIGHT_BLUE = "#E6F0FA";   // Background light blue
-const LAPOSTE_ACCENT = "#003087";      // Darker blue for emphasis
+const LAPOSTE_BLUE = "#005EB8";
+const LAPOSTE_LIGHT_BLUE = "#E6F0FA";
+const LAPOSTE_ACCENT = "#003087";
 const TEXT_DARK = "#1A1A1A";
 const TEXT_LIGHT = "#555";
 
@@ -30,6 +31,7 @@ export default function D17PaymentScreen({
   paymentAmount,
   onPaymentSuccess,
 }) {
+  const { t, isRTL } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -45,12 +47,12 @@ export default function D17PaymentScreen({
     const cleaned = phoneNumber.replace(/\D/g, "");
 
     if (cleaned.length !== 8) {
-      Alert.alert("Numéro invalide", "Veuillez entrer un numéro D17 valide (8 chiffres)");
+      Alert.alert(t('invalidNumber'), t('enterValidD17'));
       return;
     }
 
     if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
-      Alert.alert("Erreur", "Montant invalide");
+      Alert.alert(t('error'), t('invalidAmount'));
       return;
     }
 
@@ -72,19 +74,16 @@ export default function D17PaymentScreen({
 
       if (data.success) {
         Alert.alert(
-          "Paiement en cours",
-          `Un code de confirmation a été envoyé au +216 ${cleaned.slice(
-            0,
-            2
-          )} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}\n\nVeuillez saisir le code reçu par SMS.`,
+          t('paymentInProgress'),
+          `${t('confirmationCodeSent')} +216 ${cleaned.slice(0, 2)} ${cleaned.slice(2, 5)} ${cleaned.slice(5)}\n\n${t('enterReceivedCode')}`,
           [{ text: "OK", onPress: () => onPaymentSuccess?.() }]
         );
       } else {
-        Alert.alert("Échec", data.message || "Impossible d'initier le paiement D17");
+        Alert.alert(t('failed'), data.message || t('unableToInitiateD17'));
       }
     } catch (err) {
       console.error(err);
-      Alert.alert("Erreur de connexion", "Vérifiez votre connexion internet");
+      Alert.alert(t('connectionError'), t('checkInternetConnection'));
     } finally {
       setLoading(false);
     }
@@ -102,28 +101,49 @@ export default function D17PaymentScreen({
               {/* Header */}
               <View style={styles.header}>
                 <Image source={D17Logo} style={styles.logo} resizeMode="contain" />
-                <Text style={styles.title}>Payer avec D17</Text>
-                <Text style={styles.subtitle}>
-                  Service de paiement mobile de La Poste Tunisienne
+                <Text style={[styles.title, isRTL && { textAlign: 'right' }]}>
+                  {t('payWithD17')}
+                </Text>
+                <Text style={[styles.subtitle, isRTL && { textAlign: 'right' }]}>
+                  {t('d17ServiceDescription')}
                 </Text>
               </View>
 
               {/* Amount Card */}
               <View style={styles.amountCard}>
-                <Text style={styles.amountLabel}>Montant à payer</Text>
-                <Text style={styles.amountValue}>{paymentAmount} TND</Text>
+                <Text style={[styles.amountLabel, isRTL && { textAlign: 'right' }]}>
+                  {t('amountToPay')}
+                </Text>
+                <Text style={[styles.amountValue, isRTL && { textAlign: 'right' }]}>
+                  {paymentAmount} TND
+                </Text>
               </View>
 
               {/* Phone Number Input */}
               <View style={styles.inputSection}>
-                <Text style={styles.inputLabel}>Numéro D17 (Mobile)</Text>
-                <View style={styles.phoneInputContainer}>
-                  <View style={styles.countryCode}>
+                <Text style={[styles.inputLabel, isRTL && { textAlign: 'right' }]}>
+                  {t('d17NumberMobile')}
+                </Text>
+                <View style={[
+                  styles.phoneInputContainer,
+                  isRTL && { flexDirection: 'row-reverse' }
+                ]}>
+                  <View style={[
+                    styles.countryCode,
+                    isRTL && { 
+                      borderRightWidth: 0, 
+                      borderLeftWidth: 1, 
+                      borderLeftColor: '#ddd' 
+                    }
+                  ]}>
                     <Text style={styles.countryFlag}>TN</Text>
                     <Text style={styles.countryPrefix}>+216</Text>
                   </View>
                   <TextInput
-                    style={styles.phoneInput}
+                    style={[
+                      styles.phoneInput,
+                      isRTL ? { marginRight: 14, textAlign: 'right' } : { marginLeft: 14 }
+                    ]}
                     placeholder="98 123 456"
                     keyboardType="numeric"
                     value={formatPhoneNumber(phoneNumber)}
@@ -132,20 +152,39 @@ export default function D17PaymentScreen({
                     editable={!loading}
                   />
                 </View>
-                <Text style={styles.helpText}>
-                  Entrez votre numéro de téléphone associé à votre compte D17
+                <Text style={[styles.helpText, isRTL && { textAlign: 'right' }]}>
+                  {t('enterPhoneNumber')}
                 </Text>
               </View>
 
               {/* Security & Trust Indicators */}
-              <View style={styles.trustRow}>
-                <View style={styles.trustItem}>
+              <View style={[
+                styles.trustRow,
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
+                <View style={[
+                  styles.trustItem,
+                  isRTL && { flexDirection: 'row-reverse' }
+                ]}>
                   <MaterialCommunityIcons name="shield-check" size={20} color={LAPOSTE_BLUE} />
-                  <Text style={styles.trustText}>Sécurisé par La Poste</Text>
+                  <Text style={[
+                    styles.trustText,
+                    isRTL ? { marginRight: 8 } : { marginLeft: 8 }
+                  ]}>
+                    {t('securedByLaPoste')}
+                  </Text>
                 </View>
-                <View style={styles.trustItem}>
+                <View style={[
+                  styles.trustItem,
+                  isRTL && { flexDirection: 'row-reverse' }
+                ]}>
                   <Feather name="lock" size={18} color={LAPOSTE_BLUE} />
-                  <Text style={styles.trustText}>Cryptage 256 bits</Text>
+                  <Text style={[
+                    styles.trustText,
+                    isRTL ? { marginRight: 8 } : { marginLeft: 8 }
+                  ]}>
+                    {t('encryption256')}
+                  </Text>
                 </View>
               </View>
 
@@ -157,32 +196,54 @@ export default function D17PaymentScreen({
                   disabled={loading}
                 >
                   {loading ? (
-                    <View style={styles.loadingRow}>
+                    <View style={[
+                      styles.loadingRow,
+                      isRTL && { flexDirection: 'row-reverse' }
+                    ]}>
                       <ActivityIndicator color="#fff" />
-                      <Text style={styles.payButtonText}>Traitement en cours...</Text>
+                      <Text style={[
+                        styles.payButtonText,
+                        isRTL ? { marginRight: 10 } : { marginLeft: 10 }
+                      ]}>
+                        {t('processingInProgress')}
+                      </Text>
                     </View>
                   ) : (
-                    <>
-                      <Text style={styles.payButtonText}>Payer {paymentAmount} TND</Text>
-                      <Feather name="arrow-right" size={22} color="#fff" style={{ marginLeft: 10 }} />
-                    </>
+                    <View style={[
+                      styles.payButtonContent,
+                      isRTL && { flexDirection: 'row-reverse' }
+                    ]}>
+                      <Text style={styles.payButtonText}>
+                        {t('pay')} {paymentAmount} TND
+                      </Text>
+                      <Feather 
+                        name={isRTL ? "arrow-left" : "arrow-right"} 
+                        size={22} 
+                        color="#fff" 
+                        style={isRTL ? { marginRight: 10 } : { marginLeft: 10 }} 
+                      />
+                    </View>
                   )}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={loading}>
-                  <Text style={styles.cancelText}>Annuler</Text>
+                <TouchableOpacity 
+                  style={styles.cancelButton} 
+                  onPress={onClose} 
+                  disabled={loading}
+                >
+                  <Text style={styles.cancelText}>{t('cancel')}</Text>
                 </TouchableOpacity>
               </View>
 
               {/* Footer */}
               <View style={styles.footer}>
                 <Image
-                  source={{ uri: "https://www.poste.tn/images/logo-poste.png" }} // Optional: official logo
+                  source={{ uri: "https://www.poste.tn/images/logo-poste.png" }}
                   style={styles.posteLogo}
                   resizeMode="contain"
                 />
-                <Text style={styles.footerText}>
-                  Service officiel de paiement mobile • La Poste Tunisienne
+                <Text style={[styles.footerText, isRTL && { textAlign: 'right' }]}>
+                  {t('officialPaymentService')} • La Poste Tunisienne
                 </Text>
               </View>
             </View>
@@ -283,7 +344,6 @@ const styles = StyleSheet.create({
   },
   phoneInput: {
     flex: 1,
-    marginLeft: 14,
     fontSize: 18,
     color: TEXT_DARK,
     letterSpacing: 1,
@@ -305,7 +365,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   trustText: {
-    marginLeft: 8,
     fontSize: 13,
     color: TEXT_LIGHT,
     fontWeight: "600",
@@ -334,6 +393,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "700",
+  },
+  payButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   loadingRow: {
     flexDirection: "row",

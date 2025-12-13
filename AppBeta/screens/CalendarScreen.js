@@ -9,21 +9,12 @@ import {
   StatusBar,
   Dimensions,
   Image,
-  LayoutAnimation,
-  UIManager,
+  Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import TopNavBar from "../components/TopNavBar";
-
-// Enable LayoutAnimation for Android
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
@@ -33,21 +24,17 @@ export default function CalendarScreenV1({ navigation }) {
   // --- STATE ---
   const [currentDate, setCurrentDate] = useState(new Date()); 
   const [selectedDate, setSelectedDate] = useState(new Date()); 
-  const [isExpanded, setIsExpanded] = useState(false);
   const [visibleDates, setVisibleDates] = useState([]);
   const [selectedChildId, setSelectedChildId] = useState(null);
+  const [showCalendarPopup, setShowCalendarPopup] = useState(false);
 
   // --- CALENDAR LOGIC ---
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   useEffect(() => {
-    if (isExpanded) {
-      generateMonth();
-    } else {
-      generateMonth();
-    }
-  }, [currentDate, isExpanded]);
+    generateMonth();
+  }, [currentDate]);
 
   const generateMonth = () => {
     const year = currentDate.getFullYear();
@@ -69,23 +56,17 @@ export default function CalendarScreenV1({ navigation }) {
     setVisibleDates(dates);
   };
 
-  const toggleCalendar = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsExpanded(!isExpanded);
-    if (!isExpanded) {
-        setCurrentDate(new Date(selectedDate));
-    }
-  };
-
   const changeMonth = (direction) => {
     const newDate = new Date(currentDate);
     newDate.setMonth(currentDate.getMonth() + direction);
     setCurrentDate(newDate);
   };
 
-  const onDatePress = (dateObj) => {
+  const onPopupDatePress = (dateObj) => {
     if (!dateObj.date) return;
     setSelectedDate(dateObj.date);
+    setCurrentDate(new Date(dateObj.date));
+    setShowCalendarPopup(false);
   };
 
   const isSameDay = (d1, d2) => {
@@ -100,21 +81,11 @@ export default function CalendarScreenV1({ navigation }) {
     return `${dayName}, ${monthNames[date.getMonth()].substring(0, 3)} ${date.getDate()}`;
   };
 
-  // --- DYNAMIC HEIGHT CALCULATION ---
-  const numRows = Math.ceil(visibleDates.length / 7);
-  
-  // Component heights - adjusted for better mobile experience
+  // --- FIXED COMPACT HEIGHT ---
   const STATUS_BAR = Platform.OS === 'android' ? StatusBar.currentHeight : 44;
-  const TOP_NAV = 60;
-  const MONTH_PICKER = 70;
-  const WEEK_DAYS = 35;
-  const DATE_ROW_HEIGHT = 50;
-  const PADDING = 20;
-  
-  // Calculate heights
-  const expandedHeight = STATUS_BAR + TOP_NAV + MONTH_PICKER + WEEK_DAYS + (numRows * DATE_ROW_HEIGHT) + PADDING;
-  const COLLAPSED_HEIGHT = STATUS_BAR + TOP_NAV + MONTH_PICKER + PADDING + 20;
-  const currentHeight = isExpanded ? expandedHeight : COLLAPSED_HEIGHT;
+  const TOP_NAV = 80;
+  const PADDING = 30;
+  const FIXED_HEIGHT = STATUS_BAR + TOP_NAV + PADDING;
 
   // --- MOCK DATA ---
   const children = [
@@ -137,54 +108,54 @@ export default function CalendarScreenV1({ navigation }) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#6f42c1" />
 
-      {/* --- PURPLE TOP SECTION --- */}
-      <View style={[styles.fixedTopSection, { height: currentHeight }]}>
-        <LinearGradient colors={colors.headerGradient || ["#6f42c1", "#8e44ad"]} style={StyleSheet.absoluteFill}>
-          
-          <View style={styles.safeArea} />
-          
-          <TopNavBar title="Calendar" navigation={navigation} transparent={true} />
-
-          <View style={styles.calendarHeader}>
-            {/* Month Picker */}
-            <View style={styles.monthPicker}>
-              <TouchableOpacity style={styles.navIcon} onPress={() => changeMonth(-1)}>
-                <Feather name="chevron-left" size={22} color="#fff" />
-              </TouchableOpacity>
+      {/* --- CALENDAR POPUP MODAL --- */}
+      <Modal
+        visible={showCalendarPopup}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowCalendarPopup(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowCalendarPopup(false)}
+        >
+          <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
+            <LinearGradient colors={colors.headerGradient || ["#6f42c1", "#8e44ad"]} style={styles.popupGradient}>
               
-              <View style={styles.monthLabelContainer}>
-                <Text style={styles.monthText}>
-                  {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
-                </Text>
-              </View>
+              {/* Close Button */}
+              <TouchableOpacity 
+                style={styles.closeButton} 
+                onPress={() => setShowCalendarPopup(false)}
+              >
+                <Feather name="x" size={24} color="#fff" />
+              </TouchableOpacity>
 
-              <View style={styles.monthRightSide}>
+              {/* Month Picker */}
+              <View style={styles.popupMonthPicker}>
+                <TouchableOpacity style={styles.navIcon} onPress={() => changeMonth(-1)}>
+                  <Feather name="chevron-left" size={22} color="#fff" />
+                </TouchableOpacity>
+                
+                <View style={styles.monthLabelContainer}>
+                  <Text style={styles.monthText}>
+                    {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+                  </Text>
+                </View>
+
                 <TouchableOpacity style={styles.navIcon} onPress={() => changeMonth(1)}>
                   <Feather name="chevron-right" size={22} color="#fff" />
                 </TouchableOpacity>
-                
-                {/* Toggle Arrow */}
-                <TouchableOpacity onPress={toggleCalendar} style={styles.monthToggleButton}>
-                  <Feather 
-                    name={isExpanded ? "chevron-up" : "chevron-down"} 
-                    size={22} 
-                    color="rgba(255,255,255,0.95)" 
-                  />
-                </TouchableOpacity>
               </View>
-            </View>
 
-            {/* Week Days - Only show in expanded mode */}
-            {isExpanded && (
+              {/* Week Days */}
               <View style={styles.weekDays}>
                 {dayNames.map((day, index) => (
                   <Text key={index} style={styles.weekDayText}>{day}</Text>
                 ))}
               </View>
-            )}
 
-            {/* Date Grid - Only show in expanded mode */}
-            {isExpanded && (
+              {/* Date Grid */}
               <View style={styles.dateGridContainer}>
                 {visibleDates.map((item, index) => {
                   if (!item.date) return <View key={`empty-${index}`} style={styles.dateCell} />;
@@ -196,7 +167,7 @@ export default function CalendarScreenV1({ navigation }) {
                       key={index} 
                       style={[styles.dateCell, isSelected && styles.dateCellActive]}
                       activeOpacity={0.7}
-                      onPress={() => onDatePress(item)}
+                      onPress={() => onPopupDatePress(item)}
                     >
                       <View style={[
                         isSelected ? styles.selectedCircle : styles.normalCircle,
@@ -213,19 +184,36 @@ export default function CalendarScreenV1({ navigation }) {
                   );
                 })}
               </View>
-            )}
+            </LinearGradient>
           </View>
-          
+        </TouchableOpacity>
+      </Modal>
+
+      {/* --- COMPACT PURPLE TOP SECTION --- */}
+      <View style={[styles.fixedTopSection, { height: FIXED_HEIGHT }]}>
+        <LinearGradient colors={colors.headerGradient || ["#6f42c1", "#8e44ad"]} style={StyleSheet.absoluteFill}>
+          <View style={styles.safeArea} />
+          <TopNavBar title="Calendar" navigation={navigation} transparent={true} />
         </LinearGradient>
       </View>
 
       {/* --- WHITE BOTTOM SECTION --- */}
-      <View style={[styles.whiteSection, { top: currentHeight - 30 }]}>
+      <View style={[styles.whiteSection, { top: FIXED_HEIGHT - 30 }]}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
           <View style={styles.eventHeader}>
-            <Text style={styles.eventCount}>{filteredEvents.length} tasks • {filteredEvents.length} lessons</Text>
-            <Text style={styles.eventDate}>{getFormattedFullDate(selectedDate)}</Text>
+            <View style={styles.eventHeaderRow}>
+              <View>
+                <Text style={styles.eventCount}>{filteredEvents.length} tasks • {filteredEvents.length} lessons</Text>
+                <Text style={styles.eventDate}>{getFormattedFullDate(selectedDate)}</Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.calendarIconButton}
+                onPress={() => setShowCalendarPopup(true)}
+              >
+                <Feather name="calendar" size={24} color="#6F42C1" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Filters */}
@@ -288,110 +276,6 @@ const styles = StyleSheet.create({
     borderBottomStartRadius: 35,
   },
   safeArea: { height: Platform.OS === "android" ? StatusBar.currentHeight : 44 },
-  
-  calendarHeader: { paddingHorizontal: 18, paddingTop: 10, paddingBottom: 18 },
-  monthPicker: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 18 },
-  monthLabelContainer: { 
-    backgroundColor: 'rgba(255,255,255,0.2)', 
-    paddingHorizontal: 18, 
-    paddingVertical: 10, 
-    borderRadius: 22,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  monthText: { fontSize: 17, fontWeight: "700", color: "#fff", letterSpacing: 0.3 },
-  monthRightSide: { flexDirection: "row", alignItems: "center", gap: 10 },
-  navIcon: { 
-    padding: 10, 
-    backgroundColor: 'rgba(255,255,255,0.15)', 
-    borderRadius: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  monthToggleButton: {
-    padding: 10,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  
-  weekDays: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12, paddingHorizontal: 2 },
-  weekDayText: { 
-    width: (screenWidth - 40) / 7, 
-    textAlign: "center", 
-    fontSize: 13, 
-    color: "rgba(255,255,255,0.85)", 
-    fontWeight: "700", 
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  
-  dateGridContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-    paddingHorizontal: 2,
-  },
-  dateCell: {
-    width: (screenWidth - 40) / 7,
-    height: 48,
-    alignItems: "center",
-    justifyContent: 'center',
-    marginBottom: 4,
-  },
-  dateCellActive: { 
-    transform: [{scale: 1.05}],
-  },
-  
-  selectedCircle: { 
-    width: 40, 
-    height: 40, 
-    borderRadius: 12, 
-    backgroundColor: "#FFD700", 
-    justifyContent: "center", 
-    alignItems: "center",
-    shadowColor: "#FFD700",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.4,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  normalCircle: { 
-    width: 40, 
-    height: 40, 
-    justifyContent: "center", 
-    alignItems: "center",
-    borderRadius: 12,
-  },
-  todayCircle: {
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.5)',
-  },
-  selectedDateText: { 
-    fontSize: 16, 
-    fontWeight: "800", 
-    color: "#6F42C1", 
-  },
-  normalDateText: { 
-    fontSize: 16, 
-    color: "rgba(255,255,255,0.95)", 
-    fontWeight: "600",
-  },
-  todayDateText: {
-    color: "#fff",
-    fontWeight: "800",
-  },
 
   whiteSection: { 
     position: "absolute", 
@@ -410,8 +294,26 @@ const styles = StyleSheet.create({
   },
   scrollContent: { paddingTop: 28, paddingHorizontal: 18, paddingBottom: 120 },
   eventHeader: { marginBottom: 20 },
+  eventHeaderRow: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center" 
+  },
   eventCount: { fontSize: 14, color: "#999999", marginBottom: 6, fontWeight: "500" },
   eventDate: { fontSize: 24, fontWeight: "700", color: "#1a1a2e", letterSpacing: 0.3 },
+  calendarIconButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#FFD700",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   
   filterSection: { marginBottom: 22 },
   filterTitle: { fontSize: 14, fontWeight: "700", color: "#555555", marginBottom: 12 },
@@ -460,8 +362,134 @@ const styles = StyleSheet.create({
     elevation: 4,
     borderRadius: 25,
   },
-  childImage: { width: 46, height: 46, borderRadius: 23, borderWidth: 2.5, borderColor: "#FFD700" },
+  childImage: { width: 46, height: 46, borderRadius: 23, borderWidth: 2.5, borderColor: "white" },
   iconCircle: { width: 48, height: 48, borderRadius: 24, justifyContent: "center", alignItems: "center", marginBottom: 14 },
   title: { fontSize: 19, fontWeight: "700", color: "#1a1a2e", marginBottom: 5, letterSpacing: 0.2 },
   subtitle: { fontSize: 14, color: "#777777", fontWeight: "500" },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: screenWidth * 0.9,
+    maxWidth: 400,
+    borderRadius: 25,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  popupGradient: {
+    padding: 20,
+    paddingBottom: 30,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 10,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 20,
+    padding: 8,
+  },
+  popupMonthPicker: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  monthLabelContainer: { 
+    backgroundColor: 'rgba(255,255,255,0.2)', 
+    paddingHorizontal: 18, 
+    paddingVertical: 10, 
+    borderRadius: 22,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  monthText: { fontSize: 17, fontWeight: "700", color: "#fff", letterSpacing: 0.3 },
+  navIcon: { 
+    padding: 10, 
+    backgroundColor: 'rgba(255,255,255,0.15)', 
+    borderRadius: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  weekDays: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12, paddingHorizontal: 2 },
+  weekDayText: { 
+    width: (screenWidth - 40) / 7, 
+    textAlign: "center", 
+    fontSize: 13, 
+    color: "rgba(255,255,255,0.85)", 
+    fontWeight: "700", 
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  dateGridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "flex-start",
+    paddingHorizontal: 2,
+  },
+  dateCell: {
+    width: (screenWidth - 40) / 7,
+    height: 48,
+    alignItems: "center",
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
+  dateCellActive: { 
+    transform: [{scale: 1.05}],
+  },
+  selectedCircle: { 
+    width: 40, 
+    height: 40, 
+    borderRadius: 12, 
+    backgroundColor: "#FFD700", 
+    justifyContent: "center", 
+    alignItems: "center",
+    shadowColor: "#FFD700",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  normalCircle: { 
+    width: 40, 
+    height: 40, 
+    justifyContent: "center", 
+    alignItems: "center",
+    borderRadius: 12,
+  },
+  todayCircle: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.5)',
+  },
+  selectedDateText: { 
+    fontSize: 16, 
+    fontWeight: "800", 
+    color: "#6F42C1", 
+  },
+  normalDateText: { 
+    fontSize: 16, 
+    color: "rgba(255,255,255,0.95)", 
+    fontWeight: "600",
+  },
+  todayDateText: {
+    color: "#fff",
+    fontWeight: "800",
+  },
 });

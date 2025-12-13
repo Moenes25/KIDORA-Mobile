@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
 
 // Logos
 import MastercardLogo from "../assets/mastercard.png";
@@ -20,17 +21,18 @@ import PayoneerLogo from "../assets/payoneer.png";
 // Payment Screens
 import AddCardScreen from "./AddCardScreen";
 import PaymentConfirmationScreen from "./PaymentConfirmationScreen";
-import D17PaymentScreen from "./D17PaymentScreen";           // Updated: New official D17 screen
+import D17PaymentScreen from "./D17PaymentScreen";
 import FlouciPaymentScreen from "./FlouciPaymentScreen";
-import PayoneerPaymentScreen from "./PayonnerPaymentScreen"; // Fixed typo: Payonner → Payoneer (optional)
+import PayoneerPaymentScreen from "./PayonnerPaymentScreen";
 
 export default function PayMethodScreen({ visible, onClose, amount }) {
   const { colors, theme } = useTheme();
+  const { t, isRTL } = useTranslation();
   const isDark = theme === "dark";
 
   const [showAddCard, setShowAddCard] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showD17, setShowD17] = useState(false);           // Updated state name
+  const [showD17, setShowD17] = useState(false);
   const [showFlouci, setShowFlouci] = useState(false);
   const [showPayoneer, setShowPayoneer] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState(null);
@@ -52,7 +54,7 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
     if (method.type === "visa" || method.type === "mastercard") {
       setShowConfirm(true);
     } else if (method.type === "d17") {
-      setShowD17(true);                    // Open new D17 screen
+      setShowD17(true);
     } else if (method.type === "flouci") {
       setShowFlouci(true);
     } else if (method.type === "payoneer") {
@@ -80,9 +82,9 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
             onPress={() => {}}
           >
             {/* Header */}
-            <View style={styles.titleRow}>
+            <View style={[styles.titleRow, isRTL && { flexDirection: 'row-reverse' }]}>
               <Text style={[styles.title, { color: colors.primary }]}>
-                Choose payment method
+                {t('choosePaymentMethod')}
               </Text>
               <TouchableOpacity onPress={onClose}>
                 <Feather name="x" size={24} color={colors.primary} />
@@ -91,8 +93,12 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
 
             {/* Credit & Debit Cards */}
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionLabel, { color: colors.primary }]}>
-                Credit & Debit Card
+              <Text style={[
+                styles.sectionLabel, 
+                { color: colors.primary },
+                isRTL && { textAlign: 'right' }
+              ]}>
+                {t('creditDebitCard')}
               </Text>
             </View>
 
@@ -101,6 +107,7 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
               style={[
                 styles.cardItem,
                 { backgroundColor: isDark ? colors.sidebarItemBg : "#f5f5f5" },
+                isRTL && { flexDirection: 'row-reverse' }
               ]}
               onPress={() =>
                 handleSelectMethod({
@@ -110,32 +117,56 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
               }
             >
               <Image source={cardLogo} style={styles.cardLogo} resizeMode="contain" />
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={[styles.cardTitle, { color: colors.text }]}>
+              <View style={[
+                { flex: 1 },
+                isRTL ? { marginRight: 12 } : { marginLeft: 12 }
+              ]}>
+                <Text style={[
+                  styles.cardTitle, 
+                  { color: colors.text },
+                  isRTL && { textAlign: 'right' }
+                ]}>
                   {primaryCard.name}
                 </Text>
-                <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+                <Text style={[
+                  styles.cardSubtitle, 
+                  { color: colors.textSecondary },
+                  isRTL && { textAlign: 'right' }
+                ]}>
                   •••• {primaryCard.number}
                 </Text>
               </View>
               <View style={[styles.primaryTag, { backgroundColor: colors.primary }]}>
-                <Text style={styles.primaryText}>Primary</Text>
+                <Text style={styles.primaryText}>{t('primary')}</Text>
               </View>
             </TouchableOpacity>
 
             {/* Add New Card */}
             <TouchableOpacity
-              style={[styles.addBtn, { backgroundColor: colors.primary }]}
+              style={[
+                styles.addBtn, 
+                { backgroundColor: colors.primary },
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}
               onPress={() => setShowAddCard(true)}
             >
               <Feather name="plus" size={20} color="white" />
-              <Text style={styles.addBtnText}>Add new card</Text>
+              <Text style={[
+                styles.addBtnText,
+                isRTL ? { marginRight: 6 } : { marginLeft: 6 }
+              ]}>
+                {t('addNewCard')}
+              </Text>
             </TouchableOpacity>
 
             {/* Alternative Methods */}
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionLabel, { color: colors.primary }]}>
-                Or pay with
+              <Text style={[
+                styles.sectionLabel, 
+                { color: colors.primary },
+                isRTL && { textAlign: 'right' }
+              ]}>
+                {t('orPayWith')}
               </Text>
             </View>
 
@@ -144,14 +175,25 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
               style={[
                 styles.altMethod,
                 { backgroundColor: isDark ? colors.sidebarItemBg : "#f5f5f5" },
+                isRTL && { flexDirection: 'row-reverse' }
               ]}
               onPress={() => handleSelectMethod({ type: "d17" })}
             >
               <Image source={D17Logo} style={styles.altLogo} resizeMode="contain" />
-              <View style={{ marginLeft: 12 }}>
-                <Text style={[styles.altTitle, { color: colors.text }]}>D17</Text>
-                <Text style={[styles.altDesc, { color: colors.textSecondary }]}>
-                  Paiement mobile La Poste Tunisienne
+              <View style={[isRTL ? { marginRight: 12 } : { marginLeft: 12 }]}>
+                <Text style={[
+                  styles.altTitle, 
+                  { color: colors.text },
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  D17
+                </Text>
+                <Text style={[
+                  styles.altDesc, 
+                  { color: colors.textSecondary },
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  {t('d17Description')}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -161,14 +203,25 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
               style={[
                 styles.altMethod,
                 { backgroundColor: isDark ? colors.sidebarItemBg : "#f5f5f5" },
+                isRTL && { flexDirection: 'row-reverse' }
               ]}
               onPress={() => handleSelectMethod({ type: "flouci" })}
             >
               <Image source={FlouciLogo} style={styles.altLogo} resizeMode="contain" />
-              <View style={{ marginLeft: 12 }}>
-                <Text style={[styles.altTitle, { color: colors.text }]}>Flouci</Text>
-                <Text style={[styles.altDesc, { color: colors.textSecondary }]}>
-                  Portefeuille numérique
+              <View style={[isRTL ? { marginRight: 12 } : { marginLeft: 12 }]}>
+                <Text style={[
+                  styles.altTitle, 
+                  { color: colors.text },
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  Flouci
+                </Text>
+                <Text style={[
+                  styles.altDesc, 
+                  { color: colors.textSecondary },
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  {t('flouciDescription')}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -178,14 +231,25 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
               style={[
                 styles.altMethod,
                 { backgroundColor: isDark ? colors.sidebarItemBg : "#f5f5f5" },
+                isRTL && { flexDirection: 'row-reverse' }
               ]}
               onPress={() => handleSelectMethod({ type: "payoneer" })}
             >
               <Image source={PayoneerLogo} style={styles.altLogo} resizeMode="contain" />
-              <View style={{ marginLeft: 12 }}>
-                <Text style={[styles.altTitle, { color: colors.text }]}>Payoneer</Text>
-                <Text style={[styles.altDesc, { color: colors.textSecondary }]}>
-                  Paiement international
+              <View style={[isRTL ? { marginRight: 12 } : { marginLeft: 12 }]}>
+                <Text style={[
+                  styles.altTitle, 
+                  { color: colors.text },
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  Payoneer
+                </Text>
+                <Text style={[
+                  styles.altDesc, 
+                  { color: colors.textSecondary },
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  {t('payoneerDescription')}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -208,7 +272,6 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
         onPaymentSuccess={handlePaymentSuccess}
       />
 
-      {/* Updated: Using the new official D17 screen */}
       <D17PaymentScreen
         visible={showD17}
         onClose={() => setShowD17(false)}
@@ -233,7 +296,6 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
   );
 }
 
-// Styles remain unchanged (you can keep your existing styles)
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -305,7 +367,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 15,
     fontWeight: "600",
-    marginLeft: 6,
   },
   altMethod: {
     flexDirection: "row",

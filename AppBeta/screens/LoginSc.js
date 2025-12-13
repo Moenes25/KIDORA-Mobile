@@ -29,22 +29,13 @@ export default function LoginSc({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   // Animation refs
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    // Set values immediately without animation
+    fadeAnim.setValue(1);
+    slideAnim.setValue(0);
   }, []);
 
   const handleStaticLogin = async () => {

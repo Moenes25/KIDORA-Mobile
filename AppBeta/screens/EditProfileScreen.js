@@ -15,15 +15,17 @@ import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
 
 export default function EditProfileScreen({ navigation, route }) {
   const { colors, theme } = useTheme();
+  const { t, isRTL } = useTranslation();
   const isDark = theme === "dark";
   
   const user = route.params?.user || {};
 
   const [avatar, setAvatar] = useState(
-    user.avatar || require("../assets/default_avatar.jpeg")
+    user.avatar || require("../assets/human.jpg")
   );
   const [form, setForm] = useState({
     fullname: user.fullname || user.firstname && user.lastname
@@ -54,6 +56,14 @@ export default function EditProfileScreen({ navigation, route }) {
 
   const shadowColor = isDark ? "#2d1b69" : "#000";
 
+  const formFields = [
+    { label: t('fullName'), key: "fullname", icon: "person-outline", placeholder: t('enterFullName') },
+    { label: t('email'), key: "email", icon: "mail-outline", placeholder: t('enterEmail') },
+    { label: t('phone'), key: "phone", icon: "call-outline", placeholder: t('enterPhone') },
+    { label: t('address'), key: "address", icon: "location-outline", placeholder: t('enterAddress') },
+    { label: t('occupation'), key: "occupation", icon: "briefcase-outline", placeholder: t('enterOccupation') },
+  ];
+
   return (
     <View style={{ flex: 1, backgroundColor: isDark ? "#0f0a1f" : "#f5f5f5" }}>
       <View 
@@ -66,7 +76,7 @@ export default function EditProfileScreen({ navigation, route }) {
         <StatusBar barStyle="light-content" />
 
         <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-          {/* Header - ALWAYS GRADIENT with WHITE TEXT */}
+          {/* Header */}
           <LinearGradient 
             colors={isDark ? colors.bgGradient : colors.headerGradient} 
             style={[
@@ -77,11 +87,17 @@ export default function EditProfileScreen({ navigation, route }) {
               }
             ]}
           >
-            <View style={styles.headerTop}>
+            <View style={[styles.headerTop, isRTL && { flexDirection: 'row-reverse' }]}>
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                <Ionicons name="arrow-back" size={26} color="#fff" />
+                <Ionicons 
+                  name={isRTL ? "arrow-forward" : "arrow-back"} 
+                  size={26} 
+                  color="#fff" 
+                />
               </TouchableOpacity>
-              <Text style={styles.headerTitle}>Modifier le profil</Text>
+              <Text style={[styles.headerTitle, isRTL && { textAlign: 'right' }]}>
+                {t('editProfile')}
+              </Text>
               <View style={{ width: 40 }} />
             </View>
 
@@ -89,7 +105,11 @@ export default function EditProfileScreen({ navigation, route }) {
             <View style={styles.avatarWrapper}>
               <Image source={avatar} style={styles.avatar} />
               <TouchableOpacity 
-                style={[styles.cameraOverlay, { backgroundColor: colors.primary }]} 
+                style={[
+                  styles.cameraOverlay, 
+                  { backgroundColor: colors.primary },
+                  isRTL && { right: 'auto', left: 8 }
+                ]} 
                 onPress={pickImage}
               >
                 <Ionicons name="camera" size={24} color="#fff" />
@@ -97,7 +117,7 @@ export default function EditProfileScreen({ navigation, route }) {
             </View>
           </LinearGradient>
 
-          {/* Form Section - WHITE in light mode, dark in dark mode */}
+          {/* Form Section */}
           <View 
             style={[
               styles.formCard, 
@@ -108,21 +128,24 @@ export default function EditProfileScreen({ navigation, route }) {
               }
             ]}
           >
-            {[
-              { label: "Nom complet", key: "fullname", icon: "person-outline" },
-              { label: "Email", key: "email", icon: "mail-outline" },
-              { label: "Téléphone", key: "phone", icon: "call-outline" },
-              { label: "Adresse", key: "address", icon: "location-outline" },
-              { label: "Profession", key: "occupation", icon: "briefcase-outline" },
-            ].map((field) => (
+            {formFields.map((field) => (
               <View key={field.key} style={styles.inputGroup}>
-                <Text style={[styles.inputLabel, { color: isDark ? "#e0d4ff" : colors.primary }]}>{field.label}</Text>
+                <Text 
+                  style={[
+                    styles.inputLabel, 
+                    { color: isDark ? "#e0d4ff" : colors.primary },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                >
+                  {field.label}
+                </Text>
                 <View 
                   style={[
                     styles.inputWrapper, 
                     {
                       backgroundColor: isDark ? colors.cardLight : "#f9f7ff",
                       borderColor: isDark ? "rgba(255,255,255,0.1)" : "#e0d4ff",
+                      flexDirection: isRTL ? 'row-reverse' : 'row',
                     }
                   ]}
                 >
@@ -130,13 +153,20 @@ export default function EditProfileScreen({ navigation, route }) {
                     name={field.icon} 
                     size={20} 
                     color={isDark ? "#e0d4ff" : colors.primary} 
-                    style={styles.inputIcon} 
+                    style={[
+                      styles.inputIcon,
+                      isRTL && { marginRight: 0, marginLeft: 12 }
+                    ]} 
                   />
                   <TextInput
-                    style={[styles.textInput, { color: isDark ? "#ffffff" : "#000000" }]}
+                    style={[
+                      styles.textInput, 
+                      { color: isDark ? "#ffffff" : "#000000" },
+                      isRTL && { textAlign: 'right' }
+                    ]}
                     value={form[field.key]}
                     onChangeText={(text) => handleChange(field.key, text)}
-                    placeholder={`Entrer ${field.label.toLowerCase()}`}
+                    placeholder={field.placeholder}
                     placeholderTextColor={isDark ? "#8b7fc7" : "#999999"}
                   />
                 </View>
@@ -152,12 +182,18 @@ export default function EditProfileScreen({ navigation, route }) {
                 { 
                   backgroundColor: isDark ? "#7c3aed" : colors.primary,
                   shadowColor: isDark ? "#7c3aed" : colors.primary,
+                  flexDirection: isRTL ? 'row-reverse' : 'row',
                 }
               ]} 
               onPress={() => console.log("Saved:", form, avatar)}
             >
-              <Ionicons name="checkmark" size={24} color="#fff" />
-              <Text style={styles.saveButtonText}>Enregistrer les modifications</Text>
+              <Ionicons 
+                name="checkmark" 
+                size={24} 
+                color="#fff"
+                style={isRTL ? { marginLeft: 10, marginRight: 0 } : {}}
+              />
+              <Text style={styles.saveButtonText}>{t('saveChanges')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -167,7 +203,9 @@ export default function EditProfileScreen({ navigation, route }) {
               ]} 
               onPress={() => navigation.goBack()}
             >
-              <Text style={[styles.cancelButtonText, { color: isDark ? "#b0a8d9" : "#666666" }]}>Annuler</Text>
+              <Text style={[styles.cancelButtonText, { color: isDark ? "#b0a8d9" : "#666666" }]}>
+                {t('cancel')}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

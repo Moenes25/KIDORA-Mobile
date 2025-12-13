@@ -13,28 +13,31 @@ import {
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
 import BottomNav from "../components/BottomNav";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 const TIMELINE_WIDTH = 60;
-const TOP_SECTION_HEIGHT = screenHeight * 0.20; // Smaller than ChildDetailScreen since no mood/attendance
-
-const milestonesData = [
-  { id: 1, period: "Septembre/Octobre", completed: true, skills: { language: 40, motor: 60, cognition: 50, social: 79 } },
-  { id: 2, period: "Novembre/Decembre", completed: true, skills: { language: 50, motor: 85, cognition: 55, social: 75 } },
-  { id: 3, period: "Janvier/Février", completed: false, skills: { language: 0, motor: 0, cognition: 0, social: 0 } },
-  { id: 4, period: "Mars/Avril", completed: false, skills: { language: 0, motor: 0, cognition: 0, social: 0 } },
-  { id: 5, period: "Mai/Juin ", completed: false, skills: { language: 0, motor: 0, cognition: 0, social: 0 } },
-];
+const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 
 export default function ImprovementsScreen({ navigation }) {
   const { colors, theme } = useTheme();
+  const { t, isRTL } = useTranslation();
   const isDark = theme === "dark";
 
   const [expandedMilestone, setExpandedMilestone] = useState(null);
 
+  // Milestones with translation keys
+  const milestonesData = [
+    { id: 1, periodKey: "septemberOctober", completed: true, skills: { language: 40, motor: 60, cognition: 50, social: 79 } },
+    { id: 2, periodKey: "novemberDecember", completed: true, skills: { language: 50, motor: 85, cognition: 55, social: 75 } },
+    { id: 3, periodKey: "januaryFebruary", completed: false, skills: { language: 0, motor: 0, cognition: 0, social: 0 } },
+    { id: 4, periodKey: "marchApril", completed: false, skills: { language: 0, motor: 0, cognition: 0, social: 0 } },
+    { id: 5, periodKey: "mayJune", completed: false, skills: { language: 0, motor: 0, cognition: 0, social: 0 } },
+  ];
+
   const toggleExpand = (id, completed) => {
-    if (!completed) return; // only allow expand if milestone is active
+    if (!completed) return;
     setExpandedMilestone(expandedMilestone === id ? null : id);
   };
 
@@ -45,7 +48,7 @@ export default function ImprovementsScreen({ navigation }) {
     <View style={[styles.container, { backgroundColor: isDark ? "#0f0a1f" : "#f5f5f5" }]}>
       <StatusBar barStyle="light-content" backgroundColor={isDark ? "#0f0a1f" : "#6f42c1"} />
 
-      {/* FIXED TOP SECTION - Gradient (Same style as ChildDetailScreen) */}
+      {/* FIXED TOP SECTION - Gradient */}
       <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
         <LinearGradient colors={isDark ? colors.bgGradient : colors.headerGradient} style={StyleSheet.absoluteFill}>
           {isDark && (
@@ -58,11 +61,29 @@ export default function ImprovementsScreen({ navigation }) {
           <View style={styles.safeArea} />
 
           {/* Header with Back Button and Title */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Feather name="chevron-left" size={28} color="#fff" />
+          <View style={[
+            styles.header,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
+            <TouchableOpacity 
+              onPress={() => navigation.goBack()} 
+              style={[
+                styles.backButton,
+                isRTL && { marginLeft: 8, marginRight: 0 }
+              ]}
+            >
+              <Feather 
+                name={isRTL ? "chevron-right" : "chevron-left"} 
+                size={28} 
+                color="#fff" 
+              />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Child Development</Text>
+            <Text style={[
+              styles.headerTitle,
+              isRTL && { textAlign: 'center', marginLeft: 40, marginRight: 0 }
+            ]}>
+              {t('childDevelopment')}
+            </Text>
           </View>
           
           {/* Spacer for rounded section */}
@@ -70,7 +91,7 @@ export default function ImprovementsScreen({ navigation }) {
         </LinearGradient>
       </View>
 
-      {/* WHITE/DARK BOTTOM SECTION with rounded top (Same style as ChildDetailScreen) */}
+      {/* WHITE/DARK BOTTOM SECTION with rounded top */}
       <View style={[
         styles.whiteSection, 
         { 
@@ -79,7 +100,10 @@ export default function ImprovementsScreen({ navigation }) {
         }
       ]}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.bottomInner}>
+          <View style={[
+            styles.bottomInner,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
             {/* Timeline Sidebar */}
             <View style={styles.timeline}>
               {milestonesData.map((milestone, index) => (
@@ -117,7 +141,10 @@ export default function ImprovementsScreen({ navigation }) {
             </View>
 
             {/* Milestones Cards */}
-            <View style={styles.cardsContainer}>
+            <View style={[
+              styles.cardsContainer,
+              isRTL && { paddingRight: 12, paddingLeft: 0 }
+            ]}>
               {milestonesData.map((milestone) => (
                 <TouchableOpacity
                   key={milestone.id}
@@ -131,11 +158,15 @@ export default function ImprovementsScreen({ navigation }) {
                   onPress={() => toggleExpand(milestone.id, milestone.completed)}
                   activeOpacity={milestone.completed ? 0.85 : 1}
                 >
-                  <View style={styles.cardHeader}>
+                  <View style={[
+                    styles.cardHeader,
+                    isRTL && { flexDirection: 'row-reverse' }
+                  ]}>
                     <View
                       style={[
                         styles.iconCircle,
                         { backgroundColor: milestone.completed ? "#fff" : "#ccc" },
+                        isRTL && { marginLeft: 12, marginRight: 0 }
                       ]}
                     >
                       {milestone.completed && <Feather name="award" size={18} color="#9b59b6" />}
@@ -144,12 +175,13 @@ export default function ImprovementsScreen({ navigation }) {
                       style={[
                         styles.cardTitle,
                         { color: milestone.completed ? "#fff" : "#888" },
+                        isRTL && { textAlign: 'right' }
                       ]}
                     >
-                      {milestone.period}
+                      {t(milestone.periodKey)}
                     </Text>
                     <Ionicons
-                      name="chevron-forward"
+                      name={isRTL ? "chevron-back" : "chevron-forward"}
                       size={24}
                       color={milestone.completed ? "#fff" : "#888"}
                     />
@@ -159,8 +191,11 @@ export default function ImprovementsScreen({ navigation }) {
                   {expandedMilestone === milestone.id && milestone.completed && (
                     <View style={styles.expandedContent}>
                       {/* First Row: Language and Motor */}
-                      <View style={styles.circularProgressRow}>
-                        {["language", "motor"].map((skill) => {
+                      <View style={[
+                        styles.circularProgressRow,
+                        isRTL && { flexDirection: 'row-reverse' }
+                      ]}>
+                        {[t("language"), t("motor")].map((skill) => {
                           const value = milestone.skills[skill];
                           const progressColor = getProgressColor(value);
                           return (
@@ -182,7 +217,7 @@ export default function ImprovementsScreen({ navigation }) {
                               </View>
                               {/* Skill Label */}
                               <Text style={styles.skillLabel}>
-                                {skill.charAt(0).toUpperCase() + skill.slice(1)}
+                                {t(skill)}
                               </Text>
                             </View>
                           );
@@ -190,8 +225,11 @@ export default function ImprovementsScreen({ navigation }) {
                       </View>
 
                       {/* Second Row: Cognition and Social */}
-                      <View style={styles.circularProgressRow}>
-                        {["cognition", "social"].map((skill) => {
+                      <View style={[
+                        styles.circularProgressRow,
+                        isRTL && { flexDirection: 'row-reverse' }
+                      ]}>
+                        {[t("cognition"), t("social")].map((skill) => {
                           const value = milestone.skills[skill];
                           const progressColor = getProgressColor(value);
                           return (
@@ -213,7 +251,7 @@ export default function ImprovementsScreen({ navigation }) {
                               </View>
                               {/* Skill Label */}
                               <Text style={styles.skillLabel}>
-                                {skill.charAt(0).toUpperCase() + skill.slice(1)}
+                                {t(skill)}
                               </Text>
                             </View>
                           );
@@ -271,7 +309,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     flex: 1,
     textAlign: "center",
-    marginRight: 40, // Balance the back button width
+    marginRight: 40,
   },
 
   whiteSection: {

@@ -4,6 +4,10 @@
     "orientation": "default",
     "slug": "AppBeta",
     "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -15,8 +19,16 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save photos."
-      }
+        "NSPhotoLibraryAddUsageDescription": "This app needs access to your photo library to save photos.",
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show it on the map."
+      },
+      "bundleIdentifier": "com.anonymous.AppBeta"
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#6F42C1",
+      "androidMode": "default",
+      "androidCollapsedTitle": "#{unread_notifications} new notifications"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,10 +36,20 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.AppBeta"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "package": "com.anonymous.AppBeta",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "INTERNET",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "NOTIFICATIONS"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAapdsajcAWD5rEP-e9LrbPG4lVW9csjwo"
+        }
+      }
     },
     "extra": {
       "eas": {
@@ -35,7 +57,23 @@
       }
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#6F42C1",
+          "sounds": [
+            "./assets/notification_sound.mp3"
+          ]
+        }
+      ]
     ]
   }
 }

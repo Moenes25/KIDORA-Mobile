@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ThemeProvider } from './context/ThemeContext';
+import { TranslationProvider } from './context/TranslationContext';
 // Import all screens
 import SplashScreen from './screens/SplashScreen';
 import Login from './screens/LoginSc';
@@ -29,48 +30,54 @@ import ImprovementsScreen from './screens/ImprovementsScreen';
 import ConversationScreen from './screens/ConversationScreen';
 import CallComponent from './components/CallComponent';
 import VideoCall from './screens/VideoCallScreen';
-
+import FeedbackScreen from './components/FeedBackScreenComponent';
+import { NotificationProvider } from './context/NotificationContext';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="SplashScreen"
-            screenOptions={{
-              headerShown: false,
-              animation: 'slide_from_right'
-            }}
-          >
-            <Stack.Screen name="SplashScreen" component={SplashScreen} />
-            <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="Registerv1" component={Registerv1} />
-            <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
-            <Stack.Screen name="HomeScreen" component={HomeScreen} />
-            <Stack.Screen name="Calendar" component={CalendarScreen} />
-            <Stack.Screen name="MapScreen" component={MapScreen} />
-            <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
-            <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
-            <Stack.Screen name="ChangePwdScreen" component={ChangePwdScreen} />
-            <Stack.Screen name="ChildrenListScreen" component={ChildrenListScreen} />
-            <Stack.Screen name="ChildDetailScreen" component={ChildDetailScreen} />
-            <Stack.Screen name="PaymentsScreen" component={PaymentsScreen} />
-            <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
-            <Stack.Screen name="AboutUsScreen" component={AboutUsScreen} />
-            <Stack.Screen name="ChildrenAreaScreen" component={ChildrenAreaScreen} />
-            <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
-            <Stack.Screen name="PaidInvoiceScreen" component={PaidInvoiceScreen} />
-            <Stack.Screen name="InvoiceToPayScreen" component={InvoiceToPayScreen} />
-            <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
-            <Stack.Screen name="ImprovementsScreen" component={ImprovementsScreen} />
-            <Stack.Screen name="Conversation" component={ConversationScreen} />
-            <Stack.Screen name="VideoCall" component={VideoCall} options={{ presentation: 'modal', headerShown: false }} />
-            <Stack.Screen name="Call" component={CallComponent} options={{ presentation: 'modal', headerShown: false }} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </ThemeProvider>
+      <TranslationProvider> 
+         <NotificationProvider> 
+        <ThemeProvider>
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName="SplashScreen"
+              screenOptions={{
+                headerShown: false,
+                animation: 'slide_from_right'
+              }}
+            >
+              <Stack.Screen name="SplashScreen" component={SplashScreen} />
+              <Stack.Screen name="Login" component={Login} />
+              <Stack.Screen name="Registerv1" component={Registerv1} />
+              <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
+              <Stack.Screen name="HomeScreen" component={HomeScreen} />
+              <Stack.Screen name="Calendar" component={CalendarScreen} />
+              <Stack.Screen name="MapScreen" component={MapScreen} />
+              <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+              <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} />
+              <Stack.Screen name="ChangePwdScreen" component={ChangePwdScreen} />
+              <Stack.Screen name="ChildrenListScreen" component={ChildrenListScreen} />
+              <Stack.Screen name="ChildDetailScreen" component={ChildDetailScreen} />
+              <Stack.Screen name="PaymentsScreen" component={PaymentsScreen} />
+              <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
+              <Stack.Screen name="AboutUsScreen" component={AboutUsScreen} />
+              <Stack.Screen name="ChildrenAreaScreen" component={ChildrenAreaScreen} />
+              <Stack.Screen name="GalleryScreen" component={GalleryScreen} />
+              <Stack.Screen name="PaidInvoiceScreen" component={PaidInvoiceScreen} />
+              <Stack.Screen name="InvoiceToPayScreen" component={InvoiceToPayScreen} />
+              <Stack.Screen name="ChatListScreen" component={ChatListScreen} />
+              <Stack.Screen name="ImprovementsScreen" component={ImprovementsScreen} />
+              <Stack.Screen name="Conversation" component={ConversationScreen} />
+              <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
+              <Stack.Screen name="VideoCall" component={VideoCall} options={{ presentation: 'modal', headerShown: false }} />
+              <Stack.Screen name="Call" component={CallComponent} options={{ presentation: 'modal', headerShown: false }} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ThemeProvider>
+        </NotificationProvider>
+      </TranslationProvider>
     </SafeAreaProvider>
   );
 }

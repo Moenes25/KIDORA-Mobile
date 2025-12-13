@@ -20,15 +20,22 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
 
   // Animate the active icon on mount
   useEffect(() => {
-    Animated.spring(animations[active], {
-      toValue: 1.2,
-      useNativeDriver: true,
-      speed: 20,
-      bounciness: 6,
-    }).start();
+    if (active !== "add") {
+      Animated.spring(animations[active], {
+        toValue: 1.2,
+        useNativeDriver: true,
+        speed: 20,
+        bounciness: 6,
+      }).start();
+    }
   }, []);
 
   const handlePress = (key) => {
+    if (key === "add") {
+      navigation.navigate("FeedbackScreen");
+      return;
+    }
+
     setActive(key);
 
     // animate selected icon (scale up)
@@ -56,7 +63,7 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
       case "home":
         navigation.navigate("HomeScreen");
         break;
-        case "chat":
+      case "chat":
         navigation.navigate("ChatListScreen");
         break;
       case "people":
@@ -112,7 +119,19 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
       ]}
     >
       {renderIcon("home", "home")}
-       {renderIcon("chat", "chatbubble")}
+      {renderIcon("chat", "chatbubble")}
+      
+      {/* Floating Plus Button */}
+      <TouchableOpacity 
+        onPress={() => handlePress("add")} 
+        activeOpacity={0.8}
+        style={styles.floatingButton}
+      >
+        <View style={styles.plusButton}>
+          <Ionicons name="add" size={32} color="white" />
+        </View>
+      </TouchableOpacity>
+      
       {renderIcon("people", "people")}
       {renderIcon("person", "person")}
     </View>
@@ -143,5 +162,27 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 6,
+  },
+
+  floatingButton: {
+    position: "absolute",
+    top: -28,
+    alignSelf: "center",
+    shadowColor: "#6F42C1",
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+
+  plusButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#6F42C1",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 4,
+    borderColor: "#ffffff",
   },
 });

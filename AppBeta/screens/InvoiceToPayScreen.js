@@ -5,6 +5,7 @@ import {
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
 
 import TopNavBar from "../components/TopNavBar";
 import PayMethodScreen from "./PayMethodScreen";
@@ -14,6 +15,7 @@ const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 
 export default function InvoiceToPayScreen({ navigation, route }) {
   const { colors, theme } = useTheme();
+  const { t, isRTL } = useTranslation();
   const isDark = theme === "dark";
   const [showPaySheet, setShowPaySheet] = useState(false);
 
@@ -34,7 +36,7 @@ export default function InvoiceToPayScreen({ navigation, route }) {
       name: "Adam Ben Ali", 
       age: 8, 
       class: "Class 1",
-      avatar: require("../assets/child1.jpg") 
+      avatar: require("../assets/child1.png") 
     },
     paymentMethod: null,
   };
@@ -68,7 +70,7 @@ export default function InvoiceToPayScreen({ navigation, route }) {
         >
           {isDark && <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' }} />}
           <View style={styles.safeArea} />
-          <TopNavBar title="Invoice details" navigation={navigation} />
+          <TopNavBar title={t('invoiceDetails')} navigation={navigation} />
         </LinearGradient>
       </View>
 
@@ -77,41 +79,51 @@ export default function InvoiceToPayScreen({ navigation, route }) {
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           {/* Main Invoice Card */}
           <View style={styles.mainCard}>
-            <View style={styles.childCorner}>
+            <View style={[styles.childCorner, isRTL && { left: 10, right: 'auto' }]}>
               <Image source={invoice.child?.avatar} style={styles.childAvatar} />
             </View>
 
-            <Text style={styles.invoiceTitle}>{invoice.title}</Text>
+            <Text style={[styles.invoiceTitle, isRTL && { paddingLeft: 100, paddingRight: 0, textAlign: 'right' }]}>
+              {invoice.title}
+            </Text>
 
             {/* Invoice Information */}
             <View style={styles.section}>
-              <View style={styles.sectionHeader}>
+              <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
                 <MaterialIcons name="receipt" size={20} color="#6F42C1" />
-                <Text style={styles.sectionTitle}>Invoice Information</Text>
+                <Text style={[styles.sectionTitle, isRTL && { marginRight: 8, marginLeft: 0, textAlign: 'right' }]}>
+                  {t('invoiceInformation')}
+                </Text>
               </View>
 
-              <View style={styles.infoGrid}>
-                <View style={styles.infoItem}>
-                  <Text style={styles.label}>Reference</Text>
-                  <Text style={styles.value}>{invoice.reference}</Text>
+              <View style={[styles.infoGrid, isRTL && { flexDirection: 'row-reverse' }]}>
+                <View style={[styles.infoItem, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.label, isRTL && { textAlign: 'right' }]}>{t('reference')}</Text>
+                  <Text style={[styles.value, isRTL && { textAlign: 'right' }]}>{invoice.reference}</Text>
                 </View>
-                <View style={styles.infoItem}>
-                  <Text style={styles.label}>Status</Text>
-                  <View style={[styles.statusBadge, invoice.status === "Unpaid" ? styles.unpaid : styles.paid]}>
+                <View style={[styles.infoItem, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.label, isRTL && { textAlign: 'right' }]}>{t('status')}</Text>
+                  <View style={[
+                    styles.statusBadge, 
+                    invoice.status === "Unpaid" ? styles.unpaid : styles.paid,
+                    isRTL && { flexDirection: 'row-reverse' }
+                  ]}>
                     <Feather name={invoice.status === "Unpaid" ? "x" : "check-circle"} size={14} color="#fff" />
-                    <Text style={styles.statusText}>{invoice.status}</Text>
+                    <Text style={[styles.statusText, isRTL && { marginRight: 4, marginLeft: 0 }]}>
+                      {invoice.status === "Unpaid" ? t('unpaid') : t('paid')}
+                    </Text>
                   </View>
                 </View>
               </View>
 
-              <View style={styles.infoGrid}>
-                <View style={styles.infoItem}>
-                  <Text style={styles.label}>Issue Date</Text>
-                  <Text style={styles.value}>{invoice.issueDate}</Text>
+              <View style={[styles.infoGrid, isRTL && { flexDirection: 'row-reverse' }]}>
+                <View style={[styles.infoItem, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.label, isRTL && { textAlign: 'right' }]}>{t('issueDate')}</Text>
+                  <Text style={[styles.value, isRTL && { textAlign: 'right' }]}>{invoice.issueDate}</Text>
                 </View>
-                <View style={styles.infoItem}>
-                  <Text style={styles.label}>Due Date</Text>
-                  <Text style={styles.value}>{invoice.dueDate}</Text>
+                <View style={[styles.infoItem, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.label, isRTL && { textAlign: 'right' }]}>{t('dueDate')}</Text>
+                  <Text style={[styles.value, isRTL && { textAlign: 'right' }]}>{invoice.dueDate}</Text>
                 </View>
               </View>
             </View>
@@ -121,33 +133,43 @@ export default function InvoiceToPayScreen({ navigation, route }) {
 
             {/* Charges Breakdown */}
             <View style={styles.section}>
-              <View style={styles.sectionHeader}>
+              <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
                 <MaterialIcons name="description" size={20} color="#6F42C1" />
-                <Text style={styles.sectionTitle}>Charges Breakdown</Text>
+                <Text style={[styles.sectionTitle, isRTL && { marginRight: 8, marginLeft: 0, textAlign: 'right' }]}>
+                  {t('chargesBreakdown')}
+                </Text>
               </View>
 
-              <View style={styles.chargeRow}>
-                <Text style={styles.chargeLabel}>Monthly Frames</Text>
-                <Text style={styles.chargeValue}>{invoice.framesMonthly}</Text>
+              <View style={[styles.chargeRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                <Text style={[styles.chargeLabel, isRTL && { textAlign: 'right' }]}>{t('monthlyFrames')}</Text>
+                <Text style={[styles.chargeValue, isRTL && { textAlign: 'left' }]}>{invoice.framesMonthly}</Text>
               </View>
 
-              {invoice.additionalServices?.map((service, index) => (
-                <View key={index} style={styles.chargeRow}>
-                  <Text style={styles.chargeLabel}>{service.name}</Text>
-                  <Text style={styles.chargeValue}>{service.price}</Text>
-                </View>
-              ))}
+              {invoice.additionalServices?.map((service, index) => {
+                const serviceKey = service.name.toLowerCase().replace(/\s+/g, '');
+                const translatedName = serviceKey === 'transport' ? t('transport') 
+                  : serviceKey === 'canteen' ? t('canteen')
+                  : serviceKey === 'activitiesextras' ? t('activitiesExtras')
+                  : service.name;
+                
+                return (
+                  <View key={index} style={[styles.chargeRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <Text style={[styles.chargeLabel, isRTL && { textAlign: 'right' }]}>{translatedName}</Text>
+                    <Text style={[styles.chargeValue, isRTL && { textAlign: 'left' }]}>{service.price}</Text>
+                  </View>
+                );
+              })}
 
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Total Amount</Text>
-                <Text style={styles.totalValue}>{invoice.total}</Text>
+              <View style={[styles.totalRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                <Text style={[styles.totalLabel, isRTL && { textAlign: 'right' }]}>{t('totalAmount')}</Text>
+                <Text style={[styles.totalValue, isRTL && { textAlign: 'left' }]}>{invoice.total}</Text>
               </View>
             </View>
 
             
             {/* Confirm Payment Button */}
             <TouchableOpacity style={styles.confirmButton} onPress={() => setShowPaySheet(true)}>
-              <Text style={styles.confirmButtonText}>Pay</Text>
+              <Text style={styles.confirmButtonText}>{t('pay')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -222,7 +244,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     borderWidth: 3,
-    borderColor: "#fed703",
+    borderColor: "white",
     marginBottom: 8,
   },
 

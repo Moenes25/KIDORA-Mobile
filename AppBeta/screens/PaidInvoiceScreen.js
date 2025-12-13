@@ -14,6 +14,7 @@ import {
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
 
 import TopNavBar from "../components/TopNavBar";
 
@@ -22,6 +23,7 @@ const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 
 export default function PaidInvoiceScreen({ navigation, route }) {
   const { colors, theme } = useTheme();
+  const { t, isRTL } = useTranslation();
   const isDark = theme === "dark";
 
   // Example invoice object for testing:
@@ -43,7 +45,7 @@ export default function PaidInvoiceScreen({ navigation, route }) {
       name: "Adam Ben Ali", 
       age: 8, 
       class: "Class 1",
-      avatar: require("../assets/child1.jpg") // Add your child avatar image
+      avatar: require("../assets/child1.png")
     },
   };
 
@@ -86,7 +88,7 @@ export default function PaidInvoiceScreen({ navigation, route }) {
           )}
           
           <View style={styles.safeArea} />
-          <TopNavBar title="Invoice details" navigation={navigation} />
+          <TopNavBar title={t('invoiceDetails')} navigation={navigation} />
         </LinearGradient>
       </View>
 
@@ -99,7 +101,7 @@ export default function PaidInvoiceScreen({ navigation, route }) {
           {/* Main Invoice Card */}
           <View style={styles.mainCard}>
             {/* Child Info Corner */}
-            <View style={styles.childCorner}>
+            <View style={[styles.childCorner, isRTL && { left: 10, right: 'auto' }]}>
               <Image 
                 source={invoice.child?.avatar} 
                 style={styles.childAvatar} 
@@ -107,37 +109,47 @@ export default function PaidInvoiceScreen({ navigation, route }) {
             </View>
 
             {/* Invoice Title */}
-            <Text style={styles.invoiceTitle}>{invoice.title}</Text>
+            <Text style={[styles.invoiceTitle, isRTL && { paddingLeft: 100, paddingRight: 0, textAlign: 'right' }]}>
+              {invoice.title}
+            </Text>
 
             {/* Invoice Info Section */}
             <View style={styles.section}>
-              <View style={styles.sectionHeader}>
+              <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
                 <MaterialIcons name="receipt" size={20} color="#9b59b6" />
-                <Text style={styles.sectionTitle}>Invoice Information</Text>
+                <Text style={[styles.sectionTitle, isRTL && { marginRight: 8, marginLeft: 0, textAlign: 'right' }]}>
+                  {t('invoiceInformation')}
+                </Text>
               </View>
 
-              <View style={styles.infoGrid}>
-                <View style={styles.infoItem}>
-                  <Text style={styles.label}>Reference</Text>
-                  <Text style={styles.value}>{invoice.reference}</Text>
+              <View style={[styles.infoGrid, isRTL && { flexDirection: 'row-reverse' }]}>
+                <View style={[styles.infoItem, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.label, isRTL && { textAlign: 'right' }]}>{t('reference')}</Text>
+                  <Text style={[styles.value, isRTL && { textAlign: 'right' }]}>{invoice.reference}</Text>
                 </View>
-                <View style={styles.infoItem}>
-                  <Text style={styles.label}>Status</Text>
-                  <View style={[styles.statusBadge, invoice.status === "Paid" ? styles.paid : styles.cancelled]}>
+                <View style={[styles.infoItem, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.label, isRTL && { textAlign: 'right' }]}>{t('status')}</Text>
+                  <View style={[
+                    styles.statusBadge, 
+                    invoice.status === "Paid" ? styles.paid : styles.cancelled,
+                    isRTL && { flexDirection: 'row-reverse' }
+                  ]}>
                     <Feather name="check-circle" size={14} color="#fff" />
-                    <Text style={styles.statusText}>{invoice.status}</Text>
+                    <Text style={[styles.statusText, isRTL && { marginRight: 4, marginLeft: 0 }]}>
+                      {t('paid')}
+                    </Text>
                   </View>
                 </View>
               </View>
 
-              <View style={styles.infoGrid}>
-                <View style={styles.infoItem}>
-                  <Text style={styles.label}>Issue Date</Text>
-                  <Text style={styles.value}>{invoice.issueDate}</Text>
+              <View style={[styles.infoGrid, isRTL && { flexDirection: 'row-reverse' }]}>
+                <View style={[styles.infoItem, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.label, isRTL && { textAlign: 'right' }]}>{t('issueDate')}</Text>
+                  <Text style={[styles.value, isRTL && { textAlign: 'right' }]}>{invoice.issueDate}</Text>
                 </View>
-                <View style={styles.infoItem}>
-                  <Text style={styles.label}>Payment Date</Text>
-                  <Text style={styles.value}>{invoice.paymentDate}</Text>
+                <View style={[styles.infoItem, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.label, isRTL && { textAlign: 'right' }]}>{t('paymentDate')}</Text>
+                  <Text style={[styles.value, isRTL && { textAlign: 'right' }]}>{invoice.paymentDate}</Text>
                 </View>
               </View>
             </View>
@@ -147,26 +159,36 @@ export default function PaidInvoiceScreen({ navigation, route }) {
 
             {/* Invoice Details Section */}
             <View style={styles.section}>
-              <View style={styles.sectionHeader}>
+              <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
                 <MaterialIcons name="description" size={20} color="#9b59b6" />
-                <Text style={styles.sectionTitle}>Charges Breakdown</Text>
+                <Text style={[styles.sectionTitle, isRTL && { marginRight: 8, marginLeft: 0, textAlign: 'right' }]}>
+                  {t('chargesBreakdown')}
+                </Text>
               </View>
 
-              <View style={styles.chargeRow}>
-                <Text style={styles.chargeLabel}>Monthly Frames</Text>
-                <Text style={styles.chargeValue}>{invoice.framesMonthly}</Text>
+              <View style={[styles.chargeRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                <Text style={[styles.chargeLabel, isRTL && { textAlign: 'right' }]}>{t('monthlyFrames')}</Text>
+                <Text style={[styles.chargeValue, isRTL && { textAlign: 'left' }]}>{invoice.framesMonthly}</Text>
               </View>
 
-              {invoice.additionalServices?.map((service, index) => (
-                <View key={index} style={styles.chargeRow}>
-                  <Text style={styles.chargeLabel}>{service.name}</Text>
-                  <Text style={styles.chargeValue}>{service.price}</Text>
-                </View>
-              ))}
+              {invoice.additionalServices?.map((service, index) => {
+                const serviceKey = service.name.toLowerCase().replace(/\s+/g, '');
+                const translatedName = serviceKey === 'transport' ? t('transport') 
+                  : serviceKey === 'canteen' ? t('canteen')
+                  : serviceKey === 'activitiesextras' ? t('activitiesExtras')
+                  : service.name;
+                
+                return (
+                  <View key={index} style={[styles.chargeRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                    <Text style={[styles.chargeLabel, isRTL && { textAlign: 'right' }]}>{translatedName}</Text>
+                    <Text style={[styles.chargeValue, isRTL && { textAlign: 'left' }]}>{service.price}</Text>
+                  </View>
+                );
+              })}
 
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Total Amount</Text>
-                <Text style={styles.totalValue}>{invoice.total}</Text>
+              <View style={[styles.totalRow, isRTL && { flexDirection: 'row-reverse' }]}>
+                <Text style={[styles.totalLabel, isRTL && { textAlign: 'right' }]}>{t('totalAmount')}</Text>
+                <Text style={[styles.totalValue, isRTL && { textAlign: 'left' }]}>{invoice.total}</Text>
               </View>
             </View>
 
@@ -175,21 +197,25 @@ export default function PaidInvoiceScreen({ navigation, route }) {
 
             {/* Payment Method Section */}
             <View style={styles.section}>
-              <View style={styles.sectionHeader}>
+              <View style={[styles.sectionHeader, isRTL && { flexDirection: 'row-reverse' }]}>
                 <MaterialIcons name="payment" size={20} color="#9b59b6" />
-                <Text style={styles.sectionTitle}>Payment Method</Text>
+                <Text style={[styles.sectionTitle, isRTL && { marginRight: 8, marginLeft: 0, textAlign: 'right' }]}>
+                  {t('paymentMethod')}
+                </Text>
               </View>
 
-              <View style={styles.paymentRow}>
+              <View style={[styles.paymentRow, isRTL && { flexDirection: 'row-reverse' }]}>
                 {invoice.paymentMethod && paymentLogos[invoice.paymentMethod] && (
-                  <View style={styles.paymentLogoContainer}>
+                  <View style={[styles.paymentLogoContainer, isRTL && { marginLeft: 12, marginRight: 0 }]}>
                     <Image 
                       source={paymentLogos[invoice.paymentMethod]} 
                       style={styles.paymentLogo} 
                     />
                   </View>
                 )}
-                <Text style={styles.paymentMethodText}>{invoice.paymentMethod}</Text>
+                <Text style={[styles.paymentMethodText, isRTL && { textAlign: 'right' }]}>
+                  {invoice.paymentMethod}
+                </Text>
               </View>
             </View>
           </View>
@@ -218,9 +244,6 @@ const styles = StyleSheet.create({
   safeArea: {
     height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight,
   },
-
-
-  
 
   headerTitle: { 
     fontSize: 22, 
@@ -281,18 +304,16 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     borderWidth: 3,
-    borderColor: "#fed703",
+    borderColor: "white",
     marginBottom: 8,
   },
-
-
 
   invoiceTitle: {
     fontSize: 20,
     fontWeight: "700",
     color: "#2d3436",
     marginBottom: 20,
-    paddingRight: 100, // Space for child corner
+    paddingRight: 100,
   },
 
   section: {

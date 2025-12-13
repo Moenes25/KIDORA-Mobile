@@ -1,107 +1,45 @@
-import React, { useState, useMemo } from "react";
-import { View, Image, TouchableOpacity, StyleSheet, Modal } from "react-native";
+// components/LanguageSelector.js - Updated to work with TranslationProvider
+import React from "react";
+import { Image, TouchableOpacity, StyleSheet } from "react-native";
+import { useTranslation } from "../context/TranslationContext";
 
-// Define flag mappings at the top to avoid require() issues
 const FLAGS = {
   en: require("../assets/flags/en.png"),
   fr: require("../assets/flags/fr.png"),
   ar: require("../assets/flags/ar.png"),
 };
 
-export default function LanguageSelector({ onLanguageChange, initialLanguage = "en" }) {
-  const [open, setOpen] = useState(false);
-  const [language, setLanguage] = useState({
-    code: initialLanguage,
-    flag: FLAGS[initialLanguage] || FLAGS.en,
-  });
+const LANGUAGE_ORDER = ["en", "fr", "ar"];
 
-  const languages = useMemo(() => [
-    { code: "en", flag: FLAGS.en },
-    { code: "fr", flag: FLAGS.fr },
-    { code: "ar", flag: FLAGS.ar },
-  ], []);
+export default function LanguageSelector() {
+  const { language, changeLanguage } = useTranslation();
 
-  // Filter out the currently selected language
-  const availableLanguages = languages.filter((lang) => lang.code !== language.code);
+  const cycleLanguage = () => {
+    const currentIndex = LANGUAGE_ORDER.indexOf(language);
+    const nextIndex = (currentIndex + 1) % LANGUAGE_ORDER.length;
+    const nextLang = LANGUAGE_ORDER[nextIndex];
 
-  const handleLanguageSelect = (lang) => {
-    setLanguage(lang);
-    setOpen(false);
-    // Notify parent component about language change
-    if (onLanguageChange) {
-      onLanguageChange(lang.code);
-    }
+    changeLanguage(nextLang);
   };
 
   return (
-    <View>
-      {/* Selected Flag Only */}
-      <TouchableOpacity style={styles.selected} onPress={() => setOpen(true)}>
-        <Image source={language.flag} style={styles.flag} />
-      </TouchableOpacity>
-
-      {/* Dropdown Modal */}
-      <Modal
-        visible={open}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setOpen(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setOpen(false)}
-        >
-          <View style={styles.dropdown}>
-            {availableLanguages.map((lang) => (
-              <TouchableOpacity
-                key={lang.code}
-                style={styles.option}
-                onPress={() => handleLanguageSelect(lang)}
-              >
-                <Image source={lang.flag} style={styles.flag} />
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
-    </View>
+    <TouchableOpacity style={styles.button} onPress={cycleLanguage}>
+      <Image source={FLAGS[language]} style={styles.flag} />
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  selected: {
+  button: {
     padding: 4,
     borderRadius: 6,
-    backgroundColor: "#fbf7ff",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
   flag: {
-    width: 28,
-    height: 20,
+    width: 37,
+    height: 29,
     borderRadius: 4,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.1)",
-    justifyContent: "flex-start",
-    alignItems: "flex-end",
-    paddingTop: 50,
-    paddingRight: 15,
-  },
-  dropdown: {
-    backgroundColor: "#fbf7ff",
-    borderRadius: 8,
-    padding: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  option: {
-    paddingVertical: 6,
-    paddingHorizontal: 8,
   },
 });

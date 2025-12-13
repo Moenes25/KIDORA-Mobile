@@ -92,7 +92,7 @@ export default function SplashScreen({ navigation }) {
         {/* Top Left - Playground (half visible) */}
         <View style={[styles.circleImage, styles.topLeft]}>
           <Image
-            source={require("../assets/kid1.jpeg")}
+            source={require("../assets/kid4.jpeg")}
             resizeMode="contain"
             style={styles.image}
           />
@@ -101,7 +101,7 @@ export default function SplashScreen({ navigation }) {
         {/* Far Top Right - Kids Playing (mostly cut off) */}
         <View style={[styles.circleImage, styles.farTopRight]}>
           <Image
-            source={require("../assets/kid2.jpeg")}
+            source={require("../assets/father image.jpg")}
             resizeMode="contain"
             style={styles.image}
           />
@@ -110,7 +110,7 @@ export default function SplashScreen({ navigation }) {
         {/* Top Center - Colorful Toys */}
         <View style={[styles.circleImage, styles.topCenter]}>
           <Image
-            source={require("../assets/kid3.jpeg")}
+            source={require("../assets/robot image.jpg")}
             resizeMode="contain"
             style={styles.image}
           />
@@ -119,7 +119,7 @@ export default function SplashScreen({ navigation }) {
         {/* Center Left - Happy Kids Group */}
         <View style={[styles.circleImage, styles.centerLeft]}>
           <Image
-            source={require("../assets/kid4.jpeg")}
+            source={require("../assets/mother.jpg")}
             resizeMode="contain"
             style={styles.image}
           />
@@ -128,7 +128,7 @@ export default function SplashScreen({ navigation }) {
         {/* Center Right Large - Child Playing (main focus) */}
         <View style={[styles.circleImage, styles.centerRightLarge]}>
           <Image
-            source={require("../assets/kid5.jpeg")}
+            source={require("../assets/kid6.jpeg")}
             resizeMode="contain"
             style={styles.image}
           />
@@ -137,7 +137,7 @@ export default function SplashScreen({ navigation }) {
         {/* Bottom Center - Happy Child (above text) */}
         <View style={[styles.circleImage, styles.bottomCenter]}>
           <Image
-            source={require("../assets/kid6.jpeg")}
+            source={require("../assets/kid5.jpeg")}
             resizeMode="contain"
             style={styles.image}
           />
@@ -262,8 +262,8 @@ const styles = StyleSheet.create({
     right: -50,
   },
   topCenter: {
-    width: 130,
-    height: 130,
+    width: 160,
+    height: 160,
     top: 140,
     left: width / 2 - 65,
   },
@@ -271,11 +271,11 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     top: 260,
-    left: 10,
+    left: -20,
   },
   centerRightLarge: {
-    width: 180,
-    height: 180,
+    width: 140,
+    height: 140,
     top: 240,
     right: -30,
   },

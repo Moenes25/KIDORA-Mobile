@@ -1,4 +1,3 @@
-// ProfileScreen.js - Fixed purple section with yellow highlights
 import React, { useState } from "react";
 import {
   View,
@@ -15,6 +14,7 @@ import {
   StatusBar,
 } from "react-native";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -23,11 +23,15 @@ import BottomNav from "../components/BottomNav";
 import TopBar from "../components/TopBar";
 import SideBar from "../components/Sidebar";
 
+// ✅ IMPORTS FOR NOTIFICATION
+import { useNotifications } from "../context/NotificationContext";
+import NotificationPanel from "../components/NotificationPanel";
+
 const screenHeight = Dimensions.get("window").height;
 
-const MenuItem = ({ icon, label, subtitle, color = "#6F42C1", onPress }) => {
+// ... (MenuItem component remains unchanged) ...
+const MenuItem = ({ icon, label, subtitle, color = "#6F42C1", onPress, isRTL }) => {
   const [pressed, setPressed] = useState(false);
-  
   return (
     <TouchableOpacity 
       style={[
@@ -35,7 +39,8 @@ const MenuItem = ({ icon, label, subtitle, color = "#6F42C1", onPress }) => {
         {
           shadowOpacity: pressed ? 0.15 : 0.08,
           elevation: pressed ? 8 : 3,
-        }
+        },
+        isRTL && { flexDirection: 'row-reverse' }
       ]} 
       activeOpacity={1}
       onPressIn={() => setPressed(true)}
@@ -45,11 +50,30 @@ const MenuItem = ({ icon, label, subtitle, color = "#6F42C1", onPress }) => {
       <View style={[styles.iconCircle, { backgroundColor: color + '15' }]}>
         <Ionicons name={icon} size={24} color={color} />
       </View>
-      <View style={styles.menuContent}>
-        <Text style={styles.menuLabel}>{label}</Text>
-        {subtitle && <Text style={styles.menuSubtitle}>{subtitle}</Text>}
+      <View style={[
+        styles.menuContent,
+        isRTL ? { marginRight: 16 } : { marginLeft: 16 }
+      ]}>
+        <Text style={[
+          styles.menuLabel,
+          isRTL && { textAlign: 'right' }
+        ]}>
+          {label}
+        </Text>
+        {subtitle && (
+          <Text style={[
+            styles.menuSubtitle,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {subtitle}
+          </Text>
+        )}
       </View>
-      <Ionicons name="chevron-forward" size={22} color="#999999" />
+      <Ionicons 
+        name={isRTL ? "chevron-back" : "chevron-forward"} 
+        size={22} 
+        color="#999999" 
+      />
     </TouchableOpacity>
   );
 };
@@ -57,6 +81,12 @@ const MenuItem = ({ icon, label, subtitle, color = "#6F42C1", onPress }) => {
 export default function ProfileScreen({ navigation, route }) {
   const user = route.params?.user || {};
   const { colors } = useTheme();
+  const { t, isRTL } = useTranslation();
+
+  // ✅ 1. SETUP NOTIFICATION LOGIC
+  const { unreadCount } = useNotifications();
+  const [notificationPanelVisible, setNotificationPanelVisible] = useState(false);
+  const toggleNotificationPanel = () => setNotificationPanelVisible(!notificationPanelVisible);
 
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -71,19 +101,23 @@ export default function ProfileScreen({ navigation, route }) {
   const toggleSidebar = () => setSidebarVisible(prev => !prev);
 
   const handleLogout = () => {
-    Alert.alert("Déconnexion", "Êtes-vous sûr de vouloir vous déconnecter ?", [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Oui",
-        onPress: async () => {
-          await AsyncStorage.removeItem("user");
-          navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+    Alert.alert(
+      t('logoutTitle'), 
+      t('logoutMessage'), 
+      [
+        { text: t('cancel'), style: "cancel" },
+        {
+          text: t('yes'),
+          onPress: async () => {
+            await AsyncStorage.removeItem("user");
+            navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
-  const TOP_SECTION_HEIGHT = screenHeight * 0.28;
+  const TOP_SECTION_HEIGHT = screenHeight * 0.3;
 
   return (
     <View style={styles.container}>
@@ -98,20 +132,29 @@ export default function ProfileScreen({ navigation, route }) {
         onLogout={handleLogout} 
       />
 
+      {/* ✅ 2. ADD NOTIFICATION PANEL */}
+      <NotificationPanel 
+        visible={notificationPanelVisible}
+        onClose={toggleNotificationPanel}
+      />
+
       {/* FIXED PURPLE TOP SECTION */}
       <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
         <LinearGradient colors={colors.headerGradient} style={StyleSheet.absoluteFill}>
           <View style={styles.safeArea} />
+          
+          {/* ✅ 3. CONNECT TOPBAR */}
           <TopBar 
             onMenuPress={toggleSidebar} 
+            onNotificationPress={toggleNotificationPanel}
             showAvatar={false}
-            notificationCount={3}
+            notificationCount={unreadCount}
           />
 
           {/* Profile Section */}
           <View style={styles.profileSection}>
             <View style={styles.avatarWrapper}>
-              <Image source={require("../assets/default_avatar.jpeg")} style={styles.avatar} />
+              <Image source={require("../assets/human.jpg")} style={styles.avatar} />
               <TouchableOpacity
                 style={styles.cameraBtn}
                 onPress={() => navigation.navigate("EditProfileScreen", { user })}
@@ -119,8 +162,11 @@ export default function ProfileScreen({ navigation, route }) {
                 <Ionicons name="camera" size={18} color="#6F42C1" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.greeting}>
-              Hi, <Text style={styles.userName}>{fullName}</Text>
+            <Text style={[
+              styles.greeting,
+              isRTL && { textAlign: 'right', flexDirection: 'row-reverse' }
+            ]}>
+              {t('greeting')}, <Text style={styles.userName}>{fullName}</Text>
             </Text>
           </View>
         </LinearGradient>
@@ -131,51 +177,82 @@ export default function ProfileScreen({ navigation, route }) {
         <ScrollView contentContainerStyle={styles.bottomScroll} showsVerticalScrollIndicator={false}>
           {/* Account */}
           <View style={styles.section}>
-            <Text style={styles.sectionHeader}>ACCOUNT</Text>
+            <Text style={[
+              styles.sectionHeader,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('account')}
+            </Text>
             <MenuItem 
               icon="person-outline" 
-              label="Edit Profile"
+              label={t('editProfile')}
               color="#6F42C1"
-              onPress={() => navigation.navigate("EditProfileScreen", { user })} 
+              onPress={() => navigation.navigate("EditProfileScreen", { user })}
+              isRTL={isRTL}
             />
             <MenuItem 
               icon="lock-closed-outline" 
-              label="Change Password"
+              label={t('changePassword')}
               color="#FFC75F"
-              onPress={() => setModalVisible(true)} 
+              onPress={() => setModalVisible(true)}
+              isRTL={isRTL}
             />
             <MenuItem 
               icon="card-outline" 
-              label="Payments"
+              label={t('payments')}
               color="#4ECDC4"
-              onPress={() => navigation.navigate("PaymentsScreen")} 
+              onPress={() => navigation.navigate("PaymentsScreen")}
+              isRTL={isRTL}
             />
           </View>
 
           {/* Support */}
           <View style={styles.section}>
-            <Text style={styles.sectionHeader}>SUPPORT</Text>
+            <Text style={[
+              styles.sectionHeader,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('support')}
+            </Text>
             <MenuItem 
               icon="help-circle-outline" 
-              label="Help & Support"
+              label={t('helpSupport')}
               color="#4CAF50"
-              onPress={() => navigation.navigate("HelpSupport")} 
+              onPress={() => navigation.navigate("HelpSupport")}
+              isRTL={isRTL}
             />
             <MenuItem 
               icon="document-text-outline" 
-              label="Privacy Policy"
+              label={t('privacyPolicy')}
               color="#9B59B6"
-              onPress={() => {}} 
+              onPress={() => {}}
+              isRTL={isRTL}
             />
           </View>
 
           {/* Logout */}
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <TouchableOpacity 
+            style={[
+              styles.logoutButton,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]} 
+            onPress={handleLogout}
+          >
             <Ionicons name="log-out-outline" size={22} color="white" />
-            <Text style={styles.logoutText}>Logout</Text>
+            <Text style={[
+              styles.logoutText,
+              isRTL ? { marginRight: 10 } : { marginLeft: 10 }
+            ]}>
+              {t('logout')}
+            </Text>
           </TouchableOpacity>
 
-          <Text style={styles.version}>Version 1.2.4</Text>
+          <Text style={[
+            styles.version,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('version')} 1.2.4
+          </Text>
         </ScrollView>
       </View>
 
@@ -183,37 +260,57 @@ export default function ProfileScreen({ navigation, route }) {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Change Password</Text>
+            <Text style={[
+              styles.modalTitle,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('changePasswordTitle')}
+            </Text>
             <TextInput 
-              style={styles.input} 
-              placeholder="Current Password" 
+              style={[
+                styles.input,
+                isRTL && { textAlign: 'right' }
+              ]} 
+              placeholder={t('currentPassword')} 
               placeholderTextColor="#999999"
               secureTextEntry 
               value={currentPwd} 
               onChangeText={setCurrentPwd} 
             />
             <TextInput 
-              style={styles.input} 
-              placeholder="New Password" 
+              style={[
+                styles.input,
+                isRTL && { textAlign: 'right' }
+              ]} 
+              placeholder={t('newPassword')} 
               placeholderTextColor="#999999"
               secureTextEntry 
               value={newPwd} 
               onChangeText={setNewPwd} 
             />
             <TextInput 
-              style={styles.input} 
-              placeholder="Confirm Password" 
+              style={[
+                styles.input,
+                isRTL && { textAlign: 'right' }
+              ]} 
+              placeholder={t('confirmPassword')} 
               placeholderTextColor="#999999"
               secureTextEntry 
               value={confirmPwd} 
               onChangeText={setConfirmPwd} 
             />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setModalVisible(false)}>
-                <Text style={styles.cancelText}>Cancel</Text>
+            <View style={[
+              styles.modalButtons,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]}>
+              <TouchableOpacity 
+                style={styles.cancelBtn} 
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelText}>{t('cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.confirmBtn}>
-                <Text style={styles.confirmText}>Confirm</Text>
+                <Text style={styles.confirmText}>{t('confirm')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -244,19 +341,19 @@ const styles = StyleSheet.create({
   profileSection: {
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 5,
     paddingBottom: 20,
   },
   avatarWrapper: { 
     position: "relative", 
-    marginBottom: 12,
+    marginBottom: 8,
   },
   avatar: { 
     width: 80, 
     height: 80, 
     borderRadius: 40, 
     borderWidth: 3, 
-    borderColor: "#FFD700",
+    borderColor: "white",
   },
   cameraBtn: { 
     position: "absolute", 
@@ -265,7 +362,7 @@ const styles = StyleSheet.create({
     width: 28, 
     height: 28, 
     borderRadius: 14, 
-    backgroundColor: "#FFD700", 
+    backgroundColor: "white", 
     justifyContent: "center", 
     alignItems: "center", 
     borderWidth: 2, 
@@ -298,7 +395,14 @@ const styles = StyleSheet.create({
   },
   bottomScroll: { paddingHorizontal: 16, paddingTop: 32, paddingBottom: 100 },
   section: { marginTop: 24 },
-  sectionHeader: { fontSize: 13, fontWeight: "700", color: "#999999", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 },
+  sectionHeader: { 
+    fontSize: 13, 
+    fontWeight: "700", 
+    color: "#999999", 
+    textTransform: "uppercase", 
+    letterSpacing: 1, 
+    marginBottom: 12 
+  },
   menuItem: { 
     flexDirection: "row", 
     alignItems: "center", 
@@ -318,7 +422,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  menuContent: { flex: 1, marginLeft: 16 },
+  menuContent: { flex: 1 },
   menuLabel: { fontSize: 16, fontWeight: "600", color: "#1a1a2e" },
   menuSubtitle: { fontSize: 14, marginTop: 2, fontWeight: "500", color: "#666666" },
 
@@ -331,7 +435,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginTop: 20,
   },
-  logoutText: { fontSize: 16, fontWeight: "600", color: "white", marginLeft: 10 },
+  logoutText: { fontSize: 16, fontWeight: "600", color: "white" },
 
   version: { textAlign: "center", fontSize: 14, color: "#999999", marginVertical: 40 },
 

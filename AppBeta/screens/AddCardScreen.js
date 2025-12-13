@@ -8,12 +8,14 @@ import {
   TextInput,
   Image,
 } from "react-native";
+import { useTranslation } from "../context/TranslationContext";
 
 // Import logos from assets
 import VisaLogo from "../assets/visa.png";
 import MastercardLogo from "../assets/mastercard.png";
 
 export default function AddCardScreen({ visible, onClose, onAddCard }) {
+  const { t, isRTL } = useTranslation();
   const [cardType, setCardType] = useState("visa");
   const [cardNumber, setCardNumber] = useState("");
   const [cardHolder, setCardHolder] = useState("");
@@ -44,68 +46,134 @@ export default function AddCardScreen({ visible, onClose, onAddCard }) {
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           {/* Title */}
-          <Text style={styles.title}>Add new card</Text>
+          <Text style={[
+            styles.title,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('addNewCard')}
+          </Text>
 
           {/* Card Type Selector */}
-          <Text style={styles.label}>Card Type</Text>
-          <View style={styles.cardTypeRow}>
+          <Text style={[
+            styles.label,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('cardType')}
+          </Text>
+          <View style={[
+            styles.cardTypeRow,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
             <TouchableOpacity
-              style={styles.radioOption}
+              style={[
+                styles.radioOption,
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}
               onPress={() => setCardType("visa")}
             >
-              <View style={styles.radioCircle}>
+              <View style={[
+                styles.radioCircle,
+                isRTL && { marginLeft: 6, marginRight: 0 }
+              ]}>
                 {cardType === "visa" && <View style={styles.selected} />}
               </View>
-              <Image source={VisaLogo} style={styles.cardLogo} />
-              <Text style={styles.radioText}>Visa</Text>
+              <Image source={VisaLogo} style={[
+                styles.cardLogo,
+                isRTL && { marginLeft: 6, marginRight: 0 }
+              ]} />
+              <Text style={styles.radioText}>{t('visa')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.radioOption}
+              style={[
+                styles.radioOption,
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}
               onPress={() => setCardType("mastercard")}
             >
-              <View style={styles.radioCircle}>
+              <View style={[
+                styles.radioCircle,
+                isRTL && { marginLeft: 6, marginRight: 0 }
+              ]}>
                 {cardType === "mastercard" && <View style={styles.selected} />}
               </View>
-              <Image source={MastercardLogo} style={styles.cardLogo} />
-              <Text style={styles.radioText}>Mastercard</Text>
+              <Image source={MastercardLogo} style={[
+                styles.cardLogo,
+                isRTL && { marginLeft: 6, marginRight: 0 }
+              ]} />
+              <Text style={styles.radioText}>{t('mastercard')}</Text>
             </TouchableOpacity>
           </View>
 
           {/* Card Number */}
-          <Text style={styles.label}>Card Number</Text>
+          <Text style={[
+            styles.label,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('cardNumber')}
+          </Text>
           <TextInput
-            style={styles.input}
-            placeholder="Enter card number"
+            style={[
+              styles.input,
+              isRTL && { textAlign: 'right' }
+            ]}
+            placeholder={t('enterCardNumber')}
             value={cardNumber}
             onChangeText={setCardNumber}
             keyboardType="numeric"
           />
 
           {/* Card Holder Name */}
-          <Text style={styles.label}>Card Holder Name</Text>
+          <Text style={[
+            styles.label,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('cardHolderName')}
+          </Text>
           <TextInput
-            style={styles.input}
-            placeholder="Enter card holder name"
+            style={[
+              styles.input,
+              isRTL && { textAlign: 'right' }
+            ]}
+            placeholder={t('enterCardHolderName')}
             value={cardHolder}
             onChangeText={setCardHolder}
           />
 
           {/* Expire Date & CVV in same row */}
-          <View style={styles.row}>
+          <View style={[
+            styles.row,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
             <View style={{ flex: 0.48 }}>
-              <Text style={styles.label}>Expire Date</Text>
+              <Text style={[
+                styles.label,
+                isRTL && { textAlign: 'right' }
+              ]}>
+                {t('expireDate')}
+              </Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  isRTL && { textAlign: 'right' }
+                ]}
                 placeholder="MM/YY"
                 value={expireDate}
                 onChangeText={setExpireDate}
               />
             </View>
             <View style={{ flex: 0.48 }}>
-              <Text style={styles.label}>CVV</Text>
+              <Text style={[
+                styles.label,
+                isRTL && { textAlign: 'right' }
+              ]}>
+                CVV
+              </Text>
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  isRTL && { textAlign: 'right' }
+                ]}
                 placeholder="XXX"
                 value={cvv}
                 onChangeText={setCvv}
@@ -115,20 +183,28 @@ export default function AddCardScreen({ visible, onClose, onAddCard }) {
           </View>
 
           {/* Address */}
-          <Text style={styles.label}>Address</Text>
+          <Text style={[
+            styles.label,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('address')}
+          </Text>
           <TextInput
-            style={styles.input}
-            placeholder="Street, City, ZIP"
+            style={[
+              styles.input,
+              isRTL && { textAlign: 'right' }
+            ]}
+            placeholder={t('streetCityZip')}
             value={address}
             onChangeText={setAddress}
           />
 
           {/* Buttons */}
           <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-            <Text style={styles.buttonText}>Add</Text>
+            <Text style={styles.buttonText}>{t('add')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.buttonText}>Cancel</Text>
+            <Text style={styles.buttonText}>{t('cancel')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -159,11 +235,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  label: { fontSize: 14, fontWeight: "600", color: "#666", marginBottom: 6 },
+  label: { 
+    fontSize: 14, 
+    fontWeight: "600", 
+    color: "#666", 
+    marginBottom: 6 
+  },
 
-  cardTypeRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 15 },
+  cardTypeRow: { 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    marginBottom: 15 
+  },
 
-  radioOption: { flexDirection: "row", alignItems: "center" },
+  radioOption: { 
+    flexDirection: "row", 
+    alignItems: "center" 
+  },
 
   radioCircle: {
     width: 20,
@@ -183,9 +271,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#6F42C1",
   },
 
-  cardLogo: { width: 30, height: 20, resizeMode: "contain", marginRight: 6 },
+  cardLogo: { 
+    width: 30, 
+    height: 20, 
+    resizeMode: "contain", 
+    marginRight: 6 
+  },
 
-  radioText: { fontSize: 14, fontWeight: "600", color: "#333" },
+  radioText: { 
+    fontSize: 14, 
+    fontWeight: "600", 
+    color: "#333" 
+  },
 
   input: {
     borderWidth: 1,
@@ -196,7 +293,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  row: { flexDirection: "row", justifyContent: "space-between" },
+  row: { 
+    flexDirection: "row", 
+    justifyContent: "space-between" 
+  },
 
   addButton: {
     backgroundColor: "#6F42C1",
@@ -213,5 +313,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  buttonText: { color: "white", fontWeight: "700", fontSize: 16 },
+  buttonText: { 
+    color: "white", 
+    fontWeight: "700", 
+    fontSize: 16 
+  },
 });

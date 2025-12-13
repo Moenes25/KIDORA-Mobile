@@ -12,10 +12,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
-
-// Import the reusable TopNavBar
 import TopNavBar from "../components/TopNavBar";
-
 
 const screenHeight = Dimensions.get("window").height;
 const TOP_SECTION_HEIGHT = screenHeight * 0.20;
@@ -23,8 +20,6 @@ const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 export default function PaymentsScreen({ navigation }) {
   const { colors, theme } = useTheme();
   const isDark = theme === "dark";
-
-  //const [showPaySheet, setShowPaySheet] = useState(false);
 
   const unpaidInvoices = [
     {
@@ -91,7 +86,7 @@ export default function PaymentsScreen({ navigation }) {
         </LinearGradient>
       </View>
       
-      {/* WHITE BOTTOM SECTION */}
+      {/* WHITE/DARK BOTTOM SECTION */}
       <View style={[
         styles.bottomSection,
         { 
@@ -99,7 +94,11 @@ export default function PaymentsScreen({ navigation }) {
           top: TOP_SECTION_HEIGHT 
         }
       ]}>
-        <ScrollView contentContainerStyle={{ paddingBottom: 80, paddingTop: 20 }}>
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Unpaid Invoices Card */}
           <View 
             style={[
               styles.card, 
@@ -109,38 +108,75 @@ export default function PaymentsScreen({ navigation }) {
               }
             ]}
           >
-            <View style={styles.cardHeader}>
-              <Feather name="alert-octagon" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
-              <View style={[styles.cardTitleBox, { backgroundColor: "#f3e8ff" }]}>
-                <Text style={[styles.cardTitle, { color: "#6F42C1" }]}>Unpaid invoices</Text>
+            {/* Card Header */}
+            <View style={styles.cardHeaderSection}>
+              <View style={styles.cardHeaderContent}>
+                <View style={[styles.iconBadge, { backgroundColor: "#fee2e2" }]}>
+                  <Feather name="alert-circle" size={20} color="#dc2626" />
+                </View>
+                <View style={styles.cardHeaderText}>
+                  <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#2d3436" }]}>
+                    Unpaid Invoices
+                  </Text>
+                  <Text style={[styles.cardSubtitle, { color: isDark ? "#b0a8d9" : "#636e72" }]}>
+                    {unpaidInvoices.length} pending payment{unpaidInvoices.length !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+              </View>
+              <View style={[styles.countBadge, { backgroundColor: "#dc2626" }]}>
+                <Text style={styles.countBadgeText}>{unpaidInvoices.length}</Text>
               </View>
             </View>
 
-            {unpaidInvoices.map((item) => (
+            {/* Unpaid Invoice Items */}
+            {unpaidInvoices.map((item, index) => (
               <TouchableOpacity
                 key={item.id}
-                style={[styles.subItemContainer, { backgroundColor: isDark ? colors.sidebarItemBg : "#f9f9f9" }]}
+                style={[
+                  styles.invoiceItem,
+                  { 
+                    backgroundColor: isDark ? colors.sidebarItemBg : "#f8f9fa",
+                    marginTop: index === 0 ? 16 : 12,
+                  }
+                ]}
                 onPress={() => navigation.navigate("InvoiceToPayScreen", { invoice: item })}
                 activeOpacity={0.7}
               >
-                <View style={styles.subItemLeft}>
-                  <View style={[styles.iconCircle, { backgroundColor: "#6F42C1" }]}>
-                    <Feather name="credit-card" size={20} color="white" />
+                <View style={styles.invoiceItemContent}>
+                  <View style={[styles.invoiceIconCircle, { backgroundColor: "#fef3c7" }]}>
+                    <Feather name="file-text" size={22} color="#f59e0b" />
                   </View>
 
-                  <View style={{ flexShrink: 1 }}>
-                    <Text style={[styles.itemTitle, { color: isDark ? "#ffffff" : "#2c2c2c" }]}>{item.title}</Text>
-                    <Text style={[styles.itemSubtitle, { color: isDark ? "#b0a8d9" : "#666" }]}>{item.child}</Text>
-                    <Text style={[styles.itemSubtitle, { color: isDark ? "#b0a8d9" : "#666" }]}>{item.dueDate}</Text>
-                    <Text style={[styles.priceBelow, { color: "#6F42C1" }]}>{item.price}</Text>
+                  <View style={styles.invoiceDetails}>
+                    <Text style={[styles.invoiceTitle, { color: isDark ? "#ffffff" : "#2d3436" }]}>
+                      {item.title}
+                    </Text>
+                    <View style={styles.invoiceMetaRow}>
+                      <Feather name="user" size={12} color={isDark ? "#b0a8d9" : "#636e72"} />
+                      <Text style={[styles.invoiceMeta, { color: isDark ? "#b0a8d9" : "#636e72" }]}>
+                        {item.child}
+                      </Text>
+                    </View>
+                    <View style={styles.invoiceMetaRow}>
+                      <Feather name="calendar" size={12} color="#dc2626" />
+                      <Text style={[styles.invoiceMeta, { color: "#dc2626" }]}>
+                        {item.dueDate}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.invoicePriceSection}>
+                    <Text style={[styles.invoicePrice, { color: "#9b59b6" }]}>
+                      {item.price}
+                    </Text>
+                    <Feather name="chevron-right" size={20} color="#9b59b6" />
                   </View>
                 </View>
-
-                <Feather name="chevron-right" size={22} color="#6F42C1" />
               </TouchableOpacity>
             ))}
           </View>
 
+          {/* Payment History Card */}
           <View 
             style={[
               styles.card, 
@@ -150,36 +186,73 @@ export default function PaymentsScreen({ navigation }) {
               }
             ]}
           >
-            <View style={styles.cardHeader}>
-              <Feather name="file-text" size={22} color="#6F42C1" style={{ marginRight: 8 }} />
-              <View style={[styles.cardTitleBox, { backgroundColor: "#f3e8ff" }]}>
-                <Text style={[styles.cardTitle, { color: "#6F42C1" }]}>Payment history</Text>
+            {/* Card Header */}
+            <View style={styles.cardHeaderSection}>
+              <View style={styles.cardHeaderContent}>
+                <View style={[styles.iconBadge, { backgroundColor: "#b9f3ed" }]}>
+                  <Feather name="check-circle" size={20} color="#016266" />
+                </View>
+                <View style={styles.cardHeaderText}>
+                  <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#2d3436" }]}>
+                    Payment History
+                  </Text>
+                  <Text style={[styles.cardSubtitle, { color: isDark ? "#b0a8d9" : "#636e72" }]}>
+                    {paidInvoices.length} completed transaction{paidInvoices.length !== 1 ? 's' : ''}
+                  </Text>
+                </View>
               </View>
             </View>
 
-            {paidInvoices.map((item) => (
+            {/* Paid Invoice Items */}
+            {paidInvoices.map((item, index) => (
               <TouchableOpacity 
                 key={item.id} 
-                style={[styles.subItemContainer, { backgroundColor: isDark ? colors.sidebarItemBg : "#f9f9f9" }]}
+                style={[
+                  styles.invoiceItem,
+                  { 
+                    backgroundColor: isDark ? colors.sidebarItemBg : "#f8f9fa",
+                    marginTop: index === 0 ? 16 : 12,
+                  }
+                ]}
                 onPress={() => navigation.navigate("PaidInvoiceScreen", { invoice: item })}
+                activeOpacity={0.7}
               >
-                <View style={styles.subItemLeft}>
-                  <View style={[styles.iconCircle, { backgroundColor: "#4CAF50" }]}>
-                    <Feather name="check-circle" size={20} color="white" />
+                <View style={styles.invoiceItemContent}>
+                  <View style={[styles.invoiceIconCircle, { backgroundColor: "#b9f3ed" }]}>
+                    <Feather name="check" size={22} color="#016266" />
                   </View>
 
-                  <View style={{ flexShrink: 1 }}>
-                    <Text style={[styles.itemTitle, { color: isDark ? "#ffffff" : "#2c2c2c" }]}>{item.title}</Text>
-                    <Text style={[styles.itemSubtitle, { color: isDark ? "#b0a8d9" : "#666" }]}>{item.child}</Text>
-                    <Text style={[styles.itemSubtitle, { color: isDark ? "#b0a8d9" : "#666" }]}>{item.paymentDate}</Text>
-                    <Text style={[styles.priceBelow, { color: "#4CAF50" }]}>{item.price}</Text>
+                  <View style={styles.invoiceDetails}>
+                    <Text style={[styles.invoiceTitle, { color: isDark ? "#ffffff" : "#2d3436" }]}>
+                      {item.title}
+                    </Text>
+                    <View style={styles.invoiceMetaRow}>
+                      <Feather name="user" size={12} color={isDark ? "#b0a8d9" : "#636e72"} />
+                      <Text style={[styles.invoiceMeta, { color: isDark ? "#b0a8d9" : "#636e72" }]}>
+                        {item.child}
+                      </Text>
+                    </View>
+                    <View style={styles.invoiceMetaRow}>
+                      <Feather name="calendar" size={12} color="#016266" />
+                      <Text style={[styles.invoiceMeta, { color: "#016266" }]}>
+                        {item.paymentDate}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.invoicePriceSection}>
+                    <Text style={[styles.invoicePrice, { color: "#016266" }]}>
+                      {item.price}
+                    </Text>
+                    <Feather name="chevron-right" size={20} color={isDark ? "#b0a8d9" : "#636e72"} />
                   </View>
                 </View>
-
-                <Feather name="chevron-right" size={22} color={isDark ? "#b0a8d9" : "#666"} />
               </TouchableOpacity>
             ))}
           </View>
+
+          {/* Bottom spacing */}
+          <View style={{ height: 100 }} />
         </ScrollView>
       </View>
     </View>
@@ -214,64 +287,105 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
+  scrollContent: {
+    paddingTop: 24,
+    paddingBottom: 80,
+  },
   card: {
-    marginTop: 0,
-    marginHorizontal: 15,
-    marginBottom: 20,
-    borderRadius: 14,
-    padding: 15,
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderRadius: 20,
+    padding: 20,
     elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    shadowRadius: 8,
   },
-  cardHeader: {
+  cardHeaderSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  cardHeaderContent: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    flex: 1,
   },
-  cardTitleBox: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+  iconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  cardHeaderText: {
+    flex: 1,
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: "700",
+    marginBottom: 2,
   },
-  subItemContainer: {
+  cardSubtitle: {
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  countBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  countBadgeText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  invoiceItem: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 0,
+  },
+  invoiceItemContent: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 14,
-    marginBottom: 10,
-    borderRadius: 12,
+    alignItems: "center",
   },
-  subItemLeft: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    flex: 1,
-  },
-  iconCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  invoiceIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
-    marginTop: 3,
   },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 2,
-    flexShrink: 1,
+  invoiceDetails: {
+    flex: 1,
   },
-  itemSubtitle: {
-    fontSize: 13,
-  },
-  priceBelow: {
-    marginTop: 5,
+  invoiceTitle: {
     fontSize: 15,
     fontWeight: "700",
+    marginBottom: 6,
+  },
+  invoiceMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 3,
+  },
+  invoiceMeta: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginLeft: 6,
+  },
+  invoicePriceSection: {
+    alignItems: "flex-end",
+    justifyContent: "center",
+    marginLeft: 8,
+  },
+  invoicePrice: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 4,
   },
 });
