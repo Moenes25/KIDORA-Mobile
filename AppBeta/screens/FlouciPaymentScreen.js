@@ -11,9 +11,11 @@ import {
   Image,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useTranslation } from "../context/TranslationContext";
 import FlouciLogo from "../assets/flouci.png";
 
 export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess, paymentAmount }) {
+  const { t, isRTL } = useTranslation();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState(null);
@@ -21,12 +23,12 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
   // Initiate Flouci payment
   const initiateFlouciPayment = async () => {
     if (!phoneNumber.trim()) {
-      Alert.alert("Error", "Please enter your Flouci phone number");
+      Alert.alert(t('error'), t('enterFlouciPhoneNumber'));
       return;
     }
 
     if (!paymentAmount || parseFloat(paymentAmount) <= 0) {
-      Alert.alert("Error", "Invalid payment amount");
+      Alert.alert(t('error'), t('invalidPaymentAmount'));
       return;
     }
 
@@ -42,22 +44,20 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
         body: JSON.stringify({
           phoneNumber: phoneNumber,
           amount: parseFloat(paymentAmount),
-          // Add other required fields
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        // Flouci typically returns a payment URL
         setPaymentUrl(data.paymentUrl);
         
         Alert.alert(
-          "Payment Initiated",
-          "Please complete the payment in your Flouci app",
+          t('paymentInitiated'),
+          t('completeInFlouci'),
           [
             {
-              text: "Open Flouci",
+              text: t('openFlouci'),
               onPress: () => {
                 // Open Flouci app or payment URL
                 // Linking.openURL(data.paymentUrl);
@@ -65,17 +65,17 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
               },
             },
             {
-              text: "Cancel",
+              text: t('cancel'),
               style: "cancel",
             },
           ]
         );
       } else {
-        Alert.alert("Error", data.message || "Failed to initiate payment");
+        Alert.alert(t('error'), data.message || t('failedToInitiate'));
       }
     } catch (error) {
       console.error("Flouci Payment Error:", error);
-      Alert.alert("Error", "Failed to connect to Flouci service");
+      Alert.alert(t('error'), t('failedToConnect'));
     } finally {
       setLoading(false);
     }
@@ -88,14 +88,14 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
       const data = await response.json();
 
       if (data.status === "SUCCESS") {
-        Alert.alert("Success", "Payment completed successfully!");
+        Alert.alert(t('success'), t('paymentCompletedSuccess'));
         onPaymentSuccess && onPaymentSuccess(data);
         onClose();
       } else if (data.status === "PENDING") {
         // Keep checking
         setTimeout(() => checkPaymentStatus(paymentId), 3000);
       } else {
-        Alert.alert("Payment Failed", "The payment was not completed");
+        Alert.alert(t('paymentFailed'), t('paymentNotCompleted'));
       }
     } catch (error) {
       console.error("Payment Status Error:", error);
@@ -110,25 +110,57 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
           <Image source={FlouciLogo} style={styles.logo} resizeMode="contain" />
 
           {/* TITLE */}
-          <Text style={styles.title}>Pay with Flouci</Text>
+          <Text style={[
+            styles.title,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('payWithFlouci')}
+          </Text>
 
           {/* DESCRIPTION */}
-          <Text style={styles.description}>
-            Enter your Flouci phone number to complete the payment securely
+          <Text style={[
+            styles.description,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('enterFlouciPhone')}
           </Text>
 
           {/* AMOUNT DISPLAY */}
           <View style={styles.amountBox}>
-            <Text style={styles.amountLabel}>Amount to pay</Text>
-            <Text style={styles.amountValue}>{paymentAmount} TND</Text>
+            <Text style={[
+              styles.amountLabel,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('amountToPay')}
+            </Text>
+            <Text style={[
+              styles.amountValue,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {paymentAmount} TND
+            </Text>
           </View>
 
           {/* PHONE INPUT */}
-          <View style={styles.inputWrapper}>
-            <Feather name="smartphone" size={20} color="#666" style={styles.inputIcon} />
+          <View style={[
+            styles.inputWrapper,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
+            <Feather 
+              name="smartphone" 
+              size={20} 
+              color="#666" 
+              style={[
+                styles.inputIcon,
+                isRTL && { marginLeft: 10, marginRight: 0 }
+              ]} 
+            />
             <TextInput
-              style={styles.phoneInput}
-              placeholder="Flouci phone number"
+              style={[
+                styles.phoneInput,
+                isRTL && { textAlign: 'right' }
+              ]}
+              placeholder={t('flouciPhoneNumber')}
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
@@ -137,10 +169,16 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
           </View>
 
           {/* INFO BOX */}
-          <View style={styles.infoBox}>
+          <View style={[
+            styles.infoBox,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
             <Feather name="info" size={16} color="#FF6B35" />
-            <Text style={styles.infoText}>
-              You will be redirected to your Flouci app to confirm the payment
+            <Text style={[
+              styles.infoText,
+              isRTL && { marginRight: 8, marginLeft: 0, textAlign: 'right' }
+            ]}>
+              {t('redirectToFlouci')}
             </Text>
           </View>
 
@@ -154,10 +192,18 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
               {loading ? (
                 <ActivityIndicator color="white" />
               ) : (
-                <>
+                <View style={[
+                  styles.payBtnContent,
+                  isRTL && { flexDirection: 'row-reverse' }
+                ]}>
                   <Feather name="check-circle" size={20} color="white" />
-                  <Text style={styles.payBtnText}>Continue to Flouci</Text>
-                </>
+                  <Text style={[
+                    styles.payBtnText,
+                    isRTL ? { marginRight: 8 } : { marginLeft: 8 }
+                  ]}>
+                    {t('continueToFlouci')}
+                  </Text>
+                </View>
               )}
             </TouchableOpacity>
 
@@ -166,14 +212,22 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
               onPress={onClose}
               disabled={loading}
             >
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={styles.cancelText}>{t('cancel')}</Text>
             </TouchableOpacity>
           </View>
 
           {/* SECURITY NOTE */}
-          <View style={styles.securityNote}>
+          <View style={[
+            styles.securityNote,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
             <Feather name="lock" size={14} color="#999" />
-            <Text style={styles.securityText}>Secured by Flouci</Text>
+            <Text style={[
+              styles.securityText,
+              isRTL ? { marginRight: 6 } : { marginLeft: 6 }
+            ]}>
+              {t('securedByFlouci')}
+            </Text>
           </View>
         </View>
       </View>
@@ -302,8 +356,6 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "center",
     elevation: 2,
     shadowColor: "#FF6B35",
     shadowOffset: { width: 0, height: 2 },
@@ -315,11 +367,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFB89F",
   },
 
+  payBtnContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   payBtnText: {
     color: "white",
     fontSize: 17,
     fontWeight: "700",
-    marginLeft: 8,
   },
 
   cancelBtn: {
@@ -345,6 +402,5 @@ const styles = StyleSheet.create({
   securityText: {
     fontSize: 12,
     color: "#999",
-    marginLeft: 6,
   },
 });

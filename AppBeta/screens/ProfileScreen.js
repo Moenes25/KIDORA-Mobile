@@ -22,6 +22,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import BottomNav from "../components/BottomNav";
 import TopBar from "../components/TopBar";
 import SideBar from "../components/Sidebar";
+import FeedbackScreen from "../components/FeedBackScreenComponent";
 
 // ✅ IMPORTS FOR NOTIFICATION
 import { useNotifications } from "../context/NotificationContext";
@@ -218,7 +219,7 @@ export default function ProfileScreen({ navigation, route }) {
               icon="help-circle-outline" 
               label={t('helpSupport')}
               color="#4CAF50"
-              onPress={() => navigation.navigate("HelpSupport")}
+              onPress={() => navigation.navigate("FeedbackScreen")}
               isRTL={isRTL}
             />
             <MenuItem 

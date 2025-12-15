@@ -80,7 +80,8 @@ const translations = {
     shortcuts : "Shortcuts",
     recommend: "Recommend",
     helpNotReady : "The Help & Support interface is currently under development. Please check back later.",
-    
+    kidsZone : "Kids Zone",
+
     //ChildrenListScreen
     myChildren: "My Children",
 
@@ -165,6 +166,44 @@ const translations = {
     checkInternetConnection: 'Check your internet connection',
     officialPaymentService: 'Official mobile payment service',
 
+    // Payoneer Payment Screen
+    secure: 'SECURE',
+    orderSummary: 'Order Summary',
+    merchant: 'Merchant',
+    payWithPayoneer: 'Pay with Payoneer',
+    enterAccountDetails: 'Enter your account details to proceed.',
+    payoneerUsernameOrEmail: 'Payoneer Username or Email',
+    usernamePlaceholder: 'username@example.com',
+    redirectInfo: 'You will be redirected to Payoneer to verify your identity.',
+    payNow: 'PAY NOW',
+    cancelReturnToMerchant: 'Cancel and return to merchant',
+    allRightsReserved: '© 2025 Payoneer Inc. All Rights Reserved.',
+    privacy: 'Privacy',
+    terms: 'Terms',
+    required: 'Required',
+    enterPayoneerEmail: 'Please enter your Payoneer email/username',
+    simulated: 'Simulated',
+    paymentLogicWouldRun: 'Payment logic would run here.',
+
+    // Flouci Payment Screen
+    payWithFlouci: 'Pay with Flouci',
+    enterFlouciPhone: 'Enter your Flouci phone number to complete the payment securely',
+    flouciPhoneNumber: 'Flouci phone number',
+    redirectToFlouci: 'You will be redirected to your Flouci app to confirm the payment',
+    continueToFlouci: 'Continue to Flouci',
+    securedByFlouci: 'Secured by Flouci',
+    enterFlouciPhoneNumber: 'Please enter your Flouci phone number',
+    invalidPaymentAmount: 'Invalid payment amount',
+    paymentInitiated: 'Payment Initiated',
+    completeInFlouci: 'Please complete the payment in your Flouci app',
+    openFlouci: 'Open Flouci',
+    failedToInitiate: 'Failed to initiate payment',
+    failedToConnect: 'Failed to connect to Flouci service',
+    success: 'Success',
+    paymentCompletedSuccess: 'Payment completed successfully!',
+    paymentFailed: 'Payment Failed',
+    paymentNotCompleted: 'The payment was not completed',
+
      // Add Card Screen
     addNewCard: 'Add new card',
     cardType: 'Card Type',
@@ -181,6 +220,11 @@ const translations = {
     
     // Improvements Screen
     childDevelopment: 'Child Development',
+    septemberOctober: 'September - October',
+    novemberDecember: 'November - December',
+    januaryFebruary: 'January - February',
+    marchApril: 'March - April',
+    mayJune: 'May - June',
 
     // Edit Profile Screen
     fullName: 'Full Name',
@@ -193,6 +237,39 @@ const translations = {
     enterAddress: 'Enter address',
     enterOccupation: 'Enter occupation',
     saveChanges: 'Save Changes',
+
+    // Payments Screen
+    payments: 'Payments',
+    unpaidInvoices: 'Unpaid Invoices',
+    pendingPayment: 'pending payment',
+    pendingPayments: 'pending payments',
+    paymentHistory: 'Payment History',
+    completedTransaction: 'completed transaction',
+    completedTransactions: 'completed transactions',
+    due: 'Due',
+
+    // Gallery Screen
+    photo: 'photo',
+    photos: 'photos',
+    november2023: 'November 2023',
+    october2023: 'October 2023',
+
+     // Chat List Screen
+    messages: 'Messages',
+    stories: 'Stories',
+    recentChats: 'Recent Chats',
+    startChatting: 'Start chatting...',
+    agoTime: 'ago',
+
+    // Chat Screenv1
+    typeMessage: 'Type a message...',
+    send: 'Send',
+
+    // Conversation Screen
+    online: 'Online',
+    offline: 'Offline',
+    emojis: 'Emojis',
+    now: 'Now',
 
   },
   
@@ -270,7 +347,8 @@ const translations = {
     shortcuts : "Raccourcis",
     recommend: "Recommander",
     helpNotReady : "L'interface Aide et assistance est actuellement en cours de développement. Veuillez revenir plus tard.",
-    
+    kidsZone : "Espace Enfants",
+
     //ChildrenListScreen
     myChildren: "Mes Enfants",
 
@@ -354,6 +432,44 @@ const translations = {
     checkInternetConnection: 'Vérifiez votre connexion internet',
     officialPaymentService: 'Service officiel de paiement mobile',
 
+    // Payoneer Payment Screen
+    secure: 'SÉCURISÉ',
+    orderSummary: 'Résumé de la commande',
+    merchant: 'Marchand',
+    payWithPayoneer: 'Payer avec Payoneer',
+    enterAccountDetails: 'Entrez les détails de votre compte pour continuer.',
+    payoneerUsernameOrEmail: "Nom d'utilisateur ou email Payoneer",
+    usernamePlaceholder: 'utilisateur@exemple.com',
+    redirectInfo: 'Vous serez redirigé vers Payoneer pour vérifier votre identité.',
+    payNow: 'PAYER MAINTENANT',
+    cancelReturnToMerchant: 'Annuler et retourner au marchand',
+    allRightsReserved: '© 2025 Payoneer Inc. Tous droits réservés.',
+    privacy: 'Confidentialité',
+    terms: 'Conditions',
+    required: 'Requis',
+    enterPayoneerEmail: "Veuillez entrer votre email/nom d'utilisateur Payoneer",
+    simulated: 'Simulé',
+    paymentLogicWouldRun: 'La logique de paiement fonctionnerait ici.',
+
+     // Flouci Payment Screen
+    payWithFlouci: 'Payer avec Flouci',
+    enterFlouciPhone: 'Entrez votre numéro Flouci pour effectuer le paiement en toute sécurité',
+    flouciPhoneNumber: 'Numéro Flouci',
+    redirectToFlouci: 'Vous serez redirigé vers votre application Flouci pour confirmer le paiement',
+    continueToFlouci: 'Continuer vers Flouci',
+    securedByFlouci: 'Sécurisé par Flouci',
+    enterFlouciPhoneNumber: 'Veuillez entrer votre numéro Flouci',
+    invalidPaymentAmount: 'Montant de paiement invalide',
+    paymentInitiated: 'Paiement initié',
+    completeInFlouci: 'Veuillez compléter le paiement dans votre application Flouci',
+    openFlouci: 'Ouvrir Flouci',
+    failedToInitiate: 'Échec de l\'initialisation du paiement',
+    failedToConnect: 'Échec de connexion au service Flouci',
+    success: 'Succès',
+    paymentCompletedSuccess: 'Paiement effectué avec succès !',
+    paymentFailed: 'Paiement échoué',
+    paymentNotCompleted: 'Le paiement n\'a pas été complété',
+
     // Add Card Screen
     addNewCard: 'Ajouter une nouvelle carte',
     cardType: 'Type de carte',
@@ -370,6 +486,11 @@ const translations = {
 
     // Improvements Screen
     childDevelopment: "Développement de l'Enfant",
+    septemberOctober: 'Septembre - Octobre',
+    novemberDecember: 'Novembre - Décembre',
+    januaryFebruary: 'Janvier - Février',
+    marchApril: 'Mars - Avril',
+    mayJune: 'Mai - Juin',
 
     fullName: 'Nom complet',
     email: 'Email',
@@ -381,6 +502,39 @@ const translations = {
     enterAddress: 'Entrer l\'adresse',
     enterOccupation: 'Entrer la profession',
     saveChanges: 'Enregistrer les modifications',
+
+    // Payments Screen
+    payments: 'Paiements',
+    unpaidInvoices: 'Factures Impayées',
+    pendingPayment: 'paiement en attente',
+    pendingPayments: 'paiements en attente',
+    paymentHistory: 'Historique des Paiements',
+    completedTransaction: 'transaction effectuée',
+    completedTransactions: 'transactions effectuées',
+    due: 'Échéance',
+
+    // Gallery Screen
+    photo: 'photo',
+    photos: 'photos',
+    november2023: 'Novembre 2023',
+    october2023: 'Octobre 2023',
+
+    // Chat List Screen
+    messages: 'Messages',
+    stories: 'Histoires',
+    recentChats: 'Discussions récentes',
+    startChatting: 'Commencer à discuter...',
+    agoTime: 'il y a',
+
+    // Chat Screenv1
+    typeMessage: 'Tapez un message...',
+    send: 'Envoyer',
+
+    // Conversation Screen
+    online: 'En ligne',
+    offline: 'Hors ligne',
+    emojis: 'Émojis',
+    now: 'Maintenant',
 
     
   },
@@ -459,6 +613,7 @@ const translations = {
     shortcuts : "الاختصارات",
     recommend: "التوصية",
     helpNotReady : "واجهة المساعدة والدعم قيد التطوير حاليًا. يرجى العودة لاحقًا.",
+    kidsZone : "منطقة الأطفال",
 
     //ChildrenListScreen
     myChildren: "أطفالي",
@@ -543,6 +698,44 @@ const translations = {
     checkInternetConnection: 'تحقق من اتصالك بالإنترنت',
     officialPaymentService: 'خدمة الدفع المحمول الرسمية',
 
+    // Payoneer Payment Screen
+    secure: 'آمن',
+    orderSummary: 'ملخص الطلب',
+    merchant: 'التاجر',
+    payWithPayoneer: 'الدفع عبر Payoneer',
+    enterAccountDetails: 'أدخل تفاصيل حسابك للمتابعة.',
+    payoneerUsernameOrEmail: 'اسم المستخدم أو البريد الإلكتروني لـPayoneer',
+    usernamePlaceholder: 'user@example.com',
+    redirectInfo: 'سيتم إعادة توجيهك إلى Payoneer للتحقق من هويتك.',
+    payNow: 'ادفع الآن',
+    cancelReturnToMerchant: 'إلغاء والعودة إلى التاجر',
+    allRightsReserved: '© 2025 Payoneer Inc. جميع الحقوق محفوظة.',
+    privacy: 'الخصوصية',
+    terms: 'الشروط',
+    required: 'مطلوب',
+    enterPayoneerEmail: 'الرجاء إدخال البريد الإلكتروني/اسم المستخدم لـPayoneer',
+    simulated: 'محاكاة',
+    paymentLogicWouldRun: 'منطق الدفع سيعمل هنا.',
+
+    // Flouci Payment Screen
+    payWithFlouci: 'الدفع عبر Flouci',
+    enterFlouciPhone: 'أدخل رقم هاتف Flouci الخاص بك لإتمام الدفع بشكل آمن',
+    flouciPhoneNumber: 'رقم هاتف Flouci',
+    redirectToFlouci: 'سيتم إعادة توجيهك إلى تطبيق Flouci لتأكيد الدفع',
+    continueToFlouci: 'المتابعة إلى Flouci',
+    securedByFlouci: 'مؤمن من قبل Flouci',
+    enterFlouciPhoneNumber: 'الرجاء إدخال رقم هاتف Flouci الخاص بك',
+    invalidPaymentAmount: 'مبلغ الدفع غير صالح',
+    paymentInitiated: 'تم بدء الدفع',
+    completeInFlouci: 'الرجاء إكمال الدفع في تطبيق Flouci الخاص بك',
+    openFlouci: 'فتح Flouci',
+    failedToInitiate: 'فشل في بدء الدفع',
+    failedToConnect: 'فشل الاتصال بخدمة Flouci',
+    success: 'نجح',
+    paymentCompletedSuccess: 'تم إتمام الدفع بنجاح!',
+    paymentFailed: 'فشل الدفع',
+    paymentNotCompleted: 'لم يتم إكمال الدفع',
+
     // Add Card Screen
     addNewCard: 'إضافة بطاقة جديدة',
     cardType: 'نوع البطاقة',
@@ -559,6 +752,11 @@ const translations = {
 
     // Improvements Screen
     childDevelopment: 'تطور الطفل',
+    septemberOctober: 'سبتمبر - أكتوبر',
+    novemberDecember: 'نوفمبر - ديسمبر',
+    januaryFebruary: 'جانفي - فيفري',
+    marchApril: 'مارس - أفريل',
+    mayJune: 'ماي - جوان',
 
     // Edit Profile Screen
     fullName: 'الاسم الكامل',
@@ -571,6 +769,38 @@ const translations = {
     enterAddress: 'أدخل العنوان',
     enterOccupation: 'أدخل المهنة',
     saveChanges: 'حفظ التغييرات',
+
+    // Payments Screen
+    payments: 'المدفوعات',
+    unpaidInvoices: 'الفواتير غير المدفوعة',
+    pendingPayment: 'دفعة معلقة',
+    pendingPayments: 'دفعات معلقة',
+    paymentHistory: 'سجل المدفوعات',
+    completedTransaction: 'معاملة مكتملة',
+    completedTransactions: 'معاملات مكتملة',
+    due: 'الاستحقاق',
+
+    // Gallery Screen
+    photo: 'صورة',
+    photos: 'صور',
+    november2023: 'نوفمبر 2023',
+    october2023: 'أكتوبر 2023',
+
+    // Chat List Screen
+    messages: 'الرسائل',
+    stories: 'القصص',
+    recentChats: 'المحادثات الأخيرة',
+    startChatting: 'ابدأ المحادثة...',
+
+    // Chat Screenv1
+    typeMessage: 'اكتب رسالة...',
+    send: 'إرسال',
+
+    // Conversation Screen
+    online: 'متصل',
+    offline: 'غير متصل',
+    emojis: 'الإيموجي',
+    now: 'الآن',
 
   },
 };

@@ -9,18 +9,17 @@ import { CONVERSATIONS, USERS, STORIES } from '../data/mockData';
 import { Feather } from '@expo/vector-icons';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../context/TranslationContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNav from '../components/BottomNav';
 import SideBar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 
-// ✅ IMPORTS FOR NOTIFICATION
 import { useNotifications } from "../context/NotificationContext"; 
 import NotificationPanel from "../components/NotificationPanel";
 
 const { width, height } = Dimensions.get('window');
 
-// ... (StoryBubble and ConversationItem components remain unchanged) ...
 const StoryBubble = ({ story, onPress }) => {
   if (!story.user) return null;
   return (
@@ -35,19 +34,42 @@ const StoryBubble = ({ story, onPress }) => {
   );
 };
 
-const ConversationItem = ({ user, lastMessage, onPress, onVideoCall, onAudioCall }) => {
+const ConversationItem = ({ user, lastMessage, onPress, onVideoCall, onAudioCall, isRTL }) => {
   return (
-    <TouchableOpacity style={styles.conversationItem} onPress={() => onPress(user)}>
+    <TouchableOpacity 
+      style={[
+        styles.conversationItem,
+        isRTL && { flexDirection: 'row-reverse' }
+      ]} 
+      onPress={() => onPress(user)}
+    >
       <Avatar uri={user.avatar} size={56} name={user.name} />
-      <View style={styles.conversationInfo}>
-        <Text style={styles.conversationName}>{user.name}</Text>
-        <Text style={styles.conversationMessage} numberOfLines={1}>
+      <View style={[
+        styles.conversationInfo,
+        isRTL ? { marginRight: 12, marginLeft: 0 } : { marginLeft: 12 }
+      ]}>
+        <Text style={[
+          styles.conversationName,
+          isRTL && { textAlign: 'right' }
+        ]}>
+          {user.name}
+        </Text>
+        <Text style={[
+          styles.conversationMessage,
+          isRTL && { textAlign: 'right' }
+        ]} numberOfLines={1}>
           {lastMessage}
         </Text>
       </View>
-      <View style={styles.conversationMeta}>
+      <View style={[
+        styles.conversationMeta,
+        isRTL && { alignItems: 'flex-start' }
+      ]}>
         <Text style={styles.conversationTime}>2m ago</Text>
-        <View style={styles.callIcons}>
+        <View style={[
+          styles.callIcons,
+          isRTL && { flexDirection: 'row-reverse' }
+        ]}>
           <TouchableOpacity 
             style={styles.callIconButton}
             onPress={(e) => {
@@ -74,8 +96,8 @@ const ConversationItem = ({ user, lastMessage, onPress, onVideoCall, onAudioCall
 
 export default function ChatListScreen({ navigation, route }) {
   const { colors } = useTheme();
+  const { t, isRTL } = useTranslation();
   
-  // ✅ 1. SETUP NOTIFICATION LOGIC
   const { unreadCount } = useNotifications();
   const [notificationPanelVisible, setNotificationPanelVisible] = useState(false);
   const toggleNotificationPanel = () => setNotificationPanelVisible(!notificationPanelVisible);
@@ -91,19 +113,19 @@ export default function ChatListScreen({ navigation, route }) {
   const username = user?.name || "User";
   const email = user?.email || "";
 
-  // Mock conversations list
+  // Mock conversations list with translation for default message
   const conversations = Object.keys(USERS).map(key => ({
     user: USERS[key],
-    lastMessage: CONVERSATIONS[key]?.[CONVERSATIONS[key].length - 1]?.text || "Start chatting..."
+    lastMessage: CONVERSATIONS[key]?.[CONVERSATIONS[key].length - 1]?.text || t('startChatting')
   }));
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
 
   const handleLogout = async () => {
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t('logout'), t('logoutMessage'), [
+      { text: t('cancel'), style: "cancel" },
       {
-        text: "Yes",
+        text: t('yes'),
         onPress: async () => {
           await AsyncStorage.removeItem("user");
           navigation.reset({ index: 0, routes: [{ name: "Login" }] });
@@ -187,7 +209,6 @@ export default function ChatListScreen({ navigation, route }) {
         onLogout={handleLogout} 
       />
 
-      {/* ✅ 2. ADD NOTIFICATION PANEL */}
       <NotificationPanel 
         visible={notificationPanelVisible}
         onClose={toggleNotificationPanel}
@@ -198,7 +219,6 @@ export default function ChatListScreen({ navigation, route }) {
         <LinearGradient colors={colors.headerGradient} style={StyleSheet.absoluteFill}>
           <View style={styles.safeArea} />
           
-          {/* ✅ 3. CONNECT TOPBAR TO REAL DATA */}
           <TopBar 
             onMenuPress={toggleSidebar}
             onNotificationPress={toggleNotificationPanel}
@@ -206,16 +226,30 @@ export default function ChatListScreen({ navigation, route }) {
           />
 
           <View style={styles.fixedTopContent}>
-            <View style={styles.headerContent}>
-              <Text style={styles.headerTitle}>Messages</Text>
+            <View style={[
+              styles.headerContent,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]}>
+              <Text style={[
+                styles.headerTitle,
+                isRTL && { textAlign: 'right' }
+              ]}>
+                {t('messages')}
+              </Text>
               <Image source={require("../assets/famGif.gif")} style={styles.gif} resizeMode="contain" />
             </View>
 
             {/* Stories Section */}
             <View style={styles.storiesCard}>
-              <Text style={styles.storiesTitle}>Stories</Text>
+              <Text style={[
+                styles.storiesTitle,
+                isRTL && { textAlign: 'right' }
+              ]}>
+                {t('stories')}
+              </Text>
               <ScrollView 
                 horizontal 
+                inverted={isRTL}
                 showsHorizontalScrollIndicator={false} 
                 contentContainerStyle={{ paddingVertical: 8 }}
               >
@@ -231,7 +265,12 @@ export default function ChatListScreen({ navigation, route }) {
       {/* WHITE BOTTOM SECTION - Conversations List */}
       <View style={[styles.scrollableBottomSection, { top: TOP_SECTION_HEIGHT }]}>
         <ScrollView contentContainerStyle={styles.bottomScroll} showsVerticalScrollIndicator={false}>
-          <Text style={styles.conversationsTitle}>Recent Chats</Text>
+          <Text style={[
+            styles.conversationsTitle,
+            isRTL && { textAlign: 'right' }
+          ]}>
+            {t('recentChats')}
+          </Text>
           
           {conversations.map((conv) => (
             <ConversationItem
@@ -241,6 +280,7 @@ export default function ChatListScreen({ navigation, route }) {
               onPress={openConversation}
               onVideoCall={handleVideoCall}
               onAudioCall={handleAudioCall}
+              isRTL={isRTL}
             />
           ))}
 
@@ -256,18 +296,21 @@ export default function ChatListScreen({ navigation, route }) {
       <Modal visible={storyVisible} transparent={false} animationType="slide">
         <View style={styles.storyModal}>
           <TouchableOpacity 
-            style={styles.closeStoryButton} 
+            style={[
+              styles.closeStoryButton,
+              isRTL && { left: 'auto', right: 20 }
+            ]} 
             onPress={closeStory}
           >
             <Feather name="x" size={32} color="#fff" />
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={[styles.tapZone, { left: 0 }]} 
+            style={[styles.tapZone, isRTL ? { right: 0 } : { left: 0 }]} 
             onPress={prevStory} 
           />
           <TouchableOpacity 
-            style={[styles.tapZone, { right: 0 }]} 
+            style={[styles.tapZone, isRTL ? { left: 0 } : { right: 0 }]} 
             onPress={nextStory} 
           />
 
@@ -400,7 +443,6 @@ const styles = StyleSheet.create({
   },
   conversationInfo: {
     flex: 1,
-    marginLeft: 12,
   },
   conversationName: {
     fontSize: 16,

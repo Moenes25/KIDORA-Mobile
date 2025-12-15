@@ -191,15 +191,16 @@ export default function ImprovementsScreen({ navigation }) {
                   {expandedMilestone === milestone.id && milestone.completed && (
                     <View style={styles.expandedContent}>
                       {/* First Row: Language and Motor */}
+                      {/* First Row: Language and Motor */}
                       <View style={[
                         styles.circularProgressRow,
                         isRTL && { flexDirection: 'row-reverse' }
                       ]}>
-                        {[t("language"), t("motor")].map((skill) => {
-                          const value = milestone.skills[skill];
+                        {["language", "motor"].map((skillKey) => {
+                          const value = milestone.skills[skillKey];
                           const progressColor = getProgressColor(value);
                           return (
-                            <View key={skill} style={styles.circularProgressItem}>
+                            <View key={skillKey} style={styles.circularProgressItem}>
                               {/* Circular Progress */}
                               <View style={styles.circularProgress}>
                                 <View style={styles.circularProgressOuter}>
@@ -217,7 +218,7 @@ export default function ImprovementsScreen({ navigation }) {
                               </View>
                               {/* Skill Label */}
                               <Text style={styles.skillLabel}>
-                                {t(skill)}
+                                {t(skillKey)}
                               </Text>
                             </View>
                           );
@@ -225,15 +226,16 @@ export default function ImprovementsScreen({ navigation }) {
                       </View>
 
                       {/* Second Row: Cognition and Social */}
+                      {/* Second Row: Cognition and Social */}
                       <View style={[
                         styles.circularProgressRow,
                         isRTL && { flexDirection: 'row-reverse' }
                       ]}>
-                        {[t("cognition"), t("social")].map((skill) => {
-                          const value = milestone.skills[skill];
+                        {["cognition", "social"].map((skillKey) => {
+                          const value = milestone.skills[skillKey];
                           const progressColor = getProgressColor(value);
                           return (
-                            <View key={skill} style={styles.circularProgressItem}>
+                            <View key={skillKey} style={styles.circularProgressItem}>
                               {/* Circular Progress */}
                               <View style={styles.circularProgress}>
                                 <View style={styles.circularProgressOuter}>
@@ -251,7 +253,7 @@ export default function ImprovementsScreen({ navigation }) {
                               </View>
                               {/* Skill Label */}
                               <Text style={styles.skillLabel}>
-                                {t(skill)}
+                                {t(skillKey)}
                               </Text>
                             </View>
                           );
@@ -289,7 +291,7 @@ const styles = StyleSheet.create({
   },
 
   safeArea: {
-    height: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
   },
 
   header: {

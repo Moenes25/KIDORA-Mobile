@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     borderBottomStartRadius: 38,
   },
   safeArea: {
-    height: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
   },
   header: {
     flexDirection: "row",
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.3)",
     marginLeft: 8,
   },
-  childInfoHeader: { marginLeft: 16, flex: 1 },
+  childInfoHeader: { marginLeft: 16, marginRight: 16, flex: 1 },
   childName: { fontSize: 22, fontWeight: "700", color: "#fff" },
   childInfoText: { fontSize: 14, color: "rgba(255,255,255,0.9)", marginTop: 2 },
 

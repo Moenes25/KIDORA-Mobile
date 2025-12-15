@@ -16,8 +16,11 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Speech from 'expo-speech'; 
+import { Audio } from 'expo-av';
 import { PERPLEXITY_API_KEY } from '../../secrets';
+
 const apiKey = PERPLEXITY_API_KEY;
+
 export default function AiTutorScreen({ setScreen, isDark, colors }) {
   const [chatInput, setChatInput] = useState('');
   
@@ -44,47 +47,83 @@ export default function AiTutorScreen({ setScreen, isDark, colors }) {
 
   const shadowColor = isDark ? '#2d1b69' : '#000';
 
-  // --- 1. CLEAN TEXT FUNCTION (UPDATED) ---
+  // --- INITIALIZE AUDIO FOR iOS ---
+  useEffect(() => {
+    const setupAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+          shouldDuckAndroid: true,
+        });
+        console.log('Audio mode configured successfully');
+      } catch (error) {
+        console.log('Audio setup error:', error);
+      }
+    };
+    
+    setupAudio();
+  }, []);
+
+  // --- 1. CLEAN TEXT FUNCTION ---
   const cleanTextForSpeech = (text) => {
     if (!text) return "";
     return text
-      // 1. Remove Citations like [1], [12]
       .replace(/\[\d+\]/g, "") 
-      // 2. Remove Markdown like **text** or ## text
       .replace(/[*#]/g, "") 
-      // 3. Remove EMOJIS (This regex catches standard emojis like 🚀, 🌟, 🐦)
       .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, "")
-      // 4. Remove extra whitespace created by removals
       .trim();
   };
 
-  // --- 2. TEXT TO SPEECH ---
-  const speakText = (text) => {
-    Speech.stop(); 
-    setIsSpeaking(true);
-    
-    // We strictly use the CLEANED text for audio
-    const textToRead = cleanTextForSpeech(text);
+  // --- 2. TEXT TO SPEECH (iOS FIXED) ---
+  const speakText = async (text) => {
+    try {
+      // Stop any ongoing speech
+      await Speech.stop();
+      setIsSpeaking(true);
+      
+      const textToRead = cleanTextForSpeech(text);
 
-    // If there is nothing left to read (e.g. only emojis were sent), don't speak
-    if (!textToRead) {
+      if (!textToRead) {
         setIsSpeaking(false);
         return;
-    }
+      }
 
-    Speech.speak(textToRead, {
-      language: 'ar-SA', 
-      pitch: 1.0,        
-      rate: 0.85,        
-      onDone: () => setIsSpeaking(false),
-      onStopped: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false) 
-    });
+      // Reconfigure audio mode before each speech (iOS fix)
+      if (Platform.OS === 'ios') {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+        });
+      }
+
+      Speech.speak(textToRead, {
+        language: 'ar-SA', 
+        pitch: 1.0,        
+        rate: 0.85,        
+        onDone: () => setIsSpeaking(false),
+        onStopped: () => setIsSpeaking(false),
+        onError: (error) => {
+          console.log('Speech error:', error);
+          setIsSpeaking(false);
+        }
+      });
+    } catch (error) {
+      console.log('Speech setup error:', error);
+      setIsSpeaking(false);
+    }
   };
 
-  const stopSpeaking = () => {
-    Speech.stop();
-    setIsSpeaking(false);
+  const stopSpeaking = async () => {
+    try {
+      await Speech.stop();
+      setIsSpeaking(false);
+    } catch (error) {
+      console.log('Stop speaking error:', error);
+      setIsSpeaking(false);
+    }
   };
 
   // --- 3. SEND MESSAGE LOGIC ---
@@ -100,7 +139,6 @@ export default function AiTutorScreen({ setScreen, isDark, colors }) {
     Keyboard.dismiss();
 
     try {
-      // Filter out greeting for API logic
       const validHistory = messages.filter((msg, index) => {
         if (index === 0 && msg.role === 'assistant') return false; 
         return true;
@@ -117,7 +155,6 @@ export default function AiTutorScreen({ setScreen, isDark, colors }) {
           messages: [
             {
               role: "system",
-              // We still ask for emojis in text because they look nice
               content: "You are a friendly, magical tutor for children. Explain simply. Use emojis to make it fun. NEVER use citations or sources. Just give the answer directly in Arabic and don't read icons only phrases and try to use sentiment."
             },
             ...validHistory, 
@@ -132,21 +169,23 @@ export default function AiTutorScreen({ setScreen, isDark, colors }) {
 
       if (data.choices && data.choices.length > 0) {
         let aiResponse = data.choices[0].message.content;
-        
-        // Remove citations from TEXT as well (just in case)
         aiResponse = aiResponse.replace(/\[\d+\]/g, "");
 
         setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
         
-        // The speak function handles the Emoji removal internally
-        speakText(aiResponse);
+        // Small delay to ensure message is rendered before speaking
+        setTimeout(() => {
+          speakText(aiResponse);
+        }, 100);
       } 
 
     } catch (error) {
       console.error("API Error Details:", error);
       const errorMsg = 'عذراً، حدثت مشكلة صغيرة. هل يمكنك المحاولة مرة أخرى؟';
       setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
-      speakText(errorMsg);
+      setTimeout(() => {
+        speakText(errorMsg);
+      }, 100);
     } finally {
       setIsLoading(false);
     }
@@ -154,10 +193,9 @@ export default function AiTutorScreen({ setScreen, isDark, colors }) {
 
   useEffect(() => {
     setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
+      scrollViewRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, [messages]);
-
 
   return (
     <View style={styles.container}>
@@ -174,8 +212,8 @@ export default function AiTutorScreen({ setScreen, isDark, colors }) {
           
           <TouchableOpacity 
             onPress={isSpeaking ? stopSpeaking : () => {
-                const lastMsg = messages[messages.length-1];
-                if(lastMsg.role === 'assistant') speakText(lastMsg.content);
+              const lastMsg = messages[messages.length-1];
+              if(lastMsg && lastMsg.role === 'assistant') speakText(lastMsg.content);
             }} 
             style={styles.backButton}
           >
@@ -199,41 +237,41 @@ export default function AiTutorScreen({ setScreen, isDark, colors }) {
                 }]}>
                   
                   <ScrollView ref={scrollViewRef} style={styles.messagesList} showsVerticalScrollIndicator={false}>
-                     <View style={styles.chatHeader}>
-                        <LinearGradient colors={['#8b5cf6', '#6366f1']} style={styles.chatAvatar}>
-                          <Feather name="cpu" size={28} color="#fff" />
-                        </LinearGradient>
-                        <View style={styles.chatHeaderInfo}>
-                          <Text style={[styles.chatHeaderTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
-                            مرحباً بك!
-                          </Text>
-                          <Text style={[styles.chatHeaderSubtitle, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>
-                             أنا أتكلم وأسمعك! 🔊
-                          </Text>
-                        </View>
+                    <View style={styles.chatHeader}>
+                      <LinearGradient colors={['#8b5cf6', '#6366f1']} style={styles.chatAvatar}>
+                        <Feather name="cpu" size={28} color="#fff" />
+                      </LinearGradient>
+                      <View style={styles.chatHeaderInfo}>
+                        <Text style={[styles.chatHeaderTitle, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+                          مرحباً بك!
+                        </Text>
+                        <Text style={[styles.chatHeaderSubtitle, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>
+                          أنا أتكلم وأسمعك! 🔊
+                        </Text>
                       </View>
+                    </View>
 
-                      {messages.map((msg, index) => (
-                        <View key={index} style={[
-                          msg.role === 'user' ? styles.userMessage : styles.aiMessage,
-                          { 
-                            backgroundColor: msg.role === 'user' 
-                              ? (isDark ? '#312e81' : themeColors.userBubble) 
-                              : (isDark ? '#374151' : themeColors.aiBubble) 
-                          }
-                        ]}>
-                          <Text style={[styles.messageText, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
-                            {msg.content}
-                          </Text>
-                        </View>
-                      ))}
+                    {messages.map((msg, index) => (
+                      <View key={index} style={[
+                        msg.role === 'user' ? styles.userMessage : styles.aiMessage,
+                        { 
+                          backgroundColor: msg.role === 'user' 
+                            ? (isDark ? '#312e81' : themeColors.userBubble) 
+                            : (isDark ? '#374151' : themeColors.aiBubble) 
+                        }
+                      ]}>
+                        <Text style={[styles.messageText, { color: isDark ? colors.childrenArea.cardText : '#1f2937' }]}>
+                          {msg.content}
+                        </Text>
+                      </View>
+                    ))}
 
-                      {isLoading && (
-                        <View style={styles.loadingContainer}>
-                           <ActivityIndicator size="small" color={themeColors.primary} />
-                           <Text style={{ marginLeft: 8, color: '#6b7280' }}>جار التفكير...</Text>
-                        </View>
-                      )}
+                    {isLoading && (
+                      <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="small" color={themeColors.primary} />
+                        <Text style={{ marginLeft: 8, color: '#6b7280' }}>جار التفكير...</Text>
+                      </View>
+                    )}
                   </ScrollView>
 
                   <View style={styles.chatInput}>
@@ -263,12 +301,12 @@ export default function AiTutorScreen({ setScreen, isDark, colors }) {
               </View>
 
               <View style={{ flex: isPortrait ? 0 : 2, justifyContent: 'center' }}>
-                 {!isPortrait && (
-                   <Text style={{color: '#fff', fontSize: 16, fontWeight:'bold', marginBottom: 12, textAlign:'center', opacity: 0.9}}>
-                     ✨ أسئلة مقترحة:
-                   </Text>
-                 )}
-                 <View style={[styles.quickQuestions, !isPortrait && { flexDirection: 'column' }]}>
+                {!isPortrait && (
+                  <Text style={{color: '#fff', fontSize: 16, fontWeight:'bold', marginBottom: 12, textAlign:'center', opacity: 0.9}}>
+                    ✨ أسئلة مقترحة:
+                  </Text>
+                )}
+                <View style={[styles.quickQuestions, !isPortrait && { flexDirection: 'column' }]}>
                   {['ما هو الفضاء؟ 🚀', 'لماذا البحر مالح؟ 🌊', 'كيف تتنفس الأسماك؟ 🐟', 'من اخترع المصباح؟ 💡'].map((q, i) => (
                     <TouchableOpacity 
                       key={i} 

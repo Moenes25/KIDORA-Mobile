@@ -32,6 +32,7 @@ import CallComponent from './components/CallComponent';
 import VideoCall from './screens/VideoCallScreen';
 import FeedbackScreen from './components/FeedBackScreenComponent';
 import { NotificationProvider } from './context/NotificationContext';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {

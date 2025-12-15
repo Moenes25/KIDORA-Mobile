@@ -1,166 +1,162 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Platform, useWindowDimensions } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import SpaceBackground from '../../components/SpaceBackground';
 
-export default function AgeSelectionScreen({ setScreen, setSelectedAge }) {
-  const { width, height } = useWindowDimensions();
-  const isPortrait = height > width;
+const { width, height } = Dimensions.get('window');
+const isLandscape = width > height;
 
-  // Dynamic Card sizing
-  // In Portrait, cards take about 1/4 of width (now 4 cards).
-  // In Landscape, cards take about 1/4 of the RIGHT HALF of the screen.
-  const cardWidth = isPortrait 
-    ? (width - 80) / 4  // 80 = gap(20*3) + padding(20*2) roughly
-    : (width * 0.5 - 80) / 4; // Use half screen width for grid calculation
+export default function AgeSelectionScreen({ setScreen, setSelectedAge }) {
+  const ageGroups = [
+    { age: '4-5', label: 'سنوات', emoji: '🎈', color: ['#fef3c7', '#fde68a'], grade: 'التحضيري' },
+    { age: '6-7', label: 'سنوات', emoji: '📚', color: ['#ddd6fe', '#c4b5fd'], grade: 'السنة الأولى' },
+    { age: '8-9', label: 'سنوات', emoji: '⭐', color: ['#bfdbfe', '#93c5fd'], grade: 'السنة 2-3' },
+    { age: '10-11', label: 'سنة', emoji: '🎯', color: ['#bbf7d0', '#86efac'], grade: 'السنة 4-5' },
+    { age: '12', label: 'سنة', emoji: '🏆', color: ['#fecaca', '#fca5a5'], grade: 'السنة السادسة' },
+  ];
+
+  const handleSelectAge = (age) => {
+    if (setSelectedAge && typeof setSelectedAge === 'function') {
+      setSelectedAge(age);
+    }
+    if (setScreen && typeof setScreen === 'function') {
+      setScreen('home');
+    }
+  };
 
   return (
-    <SpaceBackground theme="purple" isPortrait={isPortrait}>
+    <SpaceBackground theme="purple" isPortrait={!isLandscape}>
       <View style={styles.container}>
-        <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44 }} />
-        <StatusBar barStyle="light-content" />
-        
-        <ScrollView 
-          contentContainerStyle={[
-            styles.centerContent, 
-            !isPortrait && styles.centerContentLandscape
-          ]} 
-          showsVerticalScrollIndicator={false}
-        >
-          
-          {/* HEADER SECTION */}
-          <View style={[
-            styles.headerSection, 
-            !isPortrait && styles.headerSectionLandscape
-          ]}>
-            <View style={[
-              styles.iconCircle, 
-              { backgroundColor: 'rgba(255,255,255,0.2)' },
-              !isPortrait && { width: 80, height: 80, borderRadius: 40, marginBottom: 16 }
-            ]}>
-              <Feather name="star" size={isPortrait ? 60 : 40} color="#fff" />
+        <View style={styles.content}>
+          {/* Header Section */}
+          <View style={styles.headerSection}>
+            <View style={styles.iconCircle}>
+              <Ionicons name="school" size={40} color="#fff" />
             </View>
-            <Text style={[styles.mainTitle, !isPortrait && { fontSize: 28 }]}>عالم التعلم السحري</Text>
-            <Text style={[styles.subtitle, !isPortrait && { fontSize: 16 }]}>اختر عمرك لنبدأ المغامرة!</Text>
+            <Text style={styles.mainTitle}>عالم التعلم السحري</Text>
+            <Text style={styles.subtitle}>اختر عمرك لنبدأ المغامرة!</Text>
           </View>
 
-          {/* GRID SECTION - Now includes age 3 */}
-          <View style={[
-            styles.ageGrid,
-            !isPortrait && styles.ageGridLandscape
-          ]}>
-            {[3, 4, 5, 6].map((age) => (
+          {/* Age Cards Grid */}
+          <View style={styles.ageCardsGrid}>
+            {ageGroups.map((group, index) => (
               <TouchableOpacity
-                key={age}
-                onPress={() => {
-                  setSelectedAge(age);
-                  setScreen('home');
-                }}
-                style={{ width: Math.max(80, cardWidth) }} // Dynamic Width with safety minimum
+                key={index}
+                onPress={() => handleSelectAge(group.age)}
+                style={styles.ageCardWrapper}
               >
-                <LinearGradient 
-                  colors={['#fef3c7', '#fde68a']} 
-                  style={[
-                    styles.ageCardGradient,
-                    !isPortrait && { padding: 14 }
-                  ]}
+                <LinearGradient
+                  colors={group.color}
+                  style={styles.ageCard}
                 >
-                  <Text style={[styles.ageEmoji, !isPortrait && { fontSize: 32 }]}>🎈</Text>
-                  <Text style={[styles.ageNumber, !isPortrait && { fontSize: 36 }]}>{age}</Text>
-                  <Text style={[styles.ageLabel, !isPortrait && { fontSize: 13 }]}>سنوات</Text>
+                  <Text style={styles.ageCardEmoji}>{group.emoji}</Text>
+                  <Text style={styles.ageCardNumber}>{group.age}</Text>
+                  <Text style={styles.ageCardLabel}>{group.label}</Text>
+                  <View style={styles.gradeTag}>
+                    <Text style={styles.gradeText}>{group.grade}</Text>
+                  </View>
                 </LinearGradient>
               </TouchableOpacity>
             ))}
           </View>
-        </ScrollView>
+        </View>
       </View>
     </SpaceBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  centerContent: { 
-    flexGrow: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    padding: 20 
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  centerContentLandscape: {
+  content: {
+    width: '100%',
+    maxWidth: 900,
+    paddingHorizontal: 40,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 40,
   },
-  
-  headerSection: { 
-    alignItems: 'center', 
-    marginBottom: 40 
-  },
-  headerSectionLandscape: {
-    marginBottom: 0,
+  headerSection: {
     alignItems: 'center',
     flex: 1,
-    paddingRight: 20,
+    paddingRight: 30,
   },
-  
-  iconCircle: { 
-    width: 120, 
-    height: 120, 
-    borderRadius: 60, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    marginBottom: 20 
-  },
-  mainTitle: { 
-    fontSize: 36, 
-    fontWeight: '900', 
-    color: '#fff', 
-    textAlign: 'center', 
-    marginBottom: 10 
-  },
-  subtitle: { 
-    fontSize: 20, 
-    fontWeight: '700', 
-    color: 'rgba(255,255,255,0.9)', 
-    textAlign: 'center' 
-  },
-  
-  ageGrid: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    justifyContent: 'center', 
-    gap: 16 
-  },
-  ageGridLandscape: {
-    flex: 1.5,
+  iconCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
-    gap: 14
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  
-  ageCardGradient: { 
-    borderRadius: 20, 
-    padding: 16, 
-    alignItems: 'center', 
+  mainTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
+  },
+  ageCardsGrid: {
+    flex: 1.5,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+  },
+  ageCardWrapper: {
+    width: '18%',
+    minWidth: 85,
+  },
+  ageCard: {
+    borderRadius: 16,
+    padding: 10,
+    alignItems: 'center',
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+    minHeight: 130,
+    justifyContent: 'center',
   },
-  ageEmoji: { 
-    fontSize: 40, 
-    marginBottom: 8 
+  ageCardEmoji: {
+    fontSize: 28,
+    marginBottom: 4,
   },
-  ageNumber: { 
-    fontSize: 42, 
-    fontWeight: '900', 
-    color: '#8b5cf6' 
+  ageCardNumber: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#8b5cf6',
   },
-  ageLabel: { 
-    fontSize: 16, 
-    fontWeight: '700', 
-    color: '#6b7280' 
+  ageCardLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  gradeTag: {
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginTop: 2,
+  },
+  gradeText: {
+    fontSize: 8,
+    fontWeight: '600',
+    color: '#8b5cf6',
+    textAlign: 'center',
   },
 });

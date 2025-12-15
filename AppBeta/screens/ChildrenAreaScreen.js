@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation'; 
 import { useTheme } from '../context/ThemeContext';
 
-// Import Sub-Screens
+// Import Sub-Screens from children folder
 import AgeSelectionScreen from './children/AgeSelectionScreen';
 import ChildrenHomeScreen from './children/ChildrenHomeScreen';
 import ModulesScreen from './children/ModulesScreen';
@@ -24,22 +24,19 @@ export default function ChildrenAreaScreen({ navigation }) {
   const [equippedSkin, setEquippedSkin] = useState(1);
   const [selectedModule, setSelectedModule] = useState(null);
 
-  // --- UPDATED ORIENTATION LOGIC ---
+  // Lock to Landscape Mode
   useEffect(() => {
     async function lockToLandscape() {
-      // This forces the screen to be Horizontal (Landscape)
-      // It applies to all sub-screens rendered below
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
     }
 
     lockToLandscape();
 
-    // Cleanup: Lock back to Portrait when the user leaves this area entirely
+    // Cleanup: Lock back to Portrait when leaving
     return () => {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
   }, []);
-  // ---------------------------------
 
   // Force Light Mode
   const isDark = false;
@@ -57,6 +54,8 @@ export default function ChildrenAreaScreen({ navigation }) {
       return (
         <ChildrenHomeScreen 
           setScreen={setScreen}
+          selectedAge={selectedAge}
+          setSelectedAge={setSelectedAge}
           coins={coins}
           level={level}
           isDark={isDark} 

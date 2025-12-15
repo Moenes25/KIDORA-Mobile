@@ -12,6 +12,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
 import TopNavBar from "../components/TopNavBar";
 
 const screenHeight = Dimensions.get("window").height;
@@ -19,6 +20,7 @@ const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 
 export default function PaymentsScreen({ navigation }) {
   const { colors, theme } = useTheme();
+  const { t, isRTL } = useTranslation();
   const isDark = theme === "dark";
 
   const unpaidInvoices = [
@@ -82,7 +84,7 @@ export default function PaymentsScreen({ navigation }) {
           )}
           
           <View style={styles.safeArea} />
-          <TopNavBar title="Payments" navigation={navigation} />
+          <TopNavBar title={t('payments')} navigation={navigation} />
         </LinearGradient>
       </View>
       
@@ -109,17 +111,17 @@ export default function PaymentsScreen({ navigation }) {
             ]}
           >
             {/* Card Header */}
-            <View style={styles.cardHeaderSection}>
-              <View style={styles.cardHeaderContent}>
-                <View style={[styles.iconBadge, { backgroundColor: "#fee2e2" }]}>
+            <View style={[styles.cardHeaderSection, isRTL && { flexDirection: 'row-reverse' }]}>
+              <View style={[styles.cardHeaderContent, isRTL && { flexDirection: 'row-reverse' }]}>
+                <View style={[styles.iconBadge, { backgroundColor: "#fee2e2" }, isRTL && { marginLeft: 12, marginRight: 0 }]}>
                   <Feather name="alert-circle" size={20} color="#dc2626" />
                 </View>
-                <View style={styles.cardHeaderText}>
-                  <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#2d3436" }]}>
-                    Unpaid Invoices
+                <View style={[styles.cardHeaderText, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#2d3436" }, isRTL && { textAlign: 'right' }]}>
+                    {t('unpaidInvoices')}
                   </Text>
-                  <Text style={[styles.cardSubtitle, { color: isDark ? "#b0a8d9" : "#636e72" }]}>
-                    {unpaidInvoices.length} pending payment{unpaidInvoices.length !== 1 ? 's' : ''}
+                  <Text style={[styles.cardSubtitle, { color: isDark ? "#b0a8d9" : "#636e72" }, isRTL && { textAlign: 'right' }]}>
+                    {unpaidInvoices.length} {unpaidInvoices.length === 1 ? t('pendingPayment') : t('pendingPayments')}
                   </Text>
                 </View>
               </View>
@@ -142,34 +144,34 @@ export default function PaymentsScreen({ navigation }) {
                 onPress={() => navigation.navigate("InvoiceToPayScreen", { invoice: item })}
                 activeOpacity={0.7}
               >
-                <View style={styles.invoiceItemContent}>
-                  <View style={[styles.invoiceIconCircle, { backgroundColor: "#fef3c7" }]}>
+                <View style={[styles.invoiceItemContent, isRTL && { flexDirection: 'row-reverse' }]}>
+                  <View style={[styles.invoiceIconCircle, { backgroundColor: "#fef3c7" }, isRTL && { marginLeft: 12, marginRight: 0 }]}>
                     <Feather name="file-text" size={22} color="#f59e0b" />
                   </View>
 
-                  <View style={styles.invoiceDetails}>
-                    <Text style={[styles.invoiceTitle, { color: isDark ? "#ffffff" : "#2d3436" }]}>
+                  <View style={[styles.invoiceDetails, isRTL && { alignItems: 'flex-end' }]}>
+                    <Text style={[styles.invoiceTitle, { color: isDark ? "#ffffff" : "#2d3436" }, isRTL && { textAlign: 'right' }]}>
                       {item.title}
                     </Text>
-                    <View style={styles.invoiceMetaRow}>
+                    <View style={[styles.invoiceMetaRow, isRTL && { flexDirection: 'row-reverse' }]}>
                       <Feather name="user" size={12} color={isDark ? "#b0a8d9" : "#636e72"} />
-                      <Text style={[styles.invoiceMeta, { color: isDark ? "#b0a8d9" : "#636e72" }]}>
+                      <Text style={[styles.invoiceMeta, { color: isDark ? "#b0a8d9" : "#636e72" }, isRTL && { marginRight: 6, marginLeft: 0 }]}>
                         {item.child}
                       </Text>
                     </View>
-                    <View style={styles.invoiceMetaRow}>
+                    <View style={[styles.invoiceMetaRow, isRTL && { flexDirection: 'row-reverse' }]}>
                       <Feather name="calendar" size={12} color="#dc2626" />
-                      <Text style={[styles.invoiceMeta, { color: "#dc2626" }]}>
+                      <Text style={[styles.invoiceMeta, { color: "#dc2626" }, isRTL && { marginRight: 6, marginLeft: 0 }]}>
                         {item.dueDate}
                       </Text>
                     </View>
                   </View>
 
-                  <View style={styles.invoicePriceSection}>
+                  <View style={[styles.invoicePriceSection, isRTL && { marginRight: 8, marginLeft: 0 }]}>
                     <Text style={[styles.invoicePrice, { color: "#9b59b6" }]}>
                       {item.price}
                     </Text>
-                    <Feather name="chevron-right" size={20} color="#9b59b6" />
+                    <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={20} color="#9b59b6" />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -187,17 +189,17 @@ export default function PaymentsScreen({ navigation }) {
             ]}
           >
             {/* Card Header */}
-            <View style={styles.cardHeaderSection}>
-              <View style={styles.cardHeaderContent}>
-                <View style={[styles.iconBadge, { backgroundColor: "#b9f3ed" }]}>
+            <View style={[styles.cardHeaderSection, isRTL && { flexDirection: 'row-reverse' }]}>
+              <View style={[styles.cardHeaderContent, isRTL && { flexDirection: 'row-reverse' }]}>
+                <View style={[styles.iconBadge, { backgroundColor: "#b9f3ed" }, isRTL && { marginLeft: 12, marginRight: 0 }]}>
                   <Feather name="check-circle" size={20} color="#016266" />
                 </View>
-                <View style={styles.cardHeaderText}>
-                  <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#2d3436" }]}>
-                    Payment History
+                <View style={[styles.cardHeaderText, isRTL && { alignItems: 'flex-end' }]}>
+                  <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#2d3436" }, isRTL && { textAlign: 'right' }]}>
+                    {t('paymentHistory')}
                   </Text>
-                  <Text style={[styles.cardSubtitle, { color: isDark ? "#b0a8d9" : "#636e72" }]}>
-                    {paidInvoices.length} completed transaction{paidInvoices.length !== 1 ? 's' : ''}
+                  <Text style={[styles.cardSubtitle, { color: isDark ? "#b0a8d9" : "#636e72" }, isRTL && { textAlign: 'right' }]}>
+                    {paidInvoices.length} {paidInvoices.length === 1 ? t('completedTransaction') : t('completedTransactions')}
                   </Text>
                 </View>
               </View>
@@ -217,34 +219,34 @@ export default function PaymentsScreen({ navigation }) {
                 onPress={() => navigation.navigate("PaidInvoiceScreen", { invoice: item })}
                 activeOpacity={0.7}
               >
-                <View style={styles.invoiceItemContent}>
-                  <View style={[styles.invoiceIconCircle, { backgroundColor: "#b9f3ed" }]}>
+                <View style={[styles.invoiceItemContent, isRTL && { flexDirection: 'row-reverse' }]}>
+                  <View style={[styles.invoiceIconCircle, { backgroundColor: "#b9f3ed" }, isRTL && { marginLeft: 12, marginRight: 0 }]}>
                     <Feather name="check" size={22} color="#016266" />
                   </View>
 
-                  <View style={styles.invoiceDetails}>
-                    <Text style={[styles.invoiceTitle, { color: isDark ? "#ffffff" : "#2d3436" }]}>
+                  <View style={[styles.invoiceDetails, isRTL && { alignItems: 'flex-end' }]}>
+                    <Text style={[styles.invoiceTitle, { color: isDark ? "#ffffff" : "#2d3436" }, isRTL && { textAlign: 'right' }]}>
                       {item.title}
                     </Text>
-                    <View style={styles.invoiceMetaRow}>
+                    <View style={[styles.invoiceMetaRow, isRTL && { flexDirection: 'row-reverse' }]}>
                       <Feather name="user" size={12} color={isDark ? "#b0a8d9" : "#636e72"} />
-                      <Text style={[styles.invoiceMeta, { color: isDark ? "#b0a8d9" : "#636e72" }]}>
+                      <Text style={[styles.invoiceMeta, { color: isDark ? "#b0a8d9" : "#636e72" }, isRTL && { marginRight: 6, marginLeft: 0 }]}>
                         {item.child}
                       </Text>
                     </View>
-                    <View style={styles.invoiceMetaRow}>
+                    <View style={[styles.invoiceMetaRow, isRTL && { flexDirection: 'row-reverse' }]}>
                       <Feather name="calendar" size={12} color="#016266" />
-                      <Text style={[styles.invoiceMeta, { color: "#016266" }]}>
+                      <Text style={[styles.invoiceMeta, { color: "#016266" }, isRTL && { marginRight: 6, marginLeft: 0 }]}>
                         {item.paymentDate}
                       </Text>
                     </View>
                   </View>
 
-                  <View style={styles.invoicePriceSection}>
+                  <View style={[styles.invoicePriceSection, isRTL && { marginRight: 8, marginLeft: 0 }]}>
                     <Text style={[styles.invoicePrice, { color: "#016266" }]}>
                       {item.price}
                     </Text>
-                    <Feather name="chevron-right" size={20} color={isDark ? "#b0a8d9" : "#636e72"} />
+                    <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={20} color={isDark ? "#b0a8d9" : "#636e72"} />
                   </View>
                 </View>
               </TouchableOpacity>

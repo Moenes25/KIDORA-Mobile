@@ -15,11 +15,12 @@ import {
   SafeAreaView
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import PayoneerLogo from "../assets/payoneer.png"; // Ensure this path is correct
+import { useTranslation } from "../context/TranslationContext";
+import PayoneerLogo from "../assets/payoneer.png";
 
 // Official-like Payoneer Color Palette
 const COLORS = {
-  orange: "#FF4800", // Official Payoneer Orange
+  orange: "#FF4800",
   darkText: "#2B2B2B",
   lightText: "#666666",
   border: "#D1D5DB",
@@ -33,20 +34,20 @@ export default function PayoneerPaymentScreen({
   onClose,
   paymentAmount,
 }) {
+  const { t, isRTL } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
 
   const initiatePayoneerPayment = async () => {
     if (!email.trim()) {
-      Alert.alert("Required", "Please enter your Payoneer email/username");
+      Alert.alert(t('required'), t('enterPayoneerEmail'));
       return;
     }
-    // ... (Your existing validation & fetch logic here)
     setLoading(true);
     setTimeout(() => {
-        setLoading(false);
-        Alert.alert("Simulated", "Payment logic would run here.");
+      setLoading(false);
+      Alert.alert(t('simulated'), t('paymentLogicWouldRun'));
     }, 2000);
   };
 
@@ -56,17 +57,34 @@ export default function PayoneerPaymentScreen({
     <Modal visible={visible} animationType="slide" transparent={false}>
       <SafeAreaView style={styles.safeArea}>
         {/* Top Header Bar (Gateway Style) */}
-        <View style={styles.headerBar}>
-            <View style={styles.headerLeft}>
-                <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                    <Feather name="x" size={24} color={COLORS.lightText} />
-                </TouchableOpacity>
-                <Image source={PayoneerLogo} style={styles.logo} resizeMode="contain" />
-            </View>
-            <View style={styles.secureBadge}>
-                <Feather name="lock" size={14} color={COLORS.success} />
-                <Text style={styles.secureText}>SECURE</Text>
-            </View>
+        <View style={[
+          styles.headerBar,
+          isRTL && { flexDirection: 'row-reverse' }
+        ]}>
+          <View style={[
+            styles.headerLeft,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
+            <TouchableOpacity 
+              onPress={onClose} 
+              style={[
+                styles.closeButton,
+                isRTL && { marginLeft: 8, marginRight: 0 }
+              ]}
+            >
+              <Feather name="x" size={24} color={COLORS.lightText} />
+            </TouchableOpacity>
+            <Image source={PayoneerLogo} style={styles.logo} resizeMode="contain" />
+          </View>
+          <View style={styles.secureBadge}>
+            <Feather name="lock" size={14} color={COLORS.success} />
+            <Text style={[
+              styles.secureText,
+              isRTL && { marginRight: 4, marginLeft: 0 }
+            ]}>
+              {t('secure')}
+            </Text>
+          </View>
         </View>
 
         <KeyboardAvoidingView
@@ -77,84 +95,153 @@ export default function PayoneerPaymentScreen({
             
             {/* Order Summary Card */}
             <View style={styles.orderSummaryContainer}>
-                <Text style={styles.sectionTitle}>Order Summary</Text>
-                <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Total Amount</Text>
-                    <View style={{alignItems: 'flex-end'}}>
-                        <Text style={styles.summaryAmount}>{paymentAmount} TND</Text>
-                        <Text style={styles.summarySubAmount}>≈ ${usdAmount} USD</Text>
-                    </View>
+              <Text style={[
+                styles.sectionTitle,
+                isRTL && { textAlign: 'right' }
+              ]}>
+                {t('orderSummary')}
+              </Text>
+              <View style={[
+                styles.summaryRow,
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
+                <Text style={[
+                  styles.summaryLabel,
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  {t('totalAmount')}
+                </Text>
+                <View style={{ alignItems: isRTL ? 'flex-start' : 'flex-end' }}>
+                  <Text style={styles.summaryAmount}>{paymentAmount} TND</Text>
+                  <Text style={[
+                    styles.summarySubAmount,
+                    isRTL && { textAlign: 'left' }
+                  ]}>
+                    ≈ ${usdAmount} USD
+                  </Text>
                 </View>
-                <View style={styles.divider} />
-                <View style={styles.merchantRow}>
-                    <Text style={styles.merchantLabel}>Merchant</Text>
-                    <Text style={styles.merchantName}>KIDORA Inc.</Text>
-                </View>
+              </View>
+              <View style={styles.divider} />
+              <View style={[
+                styles.merchantRow,
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
+                <Text style={[
+                  styles.merchantLabel,
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  {t('merchant')}
+                </Text>
+                <Text style={[
+                  styles.merchantName,
+                  isRTL && { textAlign: 'left' }
+                ]}>
+                  KIDORA Inc.
+                </Text>
+              </View>
             </View>
 
             {/* Login / Payment Form */}
             <View style={styles.formCard}>
-                <Text style={styles.formTitle}>Pay with Payoneer</Text>
-                <Text style={styles.formSubtitle}>Enter your account details to proceed.</Text>
+              <Text style={[
+                styles.formTitle,
+                isRTL && { textAlign: 'right' }
+              ]}>
+                {t('payWithPayoneer')}
+              </Text>
+              <Text style={[
+                styles.formSubtitle,
+                isRTL && { textAlign: 'right' }
+              ]}>
+                {t('enterAccountDetails')}
+              </Text>
 
-                {/* Email Input */}
-                <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Payoneer Username or Email</Text>
-                    <View style={[
-                        styles.inputWrapper,
-                        focusedField === 'email' && styles.inputWrapperFocused
-                    ]}>
-                        <TextInput
-                            style={styles.textInput}
-                            placeholder="username@example.com"
-                            placeholderTextColor="#A0A0A0"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            value={email}
-                            onChangeText={setEmail}
-                            onFocus={() => setFocusedField('email')}
-                            onBlur={() => setFocusedField(null)}
-                            editable={!loading}
-                        />
-                    </View>
+              {/* Email Input */}
+              <View style={styles.inputGroup}>
+                <Text style={[
+                  styles.inputLabel,
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  {t('payoneerUsernameOrEmail')}
+                </Text>
+                <View style={[
+                  styles.inputWrapper,
+                  focusedField === 'email' && styles.inputWrapperFocused
+                ]}>
+                  <TextInput
+                    style={[
+                      styles.textInput,
+                      isRTL && { textAlign: 'right' }
+                    ]}
+                    placeholder={t('usernamePlaceholder')}
+                    placeholderTextColor="#A0A0A0"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    editable={!loading}
+                  />
                 </View>
+              </View>
 
-                {/* Info Note */}
-                <View style={styles.infoBox}>
-                    <Feather name="info" size={16} color={COLORS.lightText} />
-                    <Text style={styles.infoText}>
-                        You will be redirected to Payoneer to verify your identity.
-                    </Text>
-                </View>
+              {/* Info Note */}
+              <View style={[
+                styles.infoBox,
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
+                <Feather name="info" size={16} color={COLORS.lightText} />
+                <Text style={[
+                  styles.infoText,
+                  isRTL && { marginRight: 10, marginLeft: 0, textAlign: 'right' }
+                ]}>
+                  {t('redirectInfo')}
+                </Text>
+              </View>
 
-                {/* Pay Button */}
-                <TouchableOpacity
-                  style={[styles.payButton, loading && styles.payButtonDisabled]}
-                  onPress={initiatePayoneerPayment}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#fff" size="small" />
-                  ) : (
-                    <Text style={styles.payButtonText}>PAY NOW</Text>
-                  )}
-                </TouchableOpacity>
+              {/* Pay Button */}
+              <TouchableOpacity
+                style={[styles.payButton, loading && styles.payButtonDisabled]}
+                onPress={initiatePayoneerPayment}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.payButtonText}>{t('payNow')}</Text>
+                )}
+              </TouchableOpacity>
 
-                {/* Cancel Link */}
-                <TouchableOpacity onPress={onClose} style={styles.cancelLink} disabled={loading}>
-                    <Text style={styles.cancelLinkText}>Cancel and return to merchant</Text>
-                </TouchableOpacity>
+              {/* Cancel Link */}
+              <TouchableOpacity 
+                onPress={onClose} 
+                style={styles.cancelLink} 
+                disabled={loading}
+              >
+                <Text style={styles.cancelLinkText}>
+                  {t('cancelReturnToMerchant')}
+                </Text>
+              </TouchableOpacity>
             </View>
 
           </ScrollView>
 
           {/* Footer (Gateway Standard) */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>© 2025 Payoneer Inc. All Rights Reserved.</Text>
-            <View style={styles.footerLinks}>
-                <Text style={styles.footerLink}>Privacy</Text>
-                <Text style={styles.footerDivider}>|</Text>
-                <Text style={styles.footerLink}>Terms</Text>
+            <Text style={[
+              styles.footerText,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('allRightsReserved')}
+            </Text>
+            <View style={[
+              styles.footerLinks,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]}>
+              <Text style={styles.footerLink}>{t('privacy')}</Text>
+              <Text style={styles.footerDivider}>|</Text>
+              <Text style={styles.footerLink}>{t('terms')}</Text>
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -189,7 +276,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 100,
-    height: 30, // Adjusted for standard header height
+    height: 30,
   },
   secureBadge: {
     flexDirection: 'row',
@@ -216,7 +303,7 @@ const styles = StyleSheet.create({
   orderSummaryContainer: {
     backgroundColor: COLORS.white,
     padding: 20,
-    borderRadius: 8, // Sharper corners for enterprise look
+    borderRadius: 8,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -310,7 +397,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 4, // Square inputs are more standard for gateways
+    borderRadius: 4,
     backgroundColor: '#FAFAFA',
     paddingHorizontal: 12,
     height: 48,
@@ -369,7 +456,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   cancelLinkText: {
-    color: '#0070BA', // Standard link blue
+    color: '#0070BA',
     fontSize: 14,
   },
 

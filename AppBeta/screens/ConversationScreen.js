@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
+// screens/ConversationScreen.js
+import React, { useState, useLayoutEffect } from 'react'; // Added useLayoutEffect
 import {
   View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, StatusBar
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import ChatBubble from '../components/ChatBubble';
-import Avatar from '../components/Avatar';
-import TopNavBar from '../components/TopNavBar';
+// Removed explicit TopNavBar and Avatar imports as ChatNavBar handles the header
+import ChatNavBar from '../components/ChatNavBar'; // <--- Import your new consistent header
 import { CONVERSATIONS } from '../data/mockData';
 import { Feather } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../context/TranslationContext';
 
 export default function ConversationScreen({ navigation, route }) {
   const { colors } = useTheme();
+  const { t, isRTL } = useTranslation();
   const { user } = route.params;
   
   const [messages, setMessages] = useState(CONVERSATIONS[user.id] || []);
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
+
+  // --- FIX: Hide the default Navigation Header to avoid duplicates ---
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+  // ------------------------------------------------------------------
 
   // Common emojis for quick access
   const commonEmojis = ['😀', '😂', '❤️', '👍', '🎉', '😊', '🔥', '💯', '👏', '🙌', '😍', '🤔', '😢', '😎', '🙏', '✨'];
@@ -29,7 +40,12 @@ export default function ConversationScreen({ navigation, route }) {
     const now = new Date();
     const hh = now.getHours().toString().padStart(2, '0');
     const mm = now.getMinutes().toString().padStart(2, '0');
-    const msg = { id: `m${Date.now()}`, from: 'me', text: text.trim(), time: `${hh}:${mm}` };
+    const msg = { 
+      id: `m${Date.now()}`, 
+      from: 'me', 
+      text: text.trim(), 
+      time: `${hh}:${mm}` 
+    };
     setMessages(prev => [...prev, msg]);
     setText('');
     setShowEmoji(false);
@@ -39,74 +55,69 @@ export default function ConversationScreen({ navigation, route }) {
   const uploadFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({});
     if (result.type === 'success') {
-      const msg = { id: `f${Date.now()}`, from: 'me', text: `📎 ${result.name}`, time: 'Now' };
+      const msg = { 
+        id: `f${Date.now()}`, 
+        from: 'me', 
+        text: `📎 ${result.name}`, 
+        time: t('now') 
+      };
       setMessages(prev => [...prev, msg]);
     }
-  };
-
-  // Navigate to video call
-  const handleVideoCall = () => {
-    navigation.navigate('VideoCall', { user });
-  };
-
-  // Navigate to audio call
-  const handleAudioCall = () => {
-    navigation.navigate('Call', { user });
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-      <StatusBar barStyle="light-content" backgroundColor="#6F42C1" />
+      <StatusBar barStyle="light-content" backgroundColor="#9d00ff" />
       
-      {/* Purple Header Section */}
-      <View style={styles.purpleHeaderSection}>
-        <LinearGradient colors={colors.headerGradient} style={styles.headerGradient}>
-          <View style={styles.safeArea} />
-          
-          {/* Top Navigation Bar */}
-          <TopNavBar title={user.name} navigation={navigation} />
-
-          {/* Chat Header with User Info */}
-          <View style={styles.chatHeader}>
-            <Avatar uri={user.avatar} size={40} name={user.name} />
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={styles.chatHeaderName}>{user.name}</Text>
-              <Text style={styles.chatHeaderStatus}>Online</Text>
-            </View>
-            <TouchableOpacity style={styles.iconButton} onPress={handleVideoCall}>
-              <Feather name="video" size={22} color="#ffffff" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton} onPress={handleAudioCall}>
-              <Feather name="phone" size={22} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-      </View>
-
+      {/* --- FIX: Use the consistent ChatNavBar --- */}
+      {/* This replaces the entire 'Purple Header Section' block you had before */}
+      <ChatNavBar 
+        name={user.name} 
+        isOnline={true} // You can pass user.status here if you have it
+        avatar={user.avatar ? { uri: user.avatar } : null}
+      />
+      
       {/* Chat Messages */}
       <FlatList
         data={messages}
         keyExtractor={i => i.id}
         contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
         style={styles.messagesList}
-        renderItem={({ item }) => <ChatBubble message={item} isMine={item.from === 'me'} />}
+        renderItem={({ item }) => (
+          <ChatBubble 
+            message={item} 
+            isMine={item.from === 'me'}
+            isRTL={isRTL}
+          />
+        )}
       />
 
       {/* Emoji Picker - Show above composer */}
       {showEmoji && (
         <View style={styles.emojiContainer}>
-          <View style={styles.emojiHeader}>
-            <Text style={styles.emojiTitle}>Emojis</Text>
+          <View style={[
+            styles.emojiHeader,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
+            <Text style={[
+              styles.emojiTitle,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('emojis')}
+            </Text>
             <TouchableOpacity onPress={() => setShowEmoji(false)}>
               <Feather name="x" size={20} color="#666" />
             </TouchableOpacity>
           </View>
           <ScrollView style={{ maxHeight: 180 }}>
-            <View style={styles.emojiGrid}>
+            <View style={[
+              styles.emojiGrid,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]}>
               {commonEmojis.map((emoji, i) => (
                 <TouchableOpacity 
                   key={i} 
@@ -125,7 +136,10 @@ export default function ConversationScreen({ navigation, route }) {
       <View style={styles.composerWrapper}>
         <LinearGradient
           colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,1)']}
-          style={styles.composer}
+          style={[
+            styles.composer,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}
         >
           <TouchableOpacity 
             style={styles.iconButtonSmall} 
@@ -134,15 +148,23 @@ export default function ConversationScreen({ navigation, route }) {
             <Feather name="smile" size={24} color="#6f42c1" />
           </TouchableOpacity>
           
-          <View style={styles.inputWrapper}>
+          <View style={[
+            styles.inputWrapper,
+            isRTL && { marginHorizontal: 8 }
+          ]}>
             <TextInput
-              style={styles.input}
-              placeholder="Type a message..."
+              style={[
+                styles.input,
+                isRTL && { textAlign: 'right' }
+              ]}
+              placeholder={t('typeMessage')}
               placeholderTextColor="#999"
               value={text}
               onChangeText={setText}
               multiline
               maxLength={500}
+              onSubmitEditing={send}
+              blurOnSubmit={false} // Keep keyboard open on submit usually better for chats
             />
           </View>
           
@@ -150,12 +172,21 @@ export default function ConversationScreen({ navigation, route }) {
             <Feather name="paperclip" size={24} color="#6f42c1" />
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.sendBtn} onPress={send}>
+          <TouchableOpacity 
+            style={styles.sendBtn} 
+            onPress={send}
+            disabled={!text.trim()}
+          >
             <LinearGradient
-              colors={colors.headerGradient}
+              colors={!text.trim() ? ['#ccc', '#aaa'] : colors.headerGradient}
               style={styles.sendGradient}
             >
-              <Feather name="send" size={18} color="#ffffff" />
+              <Feather 
+                name={isRTL ? "arrow-left" : "send"} // Nice detail for RTL
+                size={18} 
+                color="#ffffff" 
+                style={isRTL && { transform: [{ rotate: '180deg' }] }}
+              />
             </LinearGradient>
           </TouchableOpacity>
         </LinearGradient>
@@ -169,40 +200,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  safeArea: { 
-    height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0 
-  },
-  purpleHeaderSection: {
-    overflow: 'hidden',
-  },
-  headerGradient: {
-    paddingBottom: 16,
-  },
-  chatHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  chatHeaderName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#ffffff',
-  },
-  chatHeaderStatus: {
-    fontSize: 12,
-    color: '#e0e0e0',
-    marginTop: 2,
-  },
-  iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    marginLeft: 8,
-  },
+  // Removed 'purpleHeaderSection', 'headerGradient', 'safeArea', 'chatHeader' styles 
+  // because ChatNavBar handles all of that now.
+  
   messagesList: {
     flex: 1,
     backgroundColor: '#f5f5f5',

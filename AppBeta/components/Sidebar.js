@@ -34,7 +34,7 @@ export default function SideBar({ visible, onClose, username, email, navigation,
   ];
 
   const RECOMMEND = [
-    { icon: "help-circle-outline", label: t("helpSupport"), screen: "HelpSupport" },
+    { icon: "help-circle-outline", label: t("helpSupport"), screen: "FeedbackScreen" },
     { icon: "settings-outline", label: t("settings"), screen: "ProfileScreen" },
   ];
 
@@ -346,6 +346,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
+    marginLeft: 12, // Add this line for RTL spacing
   },
   yellowIconCirclePressed: { backgroundColor: "#F9A825" },
   recommendLabel: {

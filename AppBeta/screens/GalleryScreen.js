@@ -14,6 +14,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
+import { useTranslation } from "../context/TranslationContext";
 
 import TopNavBar from "../components/TopNavBar";
 import PhotoScreen from "./PhotoScreen";
@@ -22,18 +23,20 @@ const { width, height: screenHeight } = Dimensions.get("window");
 const TOP_SECTION_HEIGHT = screenHeight * 0.20;
 
 export default function GalleryScreen({ navigation }) {
+  const { colors, theme } = useTheme();
+  const { t, isRTL } = useTranslation();
+  const isDark = theme === "dark";
+
   const [visible, setVisible] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [photoDetails, setPhotoDetails] = useState({});
   const [currentPhotos, setCurrentPhotos] = useState([]);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const { colors, theme } = useTheme();
-  const isDark = theme === "dark";
 
-  // Example data
+  // Example data with translation keys
   const galleryData = [
     {
-      month: "November 2023",
+      monthKey: "november2023",
       photos: [
         require("../assets/gallery/butterfly.jpeg"),
         require("../assets/gallery/flower.jpeg"),
@@ -44,7 +47,7 @@ export default function GalleryScreen({ navigation }) {
       ],
     },
     {
-      month: "October 2023",
+      monthKey: "october2023",
       photos: [
         require("../assets/gallery/lion.jpeg"),
         require("../assets/gallery/sunflower.jpeg"),
@@ -117,11 +120,11 @@ export default function GalleryScreen({ navigation }) {
           )}
           
           <View style={styles.safeArea} />
-          <TopNavBar title="Gallerie" navigation={navigation} />
+          <TopNavBar title={t('gallery')} navigation={navigation} />
         </LinearGradient>
       </View>
 
-      {/* WHITE BOTTOM SECTION with rounded top (Same style as ImprovementsScreen) */}
+      {/* WHITE BOTTOM SECTION with rounded top */}
       <View style={[
         styles.whiteSection, 
         { 
@@ -138,6 +141,8 @@ export default function GalleryScreen({ navigation }) {
               monthBlock={monthBlock}
               openPhoto={openPhoto}
               index={index}
+              isRTL={isRTL}
+              t={t}
             />
           ))}
           
@@ -162,10 +167,10 @@ export default function GalleryScreen({ navigation }) {
 
 /* ---------------------- MONTH CARD COMPONENT ---------------------- */
 
-function MonthCard({ monthBlock, openPhoto, index }) {
+function MonthCard({ monthBlock, openPhoto, index, isRTL, t }) {
   const scrollX = useRef(new Animated.Value(0)).current;
   
-  // Alternate gradient colors for visual variety - more vibrant
+  // Alternate gradient colors for visual variety
   const gradients = [
     ["#e8d5ff", "#f0e5ff"],
     ["#d4edff", "#e6f7ff"],
@@ -182,18 +187,31 @@ function MonthCard({ monthBlock, openPhoto, index }) {
         style={styles.monthCard}
       >
         {/* Month Header */}
-        <View style={styles.monthHeader}>
-          <View style={styles.monthTitleContainer}>
-            <View style={styles.monthIconCircle}>
+        <View style={[
+          styles.monthHeader,
+          isRTL && { flexDirection: 'row-reverse' }
+        ]}>
+          <View style={[
+            styles.monthTitleContainer,
+            isRTL && { flexDirection: 'row-reverse' }
+          ]}>
+            <View style={[
+              styles.monthIconCircle,
+              isRTL && { marginLeft: 12, marginRight: 0 }
+            ]}>
               <Feather name="calendar" size={18} color="#9b59b6" />
             </View>
-            <Text style={styles.monthTitle}>{monthBlock.month}</Text>
+            <Text style={[
+              styles.monthTitle,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t(monthBlock.monthKey)}
+            </Text>
           </View>
           <View style={styles.countBadge}>
             <Text style={styles.countBadgeText}>
-              {monthBlock.photos.length} {monthBlock.photos.length === 1 ? "photo" : "photos"}
-              </Text>
-            
+              {monthBlock.photos.length} {monthBlock.photos.length === 1 ? t('photo') : t('photos')}
+            </Text>
           </View>
         </View>
 
@@ -201,6 +219,7 @@ function MonthCard({ monthBlock, openPhoto, index }) {
         <Animated.FlatList
           data={monthBlock.photos}
           horizontal
+          inverted={isRTL}
           showsHorizontalScrollIndicator={false}
           keyExtractor={(_, i) => i.toString()}
           contentContainerStyle={styles.photosContainer}
@@ -240,7 +259,8 @@ function MonthCard({ monthBlock, openPhoto, index }) {
                     { 
                       transform: [{ scale }],
                       opacity,
-                    }
+                    },
+                    isRTL && { marginLeft: 16, marginRight: 0 }
                   ]}
                 >
                   <Image source={item} style={styles.photo} />
@@ -257,8 +277,6 @@ function MonthCard({ monthBlock, openPhoto, index }) {
             );
           }}
         />
-
-    
       </LinearGradient>
     </View>
   );
@@ -282,8 +300,6 @@ const styles = StyleSheet.create({
   safeArea: {
     height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight,
   },
-
-
 
   whiteSection: {
     position: "absolute",
@@ -392,5 +408,4 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     padding: 8,
   },
-
 });

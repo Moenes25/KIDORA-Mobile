@@ -1,115 +1,445 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Platform, useWindowDimensions } from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import SpaceBackground from '../../components/SpaceBackground';
 
-export default function ChildrenHomeScreen({ setScreen, coins, level, isDark, colors }) {
-  const { width, height } = useWindowDimensions();
-  const isPortrait = height > width;
+const { width, height } = Dimensions.get('window');
+const isLandscape = width > height;
 
-  // LANDSCAPE OPTIMIZATION:
-  // 1. In Landscape, show 4 columns (all items in one row)
-  // 2. Reduce padding to fit screen
-  const numColumns = isPortrait ? 2 : 4; 
-  const padding = isPortrait ? 20 : 40; // More side padding in landscape
-  const gap = 16;
-  
-  const gridItemWidth = (width - (padding * 2) - (gap * (numColumns - 1))) / numColumns;
+export default function ChildrenHomeScreen({ 
+  setScreen, 
+  coins = 2500, 
+  level = 1, 
+  selectedAge, 
+  setSelectedAge,
+  setSelectedSubject, // Add this prop to store selected subject
+  isDark, 
+  colors 
+}) {
+
+  // Subject categories with proper routes
+  const categories = [
+    { id: 'languages', name: 'اللغات', icon: '📚', color: '#FF6B9D', subject: 'languages' },
+    { id: 'math', name: 'الرياضيات', icon: '🔢', color: '#4ECDC4', subject: 'math' },
+    { id: 'science', name: 'العلوم', icon: '🔬', color: '#95E1D3', subject: 'science' },
+    { id: 'art', name: 'الفنون', icon: '🎨', color: '#FFD93D', subject: 'art' },
+    { id: 'social', name: 'المهارات', icon: '🤝', color: '#A8E6CF', subject: 'social' },
+    { id: 'stories', name: 'قصص', icon: '📖', color: '#FFB6C1', subject: 'stories' },
+  ];
+
+  // AI-Powered Special Features
+  const aiFeatures = [
+    { id: 'ai-tutor', name: 'المعلم الذكي', icon: '🤖', color: '#667EEA', route: 'ai-tutor' },
+    { id: 'ai-games', name: 'ألعاب ذكية', icon: '🎮', color: '#F093FB', route: 'games' },
+    { id: 'rewards', name: 'الجوائز', icon: '🎡', color: '#FFA500', route: 'rewards' },
+  ];
+
+  const handleCategoryPress = (category) => {
+    if (setScreen && typeof setScreen === 'function') {
+      // Set the selected subject if the function exists
+      if (setSelectedSubject && typeof setSelectedSubject === 'function') {
+        setSelectedSubject(category.subject);
+      }
+      // Navigate to modules screen to show learning modules for this subject
+      setScreen('modules');
+    }
+  };
+
+  const handleFeaturePress = (route) => {
+    if (setScreen && typeof setScreen === 'function') {
+      setScreen(route);
+    }
+  };
+
+  const handleChangeAge = () => {
+    if (setScreen && typeof setScreen === 'function') {
+      setScreen('age-select');
+    }
+  };
 
   return (
-    <SpaceBackground theme="blue" isPortrait={isPortrait}>
+    <SpaceBackground theme="purple" isPortrait={!isLandscape}>
       <View style={styles.container}>
-        <View style={{ height: Platform.OS === 'android' ? StatusBar.currentHeight : 44 }} />
-        <StatusBar barStyle="light-content" />
-        
-        {/* Header - Compact in Landscape */}
-        <View style={[styles.header, !isPortrait && styles.headerLandscape, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+        {/* Header with Robot Mascot */}
+        <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <View style={[styles.avatarCircle, !isPortrait && { width: 40, height: 40 }]}>
-              <Text style={[styles.avatarEmoji, !isPortrait && { fontSize: 20 }]}>😊</Text>
+            <View style={styles.robotContainer}>
+              <Text style={styles.robotEmoji}>🤖</Text>
             </View>
             <View>
-              <Text style={styles.headerName}>البطل الصغير</Text>
-              {!isPortrait ? null : <Text style={styles.headerLevel}>المستوى {level}</Text>}
+              <Text style={styles.welcomeText}>مرحباً!</Text>
+              <TouchableOpacity onPress={handleChangeAge}>
+                <Text style={styles.ageText}>العمر: {selectedAge || '4-5'} 🔄</Text>
+              </TouchableOpacity>
             </View>
           </View>
+          
           <View style={styles.headerRight}>
-            <View style={styles.coinsContainer}>
-              <Feather name="star" size={16} color="#fbbf24" />
-              <Text style={styles.coinsText}>{coins}</Text>
+            <View style={styles.levelBadge}>
+              <Text style={styles.levelText}>⭐ {level}</Text>
             </View>
+            <View style={styles.coinsBadge}>
+              <Text style={styles.coinText}>💰 {coins}</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.storeButton}
+              onPress={() => handleFeaturePress('store')}
+            >
+              <Ionicons name="cart" size={20} color="#FFF" />
+            </TouchableOpacity>
           </View>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.homeContent, { padding }]}>
-          <Text style={[styles.homeTitle, !isPortrait && { fontSize: 22, marginBottom: 10 }]}>
-            ماذا تريد أن تفعل اليوم؟
-          </Text>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* AI Features Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>✨ ميزات خاصة بالذكاء الاصطناعي</Text>
+            <View style={styles.aiGrid}>
+              {aiFeatures.map((feature) => (
+                <TouchableOpacity
+                  key={feature.id}
+                  style={[styles.aiCard, { backgroundColor: feature.color }]}
+                  onPress={() => handleFeaturePress(feature.route)}
+                >
+                  <Text style={styles.featureIcon}>{feature.icon}</Text>
+                  <Text style={styles.featureName}>{feature.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
 
-          <View style={[styles.mainGrid, { flexDirection: 'row', flexWrap: 'wrap', gap }]}>
-            {[
-              { id: 'modules', title: 'التعلم', sub: 'دروس', icon: 'book', grad: ['#60a5fa', '#3b82f6'] },
-              { id: 'games', title: 'الألعاب', sub: 'مرح', icon: 'play', grad: ['#a78bfa', '#8b5cf6'] },
-              { id: 'ai-tutor', title: 'المعلم', sub: 'اسأل', icon: 'cpu', grad: ['#34d399', '#059669'] },
-              { id: 'store', title: 'المتجر', sub: 'أزياء', icon: 'shopping-bag', grad: ['#fb923c', '#f97316'] }
-            ].map((item) => (
-              <TouchableOpacity 
-                key={item.id} 
-                onPress={() => setScreen(item.id)} 
-                style={[styles.mainCard, { width: gridItemWidth }]}
-              >
-                <View style={[
-                  styles.mainCardInner, 
-                  !isPortrait && styles.mainCardInnerLandscape, // Compact inner card
-                  { backgroundColor: isDark ? colors.childrenArea.cardBg : '#ffffff' }
-                ]}>
-                  <LinearGradient 
-                    colors={item.grad} 
-                    style={[styles.mainCardIcon, !isPortrait && { width: 50, height: 50, marginBottom: 8 }]}
-                  >
-                    <Feather name={item.icon} size={isPortrait ? 40 : 24} color="#fff" />
-                  </LinearGradient>
-                  
-                  <Text style={[
-                    styles.mainCardTitle, 
-                    !isPortrait && { fontSize: 16, marginBottom: 2 },
-                    { color: isDark ? colors.childrenArea.cardText : '#1f2937' }
-                  ]}>{item.title}</Text>
-                  
-                  {isPortrait && (
-                    <Text style={[styles.mainCardSubtitle, { color: isDark ? colors.childrenArea.cardTextSecondary : '#6b7280' }]}>
-                      {item.sub}
-                    </Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
+          {/* Main Categories - Cloud Style */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>🎯 اختر المادة</Text>
+            <View style={styles.cloudGrid}>
+              {categories.map((category, index) => (
+                <TouchableOpacity
+                  key={category.id}
+                  style={[
+                    styles.cloudButton,
+                    { backgroundColor: category.color },
+                    index % 2 === 0 ? styles.cloudLeft : styles.cloudRight
+                  ]}
+                  onPress={() => handleCategoryPress(category)}
+                >
+                  <Text style={styles.categoryIcon}>{category.icon}</Text>
+                  <Text style={styles.categoryName}>{category.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Progress Section */}
+          <View style={styles.progressSection}>
+            <View style={styles.progressCard}>
+              <Text style={styles.progressTitle}>📊 تقدمك اليوم</Text>
+              <View style={styles.progressBar}>
+                <View style={[styles.progressFill, { width: '60%' }]} />
+              </View>
+              <Text style={styles.progressText}>٣ دروس من ٥ ✓</Text>
+            </View>
           </View>
         </ScrollView>
+
+        {/* Bottom Navigation */}
+        <View style={styles.bottomNav}>
+          <TouchableOpacity style={styles.navButton}>
+            <Ionicons name="home" size={22} color="#9333EA" />
+            <Text style={[styles.navText, styles.navTextActive]}>الرئيسية</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => handleFeaturePress('modules')}
+          >
+            <Ionicons name="book" size={22} color="#95A5A6" />
+            <Text style={styles.navText}>مدرستنا</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => handleFeaturePress('games')}
+          >
+            <Ionicons name="game-controller" size={22} color="#95A5A6" />
+            <Text style={styles.navText}>ألعاب</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={() => handleFeaturePress('ai-tutor')}
+          >
+            <Ionicons name="chatbubbles" size={22} color="#95A5A6" />
+            <Text style={styles.navText}>المعلم</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.navButton}
+            onPress={handleChangeAge}
+          >
+            <Ionicons name="settings" size={22} color="#95A5A6" />
+            <Text style={styles.navText}>الإعدادات</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SpaceBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
-  headerLandscape: { paddingVertical: 8 }, // Smaller header in landscape
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatarCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.3)', justifyContent: 'center', alignItems: 'center' },
-  avatarEmoji: { fontSize: 28 },
-  headerName: { fontSize: 16, fontWeight: '700', color: '#fff' },
-  headerLevel: { fontSize: 13, color: 'rgba(255,255,255,0.9)' },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  coinsContainer: { backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  coinsText: { fontSize: 15, fontWeight: '700', color: '#fff' },
-  homeContent: { flexGrow: 1, justifyContent: 'center' }, // Center content vertically
-  homeTitle: { fontSize: 28, fontWeight: '900', color: '#fff', textAlign: 'center', marginBottom: 24 },
-  mainCard: { marginBottom: 0 },
-  mainCardInner: { borderRadius: 24, padding: 24, alignItems: 'center', elevation: 8 },
-  mainCardInnerLandscape: { padding: 12, borderRadius: 16 }, // Smaller padding in landscape
-  mainCardIcon: { width: 80, height: 80, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
-  mainCardTitle: { fontSize: 20, fontWeight: '900', marginBottom: 6, textAlign: 'center' },
-  mainCardSubtitle: { fontSize: 13, fontWeight: '600', textAlign: 'center' },
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 10,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  robotContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#E8F4FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#9333EA',
+  },
+  robotEmoji: {
+    fontSize: 24,
+  },
+  welcomeText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+  },
+  ageText: {
+    fontSize: 10,
+    color: '#9333EA',
+    fontWeight: '600',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  levelBadge: {
+    backgroundColor: '#F3E8FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#9333EA',
+  },
+  levelText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#9333EA',
+  },
+  coinsBadge: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#FFA500',
+  },
+  coinText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+  },
+  storeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#9333EA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#9333EA',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 12,
+    paddingBottom: 80,
+  },
+  section: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 10,
+    textAlign: 'right',
+    textShadowColor: 'rgba(255, 255, 255, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  aiGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  aiCard: {
+    flex: 1,
+    height: 85,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  featureIcon: {
+    fontSize: 28,
+    marginBottom: 4,
+  },
+  featureName: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#FFF',
+    textAlign: 'center',
+    paddingHorizontal: 4,
+  },
+  cloudGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    gap: 8,
+  },
+  cloudButton: {
+    width: '31.5%',
+    height: 75,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+  },
+  cloudLeft: {
+    transform: [{ rotate: '-2deg' }],
+  },
+  cloudRight: {
+    transform: [{ rotate: '2deg' }],
+  },
+  categoryIcon: {
+    fontSize: 28,
+    marginBottom: 2,
+  },
+  categoryName: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#FFF',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    paddingHorizontal: 4,
+  },
+  progressSection: {
+    marginTop: 6,
+  },
+  progressCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    padding: 12,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: 'rgba(147, 51, 234, 0.2)',
+  },
+  progressTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2C3E50',
+    marginBottom: 8,
+    textAlign: 'right',
+  },
+  progressBar: {
+    height: 10,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#9333EA',
+    borderRadius: 5,
+  },
+  progressText: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    textAlign: 'right',
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    backgroundColor: '#FFF',
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  navButton: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 4,
+  },
+  navText: {
+    fontSize: 9,
+    color: '#95A5A6',
+    marginTop: 2,
+  },
+  navTextActive: {
+    color: '#9333EA',
+    fontWeight: 'bold',
+  },
 });
