@@ -28,7 +28,19 @@ import NotificationPanel from "../components/NotificationPanel";
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
-const TOP_SECTION_HEIGHT_RATIO = 0.42; 
+//const TOP_SECTION_HEIGHT_RATIO = 0.42; 
+const getTopSectionHeight = () => {
+  const baseHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
+  const topBarHeight = 60;
+  const profileHeight = 70;
+  const testBtnHeight = 40;
+  const statsHeight = 150;
+  const padding = 40;
+  
+  return baseHeight + topBarHeight + profileHeight + testBtnHeight + statsHeight + padding;
+};
+
+const TOP_SECTION_HEIGHT = getTopSectionHeight();
 
 export default function HomeScreen({ navigation, route }) {
   const { colors } = useTheme();
@@ -454,7 +466,8 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: screenHeight * TOP_SECTION_HEIGHT_RATIO,
+    //height: screenHeight * TOP_SECTION_HEIGHT_RATIO,
+    height: TOP_SECTION_HEIGHT,
     zIndex: 1,
     borderBottomEndRadius: 38,
     borderBottomStartRadius: 38,
@@ -739,7 +752,8 @@ const styles = StyleSheet.create({
 
   scrollableBottomSection: {
     position: "absolute",
-    top: screenHeight * TOP_SECTION_HEIGHT_RATIO, 
+    //top: screenHeight * TOP_SECTION_HEIGHT_RATIO, 
+    top: TOP_SECTION_HEIGHT,
     left: 0,
     right: 0,
     bottom: 0,

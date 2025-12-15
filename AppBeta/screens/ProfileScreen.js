@@ -118,7 +118,17 @@ export default function ProfileScreen({ navigation, route }) {
     );
   };
 
-  const TOP_SECTION_HEIGHT = screenHeight * 0.3;
+  //const TOP_SECTION_HEIGHT = screenHeight * 0.3;
+    const getTopSectionHeight = () => {
+    const baseHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
+    const topBarHeight = 60;
+    const avatarSection = 120; // Avatar + greeting
+    const padding = 30;
+    
+    return baseHeight + topBarHeight + avatarSection + padding;
+  };
+
+  const TOP_SECTION_HEIGHT = getTopSectionHeight();
 
   return (
     <View style={styles.container}>

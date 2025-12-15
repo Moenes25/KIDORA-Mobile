@@ -194,7 +194,7 @@ export default function ChatListScreen({ navigation, route }) {
       })
     : null;
 
-  const TOP_SECTION_HEIGHT = height * 0.45;
+const TOP_SECTION_HEIGHT = height < 801 ? height * 0.42 : height * 0.45;
 
   return (
     <View style={styles.container}>
@@ -368,8 +368,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headerTitle: { fontSize: 28, fontWeight: "700", color: "#ffffff" },
-  gif: { width: 80, height: 80 },
-  storiesCard: {
+gif: { 
+    width: height < 801 ? 50 : 80, 
+    height: height < 700 ? 50 : 80 
+  },  storiesCard: {
     backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 16,
     padding: 12,

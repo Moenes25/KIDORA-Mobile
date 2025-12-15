@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 
 export default function BottomNav({ navigation, activeScreen = "home" }) {
   const { colors, theme } = useTheme();
   const isDark = theme === "dark";
+  const insets = useSafeAreaInsets();
   
   const [active, setActive] = useState(activeScreen);
 
@@ -115,6 +117,8 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
         { 
           backgroundColor: "#ffffff",
           borderTopColor: isDark ? "rgba(0,0,0,0.1)" : "#eee",
+          paddingBottom: Math.max(insets.bottom, 10), // Use device's safe area or minimum 10px
+          height: 75 + Math.max(insets.bottom, 10), // Adjust total height
         }
       ]}
     >
@@ -140,7 +144,6 @@ export default function BottomNav({ navigation, activeScreen = "home" }) {
 
 const styles = StyleSheet.create({
   container: {
-    height: 75,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",

@@ -204,6 +204,11 @@ const translations = {
     paymentFailed: 'Payment Failed',
     paymentNotCompleted: 'The payment was not completed',
 
+    //PaymentSuccessScreen
+    confirmPayment:"Confirm Payment",
+    tnd:" TND",
+
+
      // Add Card Screen
     addNewCard: 'Add new card',
     cardType: 'Card Type',
@@ -470,6 +475,10 @@ const translations = {
     paymentFailed: 'Paiement échoué',
     paymentNotCompleted: 'Le paiement n\'a pas été complété',
 
+    //PaymentSuccessScreen
+    confirmPayment:"Confirmer le Paiement",
+    tnd:"DT",
+
     // Add Card Screen
     addNewCard: 'Ajouter une nouvelle carte',
     cardType: 'Type de carte',
@@ -735,6 +744,10 @@ const translations = {
     paymentCompletedSuccess: 'تم إتمام الدفع بنجاح!',
     paymentFailed: 'فشل الدفع',
     paymentNotCompleted: 'لم يتم إكمال الدفع',
+
+    //PaymentSuccessScreen
+    confirmPayment:"تأكيد الدفع",
+    tnd:"دينار تونسي",
 
     // Add Card Screen
     addNewCard: 'إضافة بطاقة جديدة',
