@@ -44,3 +44,5 @@ secrets.js
 .expo/
 .expo/
 AppBeta/*.apk
+*.apk
+AppBeta/*.apk
