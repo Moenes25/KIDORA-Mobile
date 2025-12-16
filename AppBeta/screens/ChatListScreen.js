@@ -4,21 +4,26 @@ import {
   Image, Dimensions, StatusBar, Platform, Modal, Animated, Alert
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Avatar from '../components/Avatar';
-import { CONVERSATIONS, USERS, STORIES } from '../data/mockData';
 import { Feather } from '@expo/vector-icons';
 import { VideoView, useVideoPlayer } from 'expo-video';
-import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from '../context/TranslationContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import Avatar from '../components/Avatar';
 import BottomNav from '../components/BottomNav';
 import SideBar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
-
-import { useNotifications } from "../context/NotificationContext"; 
-import NotificationPanel from "../components/NotificationPanel";
+import NotificationPanel from '../components/NotificationPanel';
+import { CONVERSATIONS, USERS, STORIES } from '../data/mockData';
+import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../context/TranslationContext';
+import { useNotifications } from '../context/NotificationContext';
 
 const { width, height } = Dimensions.get('window');
+
+/* ---------------------------------- */
+/* Components */
+/* ---------------------------------- */
 
 const StoryBubble = ({ story, onPress }) => {
   if (!story.user) return null;
@@ -34,225 +39,202 @@ const StoryBubble = ({ story, onPress }) => {
   );
 };
 
-const ConversationItem = ({ user, lastMessage, onPress, onVideoCall, onAudioCall, isRTL }) => {
-  return (
-    <TouchableOpacity 
-      style={[
-        styles.conversationItem,
-        isRTL && { flexDirection: 'row-reverse' }
-      ]} 
-      onPress={() => onPress(user)}
-    >
-      <Avatar uri={user.avatar} size={56} name={user.name} />
-      <View style={[
-        styles.conversationInfo,
-        isRTL ? { marginRight: 12, marginLeft: 0 } : { marginLeft: 12 }
-      ]}>
-        <Text style={[
-          styles.conversationName,
-          isRTL && { textAlign: 'right' }
-        ]}>
-          {user.name}
-        </Text>
-        <Text style={[
-          styles.conversationMessage,
-          isRTL && { textAlign: 'right' }
-        ]} numberOfLines={1}>
-          {lastMessage}
-        </Text>
+const ConversationItem = ({ user, lastMessage, onPress, onVideoCall, onAudioCall, isRTL }) => (
+  <TouchableOpacity
+    style={[styles.conversationItem, isRTL && { flexDirection: 'row-reverse' }]}
+    onPress={() => onPress(user)}
+  >
+    <Avatar uri={user.avatar} size={56} name={user.name} />
+
+    <View style={[styles.conversationInfo, isRTL ? { marginRight: 12 } : { marginLeft: 12 }]}>
+      <Text style={[styles.conversationName, isRTL && { textAlign: 'right' }]}>
+        {user.name}
+      </Text>
+      <Text
+        numberOfLines={1}
+        style={[styles.conversationMessage, isRTL && { textAlign: 'right' }]}
+      >
+        {lastMessage}
+      </Text>
+    </View>
+
+    <View style={[styles.conversationMeta, isRTL && { alignItems: 'flex-start' }]}>
+      <Text style={styles.conversationTime}>2m ago</Text>
+
+      <View style={[styles.callIcons, isRTL && { flexDirection: 'row-reverse' }]}>
+        <TouchableOpacity
+          style={styles.callIconButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            onVideoCall(user);
+          }}
+        >
+          <Feather name="video" size={18} color="#6f42c1" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.callIconButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            onAudioCall(user);
+          }}
+        >
+          <Feather name="phone" size={18} color="#6f42c1" />
+        </TouchableOpacity>
       </View>
-      <View style={[
-        styles.conversationMeta,
-        isRTL && { alignItems: 'flex-start' }
-      ]}>
-        <Text style={styles.conversationTime}>2m ago</Text>
-        <View style={[
-          styles.callIcons,
-          isRTL && { flexDirection: 'row-reverse' }
-        ]}>
-          <TouchableOpacity 
-            style={styles.callIconButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              onVideoCall(user);
-            }}
-          >
-            <Feather name="video" size={18} color="#6f42c1" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.callIconButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              onAudioCall(user);
-            }}
-          >
-            <Feather name="phone" size={18} color="#6f42c1" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
+    </View>
+  </TouchableOpacity>
+);
+
+/* ---------------------------------- */
+/* Screen */
+/* ---------------------------------- */
 
 export default function ChatListScreen({ navigation, route }) {
   const { colors } = useTheme();
   const { t, isRTL } = useTranslation();
-  
+  const insets = useSafeAreaInsets();
   const { unreadCount } = useNotifications();
-  const [notificationPanelVisible, setNotificationPanelVisible] = useState(false);
-  const toggleNotificationPanel = () => setNotificationPanelVisible(!notificationPanelVisible);
 
+  /* ---- SAFE AREA CONSTANTS ---- */
+  const COMPOSER_HEIGHT = 64;
+  const bottomInset = insets.bottom || 0;
+  const totalComposerHeight = COMPOSER_HEIGHT + bottomInset;
+
+  // Adjust top section height based on device
+  const TOP_SECTION_HEIGHT = height < 700 ? height * 0.40 : height < 801 ? height * 0.42 : height * 0.45;
+
+  /* ---- STATE ---- */
   const [sidebarVisible, setSidebarVisible] = useState(false);
-
-  // Story state
+  const [notificationPanelVisible, setNotificationPanelVisible] = useState(false);
   const [storyVisible, setStoryVisible] = useState(false);
   const [activeStoryIndex, setActiveStoryIndex] = useState(0);
   const [progress] = useState(STORIES.map(() => new Animated.Value(0)));
 
   const user = route.params?.user;
-  const username = user?.name || "User";
-  const email = user?.email || "";
+  const username = user?.name || 'User';
+  const email = user?.email || '';
 
-  // Mock conversations list with translation for default message
   const conversations = Object.keys(USERS).map(key => ({
     user: USERS[key],
-    lastMessage: CONVERSATIONS[key]?.[CONVERSATIONS[key].length - 1]?.text || t('startChatting')
+    lastMessage:
+      CONVERSATIONS[key]?.[CONVERSATIONS[key].length - 1]?.text ||
+      t('startChatting'),
   }));
 
-  const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
+  /* ---- HANDLERS ---- */
 
   const handleLogout = async () => {
     Alert.alert(t('logout'), t('logoutMessage'), [
-      { text: t('cancel'), style: "cancel" },
+      { text: t('cancel'), style: 'cancel' },
       {
         text: t('yes'),
         onPress: async () => {
-          await AsyncStorage.removeItem("user");
-          navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+          await AsyncStorage.removeItem('user');
+          navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
         },
       },
     ]);
   };
 
-  const openConversation = (selectedUser) => {
-    navigation.navigate('Conversation', { user: selectedUser });
+  const toggleNotificationPanel = () => {
+    setNotificationPanelVisible(!notificationPanelVisible);
   };
 
-  const handleVideoCall = (selectedUser) => {
-    navigation.navigate('VideoCall', { user: selectedUser });
-  };
+  const openConversation = (u) => navigation.navigate('Conversation', { user: u });
+  const handleVideoCall = (u) => navigation.navigate('VideoCall', { user: u });
+  const handleAudioCall = (u) => navigation.navigate('Call', { user: u });
 
-  const handleAudioCall = (selectedUser) => {
-    navigation.navigate('Call', { user: selectedUser });
-  };
+  /* ---- STORIES ---- */
 
-  // Story functions
   const openStory = (story) => {
-    const index = STORIES.findIndex(s => s.id === story.id);
-    setActiveStoryIndex(index);
+    setActiveStoryIndex(STORIES.findIndex(s => s.id === story.id));
     setStoryVisible(true);
   };
-  
-  const closeStory = () => { 
-    setStoryVisible(false); 
-    progress.forEach(p => p.setValue(0)); 
-  };
-  
-  const nextStory = () => { 
-    if (activeStoryIndex < STORIES.length - 1) {
-      setActiveStoryIndex(activeStoryIndex + 1);
-    } else {
-      closeStory();
-    }
-  };
-  
-  const prevStory = () => { 
-    if (activeStoryIndex > 0) {
-      setActiveStoryIndex(activeStoryIndex - 1);
-    }
+
+  const closeStory = () => {
+    setStoryVisible(false);
+    progress.forEach(p => p.setValue(0));
   };
 
-  // Story progress animation
+  const nextStory = () => {
+    activeStoryIndex < STORIES.length - 1
+      ? setActiveStoryIndex(i => i + 1)
+      : closeStory();
+  };
+
+  const prevStory = () => {
+    if (activeStoryIndex > 0) setActiveStoryIndex(i => i - 1);
+  };
+
   useEffect(() => {
     if (!storyVisible) return;
     progress[activeStoryIndex].setValue(0);
-    Animated.timing(progress[activeStoryIndex], { 
-      toValue: 1, 
-      duration: 5000, 
-      useNativeDriver: false 
-    }).start(({ finished }) => { 
-      if (finished) nextStory(); 
-    });
+    Animated.timing(progress[activeStoryIndex], {
+      toValue: 1,
+      duration: 5000,
+      useNativeDriver: false,
+    }).start(({ finished }) => finished && nextStory());
   }, [storyVisible, activeStoryIndex]);
 
-  // Video player for current story
   const currentStory = STORIES[activeStoryIndex];
-  const videoPlayer = currentStory?.type === 'video' 
-    ? useVideoPlayer(currentStory.uri, player => {
-        player.loop = true;
-        player.play();
-      })
-    : null;
+  const videoPlayer =
+    currentStory?.type === 'video'
+      ? useVideoPlayer(currentStory.uri, p => {
+          p.loop = true;
+          p.play();
+        })
+      : null;
 
-const TOP_SECTION_HEIGHT = height < 801 ? height * 0.42 : height * 0.45;
+  /* ---------------------------------- */
+  /* RENDER */
+  /* ---------------------------------- */
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#6F42C1" />
-      
-      <SideBar 
-        visible={sidebarVisible} 
-        onClose={toggleSidebar} 
-        username={username} 
-        email={email} 
-        navigation={navigation} 
-        onLogout={handleLogout} 
+
+      <SideBar
+        visible={sidebarVisible}
+        onClose={() => setSidebarVisible(false)}
+        username={username}
+        email={email}
+        navigation={navigation}
+        onLogout={handleLogout}
       />
 
+      {/* Notification Panel */}
       <NotificationPanel 
         visible={notificationPanelVisible}
         onClose={toggleNotificationPanel}
       />
 
-      {/* FIXED TOP SECTION */}
+      {/* TOP SECTION */}
       <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
         <LinearGradient colors={colors.headerGradient} style={StyleSheet.absoluteFill}>
+          {/* Safe Area Spacer */}
           <View style={styles.safeArea} />
           
-          <TopBar 
-            onMenuPress={toggleSidebar}
+          {/* Top Bar with Notification Count */}
+          <TopBar
+            onMenuPress={() => setSidebarVisible(true)}
+            notificationCount={unreadCount}
             onNotificationPress={toggleNotificationPanel}
-            notificationCount={unreadCount}   
           />
 
           <View style={styles.fixedTopContent}>
-            <View style={[
-              styles.headerContent,
-              isRTL && { flexDirection: 'row-reverse' }
-            ]}>
-              <Text style={[
-                styles.headerTitle,
-                isRTL && { textAlign: 'right' }
-              ]}>
-                {t('messages')}
-              </Text>
-              <Image source={require("../assets/famGif.gif")} style={styles.gif} resizeMode="contain" />
+            <View style={[styles.headerContent, isRTL && { flexDirection: 'row-reverse' }]}>
+              <Text style={styles.headerTitle}>{t('messages')}</Text>
+              <Image
+                source={require('../assets/famGif.gif')}
+                style={styles.gif}
+                resizeMode="contain"
+              />
             </View>
 
-            {/* Stories Section */}
             <View style={styles.storiesCard}>
-              <Text style={[
-                styles.storiesTitle,
-                isRTL && { textAlign: 'right' }
-              ]}>
-                {t('stories')}
-              </Text>
-              <ScrollView 
-                horizontal 
-                inverted={isRTL}
-                showsHorizontalScrollIndicator={false} 
-                contentContainerStyle={{ paddingVertical: 8 }}
-              >
+              <Text style={styles.storiesTitle}>{t('stories')}</Text>
+              <ScrollView horizontal inverted={isRTL} showsHorizontalScrollIndicator={false}>
                 {STORIES.map(story => (
                   <StoryBubble key={story.id} story={story} onPress={openStory} />
                 ))}
@@ -262,17 +244,23 @@ const TOP_SECTION_HEIGHT = height < 801 ? height * 0.42 : height * 0.45;
         </LinearGradient>
       </View>
 
-      {/* WHITE BOTTOM SECTION - Conversations List */}
-      <View style={[styles.scrollableBottomSection, { top: TOP_SECTION_HEIGHT }]}>
-        <ScrollView contentContainerStyle={styles.bottomScroll} showsVerticalScrollIndicator={false}>
-          <Text style={[
-            styles.conversationsTitle,
-            isRTL && { textAlign: 'right' }
-          ]}>
-            {t('recentChats')}
-          </Text>
-          
-          {conversations.map((conv) => (
+      {/* BOTTOM SECTION */}
+      <View
+        style={[
+          styles.scrollableBottomSection,
+          { top: TOP_SECTION_HEIGHT, bottom: COMPOSER_HEIGHT },
+        ]}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.bottomScroll,
+            { paddingBottom: COMPOSER_HEIGHT + 16 },
+          ]}
+        >
+          <Text style={styles.conversationsTitle}>{t('recentChats')}</Text>
+
+          {conversations.map(conv => (
             <ConversationItem
               key={conv.user.id}
               user={conv.user}
@@ -283,153 +271,130 @@ const TOP_SECTION_HEIGHT = height < 801 ? height * 0.42 : height * 0.45;
               isRTL={isRTL}
             />
           ))}
-
-          <View style={{ height: 20 }} />
         </ScrollView>
       </View>
 
-      <View style={styles.bottomNavContainer}>
+      {/* BOTTOM NAV */}
+      <View
+        style={[
+          styles.bottomNavContainer,
+          { paddingBottom: bottomInset > 0 ? bottomInset : 0 },
+        ]}
+      >
         <BottomNav navigation={navigation} activeScreen="chat" />
       </View>
 
-      {/* Story Modal */}
-      <Modal visible={storyVisible} transparent={false} animationType="slide">
+      {/* STORY MODAL */}
+      <Modal visible={storyVisible} animationType="slide">
         <View style={styles.storyModal}>
-          <TouchableOpacity 
-            style={[
-              styles.closeStoryButton,
-              isRTL && { left: 'auto', right: 20 }
-            ]} 
-            onPress={closeStory}
-          >
+          <TouchableOpacity style={styles.closeStoryButton} onPress={closeStory}>
             <Feather name="x" size={32} color="#fff" />
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.tapZone, isRTL ? { right: 0 } : { left: 0 }]} 
-            onPress={prevStory} 
-          />
-          <TouchableOpacity 
-            style={[styles.tapZone, isRTL ? { left: 0 } : { right: 0 }]} 
-            onPress={nextStory} 
-          />
+          <TouchableOpacity style={[styles.tapZone, { left: 0 }]} onPress={prevStory} />
+          <TouchableOpacity style={[styles.tapZone, { right: 0 }]} onPress={nextStory} />
 
           <View style={styles.progressContainer}>
             {STORIES.map((s, i) => (
               <View key={s.id} style={styles.progressBarBg}>
-                <Animated.View 
-                  style={[styles.progressBarFill, { flex: progress[i] }]} 
-                />
+                <Animated.View style={[styles.progressBarFill, { flex: progress[i] }]} />
               </View>
             ))}
           </View>
 
-          {currentStory?.type === 'image' ? (
-            <Image 
-              source={{ uri: currentStory.uri }} 
-              style={styles.storyImage} 
-            />
-          ) : currentStory?.type === 'video' && videoPlayer ? (
-            <VideoView
-              style={styles.storyVideo}
-              player={videoPlayer}
-              contentFit="cover"
-            />
-          ) : null}
+          {currentStory?.type === 'image' && (
+            <Image source={{ uri: currentStory.uri }} style={styles.storyImage} />
+          )}
+
+          {currentStory?.type === 'video' && videoPlayer && (
+            <VideoView style={styles.storyVideo} player={videoPlayer} contentFit="cover" />
+          )}
         </View>
       </Modal>
     </View>
   );
 }
 
+/* ---------------------------------- */
+/* STYLES */
+/* ---------------------------------- */
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+
   fixedTopSection: {
-    position: "absolute",
-    top: 0,
+    position: 'absolute',
     left: 0,
     right: 0,
     zIndex: 1,
-    overflow: "hidden",
-    borderBottomEndRadius: 38,
-    borderBottomStartRadius: 38,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    borderBottomLeftRadius: 38,
+    borderBottomRightRadius: 38,
+    overflow: 'hidden',
   },
-  safeArea: { height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight },
-  headerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 4,
-    marginTop: 12,
-    marginBottom: 20,
+
+  safeArea: { 
+    height: Platform.OS === 'ios' ? 44 : StatusBar.currentHeight 
   },
-  headerTitle: { fontSize: 28, fontWeight: "700", color: "#ffffff" },
-gif: { 
-    width: height < 801 ? 50 : 80, 
-    height: height < 700 ? 50 : 80 
-  },  storiesCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 16,
-    padding: 12,
-  },
-  storiesTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#ffffff",
-    marginBottom: 8,
-  },
-  storyBorder: {
-    padding: 3,
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
-  storyName: { 
-    fontSize: 11, 
-    marginTop: 6,
-    fontWeight: '600',
-    color: '#ffffff',
-  },
-  scrollableBottomSection: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "#ffffff",
-    borderTopLeftRadius: 38,
-    borderTopRightRadius: 38,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  bottomScroll: { paddingHorizontal: 16, paddingTop: 32, paddingBottom: 100 },
-  bottomNavContainer: { 
-    position: "absolute", 
-    bottom: 0, 
-    left: 0, 
-    right: 0, 
-    zIndex: 10, 
-    backgroundColor: "#ffffff" 
-  },
-  conversationsTitle: { 
-    fontSize: 20, 
-    fontWeight: "700", 
-    marginBottom: 16, 
-    color: "#1a1a2e" 
-  },
+
   fixedTopContent: {
     flex: 1,
     paddingHorizontal: 16,
+    paddingTop: 8,
     paddingBottom: 24,
     justifyContent: 'flex-end',
   },
+
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginTop: 24,
+  },
+
+  headerTitle: { fontSize: 28, fontWeight: '700', color: '#fff' },
+
+  gif: { width: 70, height: 70 },
+
+  storiesCard: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 16,
+    padding: 12,
+  },
+
+  storiesTitle: { fontSize: 16, fontWeight: '700', color: '#fff', marginBottom: 8 },
+
+  storyBorder: { padding: 3, borderRadius: 30, borderWidth: 2, borderColor: '#fff' },
+
+  storyName: { fontSize: 11, marginTop: 6, fontWeight: '600', color: '#fff' },
+
+  scrollableBottomSection: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 38,
+    borderTopRightRadius: 38,
+  },
+
+  bottomScroll: { paddingHorizontal: 16, paddingTop: 32 },
+
+  bottomNavContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    height: 64,
+  },
+
+  conversationsTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 16,
+    color: '#1a1a2e',
+  },
+
   conversationItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -437,96 +402,58 @@ gif: {
     backgroundColor: '#f8f8f8',
     borderRadius: 16,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
   },
-  conversationInfo: {
-    flex: 1,
-  },
-  conversationName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a2e',
-    marginBottom: 4,
-  },
-  conversationMessage: {
-    fontSize: 14,
-    color: '#666',
-  },
-  conversationMeta: {
-    alignItems: 'flex-end',
-  },
-  conversationTime: {
-    fontSize: 12,
-    color: '#999',
-    marginBottom: 8,
-  },
-  callIcons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
+
+  conversationInfo: { flex: 1 },
+
+  conversationName: { fontSize: 16, fontWeight: '700', color: '#1a1a2e' },
+
+  conversationMessage: { fontSize: 14, color: '#666' },
+
+  conversationMeta: { alignItems: 'flex-end' },
+
+  conversationTime: { fontSize: 12, color: '#999', marginBottom: 8 },
+
+  callIcons: { flexDirection: 'row', gap: 8 },
+
   callIconButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(111, 66, 193, 0.1)',
+    backgroundColor: 'rgba(111,66,193,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  storyModal: {
-    flex: 1,
-    backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
+  storyModal: { flex: 1, backgroundColor: 'black' },
+
   closeStoryButton: {
     position: 'absolute',
     top: 40,
     left: 20,
     zIndex: 2,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  tapZone: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: width / 2,
-  },
+
+  tapZone: { position: 'absolute', top: 0, bottom: 0, width: width / 2 },
+
   progressContainer: {
     position: 'absolute',
     top: 50,
     left: 10,
     right: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
   },
+
   progressBarBg: {
     flex: 1,
     height: 3,
     backgroundColor: 'rgba(255,255,255,0.3)',
     marginHorizontal: 2,
-    borderRadius: 2,
-    overflow: 'hidden',
   },
-  progressBarFill: {
-    height: 3,
-    backgroundColor: '#ffffff',
-  },
-  storyImage: {
-    width,
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  storyVideo: {
-    width,
-    height: '100%',
-  },
+
+  progressBarFill: { height: 3, backgroundColor: '#fff' },
+
+  storyImage: { width, height: '100%' },
+
+  storyVideo: { width, height: '100%' },
 });

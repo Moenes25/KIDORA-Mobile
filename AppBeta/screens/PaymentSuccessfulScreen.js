@@ -1,108 +1,164 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
-  Modal,
   StyleSheet,
-  Animated,
-  Easing,
+  Modal,
+  Image,
+  TouchableOpacity,
+  Dimensions,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "../context/TranslationContext";
 
-export default function PaymentSuccessfulScreen({ visible, onClose }) {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+// Import PaymentSuccessfulScreen
+import PaymentSuccessfulScreen from "./PaymentSuccessfulScreen";
 
-  useEffect(() => {
-    if (visible) {
-      // Play animation
-      Animated.parallel([
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 600,
-          easing: Easing.out(Easing.back(1.6)),
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]).start();
+const { width } = Dimensions.get("window");
 
-      // Auto-dismiss after 3 seconds
-      const timer = setTimeout(() => {
-        onClose();
-      }, 1500);
+export default function PaymentConfirmationScreen({
+  visible,
+  onClose,
+  amount,
+  method,
+  onPaymentSuccess, // NEW: callback to close PayMethodScreen
+}) {
+  const navigation = useNavigation();
+  const { t, isRTL } = useTranslation();
+  const [showSuccess, setShowSuccess] = useState(false);
 
-      return () => clearTimeout(timer);
-    } else {
-      scaleAnim.setValue(0);
-      opacityAnim.setValue(0);
-    }
-  }, [visible]);
+  const handleConfirm = () => {
+    // Show the success screen
+    setShowSuccess(true);
+
+    // Close this modal (confirmation screen)
+    onClose();
+
+    // Close PayMethodScreen if callback is provided
+    if (onPaymentSuccess) onPaymentSuccess();
+
+    // After 3 seconds, hide success screen and navigate to PaymentsScreen
+    setTimeout(() => {
+      setShowSuccess(false);
+      navigation.navigate("PaymentsScreen"); // Make sure this matches your navigator
+    }, 1500);
+  };
 
   return (
-    <Modal transparent visible={visible} animationType="fade">
-      <View style={styles.overlay}>
-        <Animated.View
-          style={[
-            styles.container,
-            {
-              transform: [{ scale: scaleAnim }],
-              opacity: opacityAnim,
-            },
-          ]}
-        >
-          {/* GREEN CHECK ICON */}
-          <View style={styles.iconWrapper}>
-            <Feather name="check" size={60} color="white" />
-          </View>
+    <>
+      <Modal visible={visible} transparent animationType="fade">
+        <View style={styles.overlay}>
+          <View style={styles.container}>
+            {/* Payment Logo */}
+            <Image
+              source={require("../assets/confirm_pay.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
 
-          {/* TEXT */}
-          <Text style={styles.title}>Payment Successful</Text>
-        </Animated.View>
-      </View>
-    </Modal>
+            {/* Title */}
+            <Text style={[
+              styles.title,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('confirmPayment')}
+            </Text>
+
+            {/* Amount */}
+            <Text style={[
+              styles.amountText,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {amount} {t('tnd')}
+            </Text>
+
+            {/* Confirm Button */}
+            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
+              <Text style={styles.confirmText}>{t('confirm')}</Text>
+            </TouchableOpacity>
+
+            {/* Cancel Button */}
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelText}>{t('cancel')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Payment Success Popup */}
+      <PaymentSuccessfulScreen
+        visible={showSuccess}
+        onClose={() => setShowSuccess(false)}
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
   },
 
   container: {
-    width: 260,
-    backgroundColor: "white",
-    paddingVertical: 35,
-    paddingHorizontal: 25,
-    borderRadius: 20,
+    width: width * 0.85,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 25,
     alignItems: "center",
-    elevation: 10,
+    elevation: 5,
   },
 
-  iconWrapper: {
-    backgroundColor: "#28a745",
-    width: 95,
-    height: 95,
-    borderRadius: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-    shadowColor: "#28a745",
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
+  logo: {
+    width: 90,
+    height: 90,
+    marginBottom: 10,
   },
 
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#28a745",
-    marginTop: 5,
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+
+  amountText: {
+    fontSize: 32,
+    fontWeight: "900",
+    color: "#6F42C1",
+    marginBottom: 25,
+    textAlign: "center",
+  },
+
+  confirmBtn: {
+    width: "100%",
+    paddingVertical: 12,
+    backgroundColor: "#6F42C1",
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+
+  confirmText: {
+    textAlign: "center",
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+
+  cancelBtn: {
+    width: "100%",
+    paddingVertical: 12,
+    backgroundColor: "#ccc",
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+
+  cancelText: {
+    textAlign: "center",
+    color: "#555",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });

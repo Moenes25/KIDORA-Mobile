@@ -1,40 +1,70 @@
 // screens/ConversationScreen.js
-import React, { useState, useLayoutEffect } from 'react'; // Added useLayoutEffect
+import React, { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ScrollView, StatusBar
+  KeyboardAvoidingView, Platform, ScrollView, StatusBar, Dimensions, Keyboard
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ChatBubble from '../components/ChatBubble';
-// Removed explicit TopNavBar and Avatar imports as ChatNavBar handles the header
-import ChatNavBar from '../components/ChatNavBar'; // <--- Import your new consistent header
+import ChatNavBar from '../components/ChatNavBar';
 import { CONVERSATIONS } from '../data/mockData';
 import { Feather } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../context/TranslationContext';
 
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const COMPOSER_HEIGHT = 70; // Fixed height for composer
+const EMOJI_PICKER_HEIGHT = 200; // Fixed height for emoji picker
+
 export default function ConversationScreen({ navigation, route }) {
   const { colors } = useTheme();
   const { t, isRTL } = useTranslation();
   const { user } = route.params;
+  const insets = useSafeAreaInsets();
+  const flatListRef = useRef(null);
   
   const [messages, setMessages] = useState(CONVERSATIONS[user.id] || []);
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  // --- FIX: Hide the default Navigation Header to avoid duplicates ---
+  // Calculate total bottom spacing
+  const bottomInset = insets.bottom || 0;
+  const totalComposerHeight = COMPOSER_HEIGHT + bottomInset;
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
-  // ------------------------------------------------------------------
 
-  // Common emojis for quick access
+  // Handle keyboard show/hide
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+        setShowEmoji(false);
+      }
+    );
+    
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0);
+      }
+    );
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
+
   const commonEmojis = ['😀', '😂', '❤️', '👍', '🎉', '😊', '🔥', '💯', '👏', '🙌', '😍', '🤔', '😢', '😎', '🙏', '✨'];
 
-  // Send text message
   const send = () => {
     if (!text.trim()) return;
     const now = new Date();
@@ -49,9 +79,13 @@ export default function ConversationScreen({ navigation, route }) {
     setMessages(prev => [...prev, msg]);
     setText('');
     setShowEmoji(false);
+    
+    // Scroll to bottom after sending
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 100);
   };
 
-  // File upload
   const uploadFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({});
     if (result.type === 'success') {
@@ -66,132 +100,147 @@ export default function ConversationScreen({ navigation, route }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
-    >
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#9d00ff" />
       
-      {/* --- FIX: Use the consistent ChatNavBar --- */}
-      {/* This replaces the entire 'Purple Header Section' block you had before */}
       <ChatNavBar 
         name={user.name} 
-        isOnline={true} // You can pass user.status here if you have it
+        isOnline={true}
         avatar={user.avatar ? { uri: user.avatar } : null}
       />
       
-      {/* Chat Messages */}
-      <FlatList
-        data={messages}
-        keyExtractor={i => i.id}
-        contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
-        style={styles.messagesList}
-        renderItem={({ item }) => (
-          <ChatBubble 
-            message={item} 
-            isMine={item.from === 'me'}
-            isRTL={isRTL}
-          />
-        )}
-      />
+      <View style={styles.contentContainer}>
+        {/* Chat Messages */}
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={i => i.id}
+          contentContainerStyle={{ 
+            padding: 12, 
+            paddingBottom: showEmoji 
+              ? EMOJI_PICKER_HEIGHT + totalComposerHeight + 20 
+              : totalComposerHeight + 20
+          }}
+          style={styles.messagesList}
+          renderItem={({ item }) => (
+            <ChatBubble 
+              message={item} 
+              isMine={item.from === 'me'}
+              isRTL={isRTL}
+            />
+          )}
+        />
 
-      {/* Emoji Picker - Show above composer */}
-      {showEmoji && (
-        <View style={styles.emojiContainer}>
+        {/* Emoji Picker - Show above composer */}
+        {showEmoji && (
           <View style={[
-            styles.emojiHeader,
-            isRTL && { flexDirection: 'row-reverse' }
+            styles.emojiContainer,
+            { bottom: totalComposerHeight }
           ]}>
-            <Text style={[
-              styles.emojiTitle,
-              isRTL && { textAlign: 'right' }
-            ]}>
-              {t('emojis')}
-            </Text>
-            <TouchableOpacity onPress={() => setShowEmoji(false)}>
-              <Feather name="x" size={20} color="#666" />
-            </TouchableOpacity>
-          </View>
-          <ScrollView style={{ maxHeight: 180 }}>
             <View style={[
-              styles.emojiGrid,
+              styles.emojiHeader,
               isRTL && { flexDirection: 'row-reverse' }
             ]}>
-              {commonEmojis.map((emoji, i) => (
-                <TouchableOpacity 
-                  key={i} 
-                  onPress={() => setText(prev => prev + emoji)}
-                  style={styles.emojiButton}
-                >
-                  <Text style={styles.emojiText}>{emoji}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Message Composer - Always visible at bottom */}
-      <View style={styles.composerWrapper}>
-        <LinearGradient
-          colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,1)']}
-          style={[
-            styles.composer,
-            isRTL && { flexDirection: 'row-reverse' }
-          ]}
-        >
-          <TouchableOpacity 
-            style={styles.iconButtonSmall} 
-            onPress={() => setShowEmoji(!showEmoji)}
-          >
-            <Feather name="smile" size={24} color="#6f42c1" />
-          </TouchableOpacity>
-          
-          <View style={[
-            styles.inputWrapper,
-            isRTL && { marginHorizontal: 8 }
-          ]}>
-            <TextInput
-              style={[
-                styles.input,
+              <Text style={[
+                styles.emojiTitle,
                 isRTL && { textAlign: 'right' }
-              ]}
-              placeholder={t('typeMessage')}
-              placeholderTextColor="#999"
-              value={text}
-              onChangeText={setText}
-              multiline
-              maxLength={500}
-              onSubmitEditing={send}
-              blurOnSubmit={false} // Keep keyboard open on submit usually better for chats
-            />
+              ]}>
+                {t('emojis')}
+              </Text>
+              <TouchableOpacity onPress={() => setShowEmoji(false)}>
+                <Feather name="x" size={20} color="#666" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ maxHeight: 180 }}>
+              <View style={[
+                styles.emojiGrid,
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
+                {commonEmojis.map((emoji, i) => (
+                  <TouchableOpacity 
+                    key={i} 
+                    onPress={() => setText(prev => prev + emoji)}
+                    style={styles.emojiButton}
+                  >
+                    <Text style={styles.emojiText}>{emoji}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
           </View>
-          
-          <TouchableOpacity style={styles.iconButtonSmall} onPress={uploadFile}>
-            <Feather name="paperclip" size={24} color="#6f42c1" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.sendBtn} 
-            onPress={send}
-            disabled={!text.trim()}
+        )}
+
+        {/* Message Composer - Always visible at bottom */}
+        <View style={[
+          styles.composerWrapper,
+          { 
+            paddingBottom: keyboardHeight > 0 ? 0 : bottomInset,
+            bottom: keyboardHeight > 0 ? keyboardHeight : 0
+          }
+        ]}>
+          <LinearGradient
+            colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,1)']}
+            style={[
+              styles.composer,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]}
           >
-            <LinearGradient
-              colors={!text.trim() ? ['#ccc', '#aaa'] : colors.headerGradient}
-              style={styles.sendGradient}
+            <TouchableOpacity 
+              style={styles.iconButtonSmall} 
+              onPress={() => {
+                Keyboard.dismiss();
+                setShowEmoji(!showEmoji);
+              }}
             >
-              <Feather 
-                name={isRTL ? "arrow-left" : "send"} // Nice detail for RTL
-                size={18} 
-                color="#ffffff" 
-                style={isRTL && { transform: [{ rotate: '180deg' }] }}
+              <Feather name="smile" size={24} color="#6f42c1" />
+            </TouchableOpacity>
+            
+            <View style={[
+              styles.inputWrapper,
+              isRTL && { marginHorizontal: 8 }
+            ]}>
+              <TextInput
+                style={[
+                  styles.input,
+                  isRTL && { textAlign: 'right' }
+                ]}
+                placeholder={t('typeMessage')}
+                placeholderTextColor="#999"
+                value={text}
+                onChangeText={setText}
+                onFocus={() => setShowEmoji(false)}
+                multiline
+                maxLength={500}
+                onSubmitEditing={send}
+                blurOnSubmit={false}
               />
-            </LinearGradient>
-          </TouchableOpacity>
-        </LinearGradient>
+            </View>
+            
+            <TouchableOpacity style={styles.iconButtonSmall} onPress={uploadFile}>
+              <Feather name="paperclip" size={24} color="#6f42c1" />
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.sendBtn} 
+              onPress={send}
+              disabled={!text.trim()}
+            >
+              <LinearGradient
+                colors={!text.trim() ? ['#ccc', '#aaa'] : colors.headerGradient}
+                style={styles.sendGradient}
+              >
+                <Feather 
+                  name={isRTL ? "arrow-left" : "send"}
+                  size={18} 
+                  color="#ffffff" 
+                  style={isRTL && { transform: [{ rotate: '180deg' }] }}
+                />
+              </LinearGradient>
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -200,14 +249,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  // Removed 'purpleHeaderSection', 'headerGradient', 'safeArea', 'chatHeader' styles 
-  // because ChatNavBar handles all of that now.
-  
+  contentContainer: {
+    flex: 1,
+    position: 'relative',
+  },
   messagesList: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
   composerWrapper: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    width: SCREEN_WIDTH,
     backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
@@ -223,6 +277,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#ffffff',
     minHeight: 60,
+    width: SCREEN_WIDTH,
   },
   iconButtonSmall: {
     width: 40,
@@ -267,11 +322,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emojiContainer: {
+    position: 'absolute',
+    left: 0,
+    width: SCREEN_WIDTH,
     backgroundColor: '#ffffff',
     borderTopWidth: 1,
     borderColor: 'rgba(111, 66, 193, 0.1)',
     paddingBottom: 8,
-    maxHeight: 200,
+    maxHeight: EMOJI_PICKER_HEIGHT,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
   },
   emojiHeader: {
     flexDirection: 'row',

@@ -122,7 +122,7 @@ export default function ProfileScreen({ navigation, route }) {
     const getTopSectionHeight = () => {
     const baseHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
     const topBarHeight = 60;
-    const avatarSection = 120; // Avatar + greeting
+    const avatarSection = 160; // Avatar + greeting
     const padding = 30;
     
     return baseHeight + topBarHeight + avatarSection + padding;
