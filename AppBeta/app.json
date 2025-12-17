@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "AppBeta",
+    "name": "KidoraAI",
     "orientation": "default",
-    "slug": "AppBeta",
+    "slug": "kidoraai",
     "version": "1.0.0",
     "platforms": [
       "ios",
@@ -23,7 +23,7 @@
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show it on the map.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.anonymous.AppBeta"
+      "bundleIdentifier": "com.kidora.kidoraai"
     },
     "notification": {
       "icon": "./assets/notification-icon.png",
@@ -32,12 +32,13 @@
       "androidCollapsedTitle": "#{unread_notifications} new notifications"
     },
     "android": {
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.AppBeta",
+      "package": "com.kidora.kidoraai",
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
@@ -52,11 +53,6 @@
         "googleMaps": {
           "apiKey": "AIzaSyAapdsajcAWD5rEP-e9LrbPG4lVW9csjwo"
         }
-      }
-    },
-    "extra": {
-      "eas": {
-        "projectId": "d2fcaafa-934f-401d-99cd-0b8703bc521e"
       }
     },
     "plugins": [
@@ -77,6 +73,12 @@
           ]
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "12f083ef-25a1-4c82-ab19-b0f77def2078"
+      }
+    },
+    "owner": "omardjo"
   }
 }

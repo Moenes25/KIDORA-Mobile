@@ -14,9 +14,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../context/TranslationContext';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const COMPOSER_HEIGHT = 70; // Fixed height for composer
-const EMOJI_PICKER_HEIGHT = 200; // Fixed height for emoji picker
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const EMOJI_PICKER_HEIGHT = 200;
 
 export default function ConversationScreen({ navigation, route }) {
   const { colors } = useTheme();
@@ -28,38 +27,38 @@ export default function ConversationScreen({ navigation, route }) {
   const [messages, setMessages] = useState(CONVERSATIONS[user.id] || []);
   const [text, setText] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  // Calculate total bottom spacing
-  const bottomInset = insets.bottom || 0;
-  const totalComposerHeight = COMPOSER_HEIGHT + bottomInset;
+  // Dynamic padding based on keyboard state
+  // Keyboard CLOSED: Return to initial position (safe area insets only, no extra padding)
+  // Keyboard OPEN: Use 0 - KeyboardAvoidingView handles positioning above keyboard
+  const composerBottomPadding = keyboardHeight > 0 ? 0 : insets.bottom;
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
+    navigation.setOptions({ headerShown: false });
   }, [navigation]);
 
-  // Handle keyboard show/hide
   useEffect(() => {
-    const keyboardWillShow = Keyboard.addListener(
+    const showSubscription = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
       (e) => {
         setKeyboardHeight(e.endCoordinates.height);
+        setIsKeyboardVisible(true);
         setShowEmoji(false);
       }
     );
-    
-    const keyboardWillHide = Keyboard.addListener(
+    const hideSubscription = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
       () => {
         setKeyboardHeight(0);
+        setIsKeyboardVisible(false);
       }
     );
 
     return () => {
-      keyboardWillShow.remove();
-      keyboardWillHide.remove();
+      showSubscription.remove();
+      hideSubscription.remove();
     };
   }, []);
 
@@ -79,11 +78,7 @@ export default function ConversationScreen({ navigation, route }) {
     setMessages(prev => [...prev, msg]);
     setText('');
     setShowEmoji(false);
-    
-    // Scroll to bottom after sending
-    setTimeout(() => {
-      flatListRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
   const uploadFile = async () => {
@@ -109,137 +104,119 @@ export default function ConversationScreen({ navigation, route }) {
         avatar={user.avatar ? { uri: user.avatar } : null}
       />
       
-      <View style={styles.contentContainer}>
-        {/* Chat Messages */}
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={i => i.id}
-          contentContainerStyle={{ 
-            padding: 12, 
-            paddingBottom: showEmoji 
-              ? EMOJI_PICKER_HEIGHT + totalComposerHeight + 20 
-              : totalComposerHeight + 20
-          }}
-          style={styles.messagesList}
-          renderItem={({ item }) => (
-            <ChatBubble 
-              message={item} 
-              isMine={item.from === 'me'}
-              isRTL={isRTL}
-            />
-          )}
-        />
-
-        {/* Emoji Picker - Show above composer */}
-        {showEmoji && (
-          <View style={[
-            styles.emojiContainer,
-            { bottom: totalComposerHeight }
-          ]}>
-            <View style={[
-              styles.emojiHeader,
-              isRTL && { flexDirection: 'row-reverse' }
-            ]}>
-              <Text style={[
-                styles.emojiTitle,
-                isRTL && { textAlign: 'right' }
-              ]}>
-                {t('emojis')}
-              </Text>
-              <TouchableOpacity onPress={() => setShowEmoji(false)}>
-                <Feather name="x" size={20} color="#666" />
-              </TouchableOpacity>
-            </View>
-            <ScrollView style={{ maxHeight: 180 }}>
-              <View style={[
-                styles.emojiGrid,
-                isRTL && { flexDirection: 'row-reverse' }
-              ]}>
-                {commonEmojis.map((emoji, i) => (
-                  <TouchableOpacity 
-                    key={i} 
-                    onPress={() => setText(prev => prev + emoji)}
-                    style={styles.emojiButton}
-                  >
-                    <Text style={styles.emojiText}>{emoji}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </ScrollView>
-          </View>
-        )}
-
-        {/* Message Composer - Always visible at bottom */}
-        <View style={[
-          styles.composerWrapper,
-          { 
-            paddingBottom: keyboardHeight > 0 ? 0 : bottomInset,
-            bottom: keyboardHeight > 0 ? keyboardHeight : 0
-          }
-        ]}>
-          <LinearGradient
-            colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,1)']}
-            style={[
-              styles.composer,
-              isRTL && { flexDirection: 'row-reverse' }
-            ]}
-          >
-            <TouchableOpacity 
-              style={styles.iconButtonSmall} 
-              onPress={() => {
-                Keyboard.dismiss();
-                setShowEmoji(!showEmoji);
-              }}
-            >
-              <Feather name="smile" size={24} color="#6f42c1" />
-            </TouchableOpacity>
-            
-            <View style={[
-              styles.inputWrapper,
-              isRTL && { marginHorizontal: 8 }
-            ]}>
-              <TextInput
-                style={[
-                  styles.input,
-                  isRTL && { textAlign: 'right' }
-                ]}
-                placeholder={t('typeMessage')}
-                placeholderTextColor="#999"
-                value={text}
-                onChangeText={setText}
-                onFocus={() => setShowEmoji(false)}
-                multiline
-                maxLength={500}
-                onSubmitEditing={send}
-                blurOnSubmit={false}
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        enabled={isKeyboardVisible}
+      >
+        <View style={styles.innerContainer}>
+          
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={i => i.id}
+            contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
+            style={styles.messagesList}
+            renderItem={({ item }) => (
+              <ChatBubble 
+                message={item} 
+                isMine={item.from === 'me'}
+                isRTL={isRTL}
               />
+            )}
+            onContentSizeChange={() => {
+              flatListRef.current?.scrollToEnd({ animated: true });
+            }}
+          />
+
+          {showEmoji && !isKeyboardVisible && (
+            <View style={styles.emojiContainer}>
+              <View style={[styles.emojiHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+                <Text style={[styles.emojiTitle, isRTL && { textAlign: 'right' }]}>{t('emojis')}</Text>
+                <TouchableOpacity onPress={() => setShowEmoji(false)}>
+                  <Feather name="x" size={20} color="#666" />
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={{ maxHeight: 150 }} nestedScrollEnabled={true}>
+                <View style={[styles.emojiGrid, isRTL && { flexDirection: 'row-reverse' }]}>
+                  {commonEmojis.map((emoji, i) => (
+                    <TouchableOpacity 
+                      key={i} 
+                      onPress={() => setText(prev => prev + emoji)}
+                      style={styles.emojiButton}
+                    >
+                      <Text style={styles.emojiText}>{emoji}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
             </View>
-            
-            <TouchableOpacity style={styles.iconButtonSmall} onPress={uploadFile}>
-              <Feather name="paperclip" size={24} color="#6f42c1" />
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.sendBtn} 
-              onPress={send}
-              disabled={!text.trim()}
+          )}
+
+          {/* Composer Wrapper */}
+          <View style={[
+            styles.composerWrapper,
+            { 
+              paddingBottom: composerBottomPadding 
+            }
+          ]}>
+            <LinearGradient
+              colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,1)']}
+              style={[styles.composer, isRTL && { flexDirection: 'row-reverse' }]}
             >
-              <LinearGradient
-                colors={!text.trim() ? ['#ccc', '#aaa'] : colors.headerGradient}
-                style={styles.sendGradient}
+              <TouchableOpacity 
+                style={styles.iconButtonSmall} 
+                onPress={() => {
+                  if (isKeyboardVisible) {
+                    Keyboard.dismiss();
+                    setTimeout(() => setShowEmoji(true), 100);
+                  } else {
+                    setShowEmoji(!showEmoji);
+                  }
+                }}
               >
-                <Feather 
-                  name={isRTL ? "arrow-left" : "send"}
-                  size={18} 
-                  color="#ffffff" 
-                  style={isRTL && { transform: [{ rotate: '180deg' }] }}
+                <Feather name="smile" size={24} color="#6f42c1" />
+              </TouchableOpacity>
+              
+              <View style={[styles.inputWrapper, isRTL && { marginHorizontal: 8 }]}>
+                <TextInput
+                  style={[styles.input, isRTL && { textAlign: 'right' }]}
+                  placeholder={t('typeMessage')}
+                  placeholderTextColor="#999"
+                  value={text}
+                  onChangeText={setText}
+                  onFocus={() => setShowEmoji(false)}
+                  multiline
+                  maxLength={500}
                 />
-              </LinearGradient>
-            </TouchableOpacity>
-          </LinearGradient>
+              </View>
+              
+              <TouchableOpacity style={styles.iconButtonSmall} onPress={uploadFile}>
+                <Feather name="paperclip" size={24} color="#6f42c1" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.sendBtn} 
+                onPress={send}
+                disabled={!text.trim()}
+              >
+                <LinearGradient
+                  colors={!text.trim() ? ['#ccc', '#aaa'] : colors.headerGradient}
+                  style={styles.sendGradient}
+                >
+                  <Feather 
+                    name={isRTL ? "arrow-left" : "send"}
+                    size={18} 
+                    color="#ffffff" 
+                    style={isRTL && { transform: [{ rotate: '180deg' }] }}
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -249,19 +226,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  contentContainer: {
+  innerContainer: {
     flex: 1,
-    position: 'relative',
+    justifyContent: 'flex-end',
   },
   messagesList: {
-    flex: 1,
+    flex: 1, 
     backgroundColor: '#f5f5f5',
   },
   composerWrapper: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    width: SCREEN_WIDTH,
+    width: '100%',
     backgroundColor: '#ffffff',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -2 },
@@ -274,10 +248,9 @@ const styles = StyleSheet.create({
   composer: { 
     flexDirection: 'row', 
     padding: 12, 
-    alignItems: 'center',
+    alignItems: 'flex-end',
     backgroundColor: '#ffffff',
     minHeight: 60,
-    width: SCREEN_WIDTH,
   },
   iconButtonSmall: {
     width: 40,
@@ -286,6 +259,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(111, 66, 193, 0.1)',
+    marginBottom: 4,
   },
   inputWrapper: {
     flex: 1,
@@ -314,6 +288,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 4,
+    marginBottom: 2,
   },
   sendGradient: {
     width: '100%',
@@ -322,31 +297,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emojiContainer: {
-    position: 'absolute',
-    left: 0,
-    width: SCREEN_WIDTH,
+    width: '100%',
     backgroundColor: '#ffffff',
     borderTopWidth: 1,
     borderColor: 'rgba(111, 66, 193, 0.1)',
-    paddingBottom: 8,
-    maxHeight: EMOJI_PICKER_HEIGHT,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 6,
+    height: EMOJI_PICKER_HEIGHT,
   },
   emojiHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderColor: '#f0f0f0',
   },
   emojiTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: '#6f42c1',
   },
@@ -358,17 +325,17 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   emojiButton: {
-    padding: 10,
+    padding: 8,
     margin: 4,
     backgroundColor: '#f7f7f7',
     borderRadius: 12,
-    minWidth: 50,
+    minWidth: 45,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: 'rgba(111, 66, 193, 0.1)',
   },
   emojiText: {
-    fontSize: 28,
+    fontSize: 24,
   },
 });

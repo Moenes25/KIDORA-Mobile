@@ -19,7 +19,7 @@ import * as Speech from 'expo-speech';
 import { Audio } from 'expo-av';
 import { PERPLEXITY_API_KEY } from '../../secrets';
 
-const apiKey = PERPLEXITY_API_KEY;
+const apiKey = PERPLEXITY_API_KEY; ;
 
 export default function AiTutorScreen({ setScreen, isDark, colors }) {
   const [chatInput, setChatInput] = useState('');

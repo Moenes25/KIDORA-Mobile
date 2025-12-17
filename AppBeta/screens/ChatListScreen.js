@@ -102,7 +102,7 @@ export default function ChatListScreen({ navigation, route }) {
   const totalComposerHeight = COMPOSER_HEIGHT + bottomInset;
 
   // Adjust top section height based on device
-  const TOP_SECTION_HEIGHT = height < 700 ? height * 0.40 : height < 801 ? height * 0.42 : height * 0.45;
+  const TOP_SECTION_HEIGHT = height < 700 ? height * 0.44 : height < 801 ? height * 0.46 : height * 0.48;
 
   /* ---- STATE ---- */
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -275,12 +275,7 @@ export default function ChatListScreen({ navigation, route }) {
       </View>
 
       {/* BOTTOM NAV */}
-      <View
-        style={[
-          styles.bottomNavContainer,
-          { paddingBottom: bottomInset > 0 ? bottomInset : 0 },
-        ]}
-      >
+      <View style={styles.bottomNavContainer}>
         <BottomNav navigation={navigation} activeScreen="chat" />
       </View>
 
@@ -379,14 +374,14 @@ const styles = StyleSheet.create({
 
   bottomScroll: { paddingHorizontal: 16, paddingTop: 32 },
 
-  bottomNavContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    height: 64,
-  },
+  bottomNavContainer: { 
+  position: "absolute", 
+  bottom: 0, 
+  left: 0, 
+  right: 0, 
+  zIndex: 10, 
+  backgroundColor: "#ffffff" 
+},
 
   conversationsTitle: {
     fontSize: 20,
