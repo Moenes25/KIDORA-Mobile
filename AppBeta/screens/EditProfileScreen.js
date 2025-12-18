@@ -16,6 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "../context/TranslationContext";
+import { normalize, wp, hp } from "../utils/responsive";
 
 export default function EditProfileScreen({ navigation, route }) {
   const { colors, theme } = useTheme();
@@ -68,7 +69,7 @@ export default function EditProfileScreen({ navigation, route }) {
     <View style={{ flex: 1, backgroundColor: isDark ? "#0f0a1f" : "#f5f5f5" }}>
       <View 
         style={{ 
-          height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
+          height: Platform.OS === "android" ? StatusBar.currentHeight : hp(5.5),
           backgroundColor: isDark ? "#0f0a1f" : "#6f42c1" 
         }} 
       />
@@ -91,14 +92,14 @@ export default function EditProfileScreen({ navigation, route }) {
               <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                 <Ionicons 
                   name={isRTL ? "arrow-forward" : "arrow-back"} 
-                  size={26} 
+                  size={normalize(26)} 
                   color="#fff" 
                 />
               </TouchableOpacity>
               <Text style={[styles.headerTitle, isRTL && { textAlign: 'right' }]}>
                 {t('editProfile')}
               </Text>
-              <View style={{ width: 40 }} />
+              <View style={{ width: wp(10) }} />
             </View>
 
             {/* Avatar with Floating Edit Button */}
@@ -108,11 +109,11 @@ export default function EditProfileScreen({ navigation, route }) {
                 style={[
                   styles.cameraOverlay, 
                   { backgroundColor: colors.primary },
-                  isRTL && { right: 'auto', left: 8 }
+                  isRTL && { right: 'auto', left: wp(2) }
                 ]} 
                 onPress={pickImage}
               >
-                <Ionicons name="camera" size={24} color="#fff" />
+                <Ionicons name="camera" size={normalize(24)} color="#fff" />
               </TouchableOpacity>
             </View>
           </LinearGradient>
@@ -151,11 +152,11 @@ export default function EditProfileScreen({ navigation, route }) {
                 >
                   <Ionicons 
                     name={field.icon} 
-                    size={20} 
+                    size={normalize(20)} 
                     color={isDark ? "#e0d4ff" : colors.primary} 
                     style={[
                       styles.inputIcon,
-                      isRTL && { marginRight: 0, marginLeft: 12 }
+                      isRTL && { marginRight: 0, marginLeft: wp(3) }
                     ]} 
                   />
                   <TextInput
@@ -189,9 +190,9 @@ export default function EditProfileScreen({ navigation, route }) {
             >
               <Ionicons 
                 name="checkmark" 
-                size={24} 
+                size={normalize(24)} 
                 color="#fff"
-                style={isRTL ? { marginLeft: 10, marginRight: 0 } : {}}
+                style={isRTL ? { marginLeft: wp(2.5), marginRight: 0 } : {}}
               />
               <Text style={styles.saveButtonText}>{t('saveChanges')}</Text>
             </TouchableOpacity>
@@ -218,13 +219,13 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
 
   header: {
-    paddingTop: 20,
-    paddingBottom: 40,
+    paddingTop: hp(2.5),
+    paddingBottom: hp(5),
     alignItems: "center",
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 12,
+    borderBottomLeftRadius: normalize(32),
+    borderBottomRightRadius: normalize(32),
+    shadowOffset: { width: 0, height: hp(0.75) },
+    shadowRadius: normalize(12),
     elevation: 8,
   },
   headerTop: {
@@ -232,103 +233,107 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
-    paddingHorizontal: 20,
-    marginBottom: 30,
+    paddingHorizontal: wp(5),
+    marginBottom: hp(3.5),
   },
-  backBtn: { padding: 8 },
-  headerTitle: { fontSize: 22, fontWeight: "700", color: "#fff" },
+  backBtn: { padding: wp(2) },
+  headerTitle: { 
+    fontSize: normalize(22), 
+    fontWeight: "700", 
+    color: "#fff" 
+  },
 
   avatarWrapper: { position: "relative" },
   avatar: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    borderWidth: 5,
+    width: wp(32),
+    height: wp(32),
+    borderRadius: wp(16),
+    borderWidth: normalize(5),
     borderColor: "#fff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: hp(0.5) },
     shadowOpacity: 0.3,
-    shadowRadius: 10,
+    shadowRadius: normalize(10),
     elevation: 12,
   },
   cameraOverlay: {
     position: "absolute",
-    bottom: 8,
-    right: 8,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    bottom: wp(2),
+    right: wp(2),
+    width: wp(11),
+    height: wp(11),
+    borderRadius: wp(5.5),
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 4,
+    borderWidth: normalize(4),
     borderColor: "#fff",
     shadowColor: "#000",
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: normalize(8),
     elevation: 10,
   },
 
   formCard: {
-    marginTop: -20,
-    marginHorizontal: 20,
-    borderRadius: 20,
-    padding: 24,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 20,
+    marginTop: -hp(2.5),
+    marginHorizontal: wp(5),
+    borderRadius: normalize(20),
+    padding: wp(6),
+    shadowOffset: { width: 0, height: hp(1) },
+    shadowRadius: normalize(20),
     elevation: 12,
   },
 
-  inputGroup: { marginBottom: 20 },
+  inputGroup: { marginBottom: hp(2.5) },
   inputLabel: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "600",
-    marginBottom: 8,
+    marginBottom: hp(1),
     letterSpacing: 0.5,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 56,
-    borderWidth: 1.5,
+    borderRadius: normalize(16),
+    paddingHorizontal: wp(4),
+    height: hp(7),
+    borderWidth: normalize(1.5),
   },
-  inputIcon: { marginRight: 12 },
+  inputIcon: { marginRight: wp(3) },
   textInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: normalize(16),
   },
 
   buttonContainer: {
-    marginHorizontal: 20,
-    marginTop: 30,
-    marginBottom: 40,
+    marginHorizontal: wp(5),
+    marginTop: hp(3.5),
+    marginBottom: hp(5),
   },
   saveButton: {
     flexDirection: "row",
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: hp(2),
+    borderRadius: normalize(16),
     justifyContent: "center",
     alignItems: "center",
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: hp(0.75) },
     shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowRadius: normalize(12),
     elevation: 10,
   },
   saveButtonText: {
     color: "#fff",
-    fontSize: 17,
+    fontSize: normalize(17),
     fontWeight: "700",
-    marginLeft: 10,
+    marginLeft: wp(2.5),
   },
   cancelButton: {
-    marginTop: 12,
-    paddingVertical: 14,
-    borderRadius: 16,
+    marginTop: hp(1.5),
+    paddingVertical: hp(1.7),
+    borderRadius: normalize(16),
     alignItems: "center",
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
   },
 });

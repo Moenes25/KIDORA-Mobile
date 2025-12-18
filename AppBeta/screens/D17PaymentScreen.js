@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTranslation } from "../context/TranslationContext";
+import { normalize, wp, hp } from "../utils/responsive";
 import D17Logo from "../assets/D17.png";
 
 // Official La Poste Tunisienne colors
@@ -101,27 +102,42 @@ export default function D17PaymentScreen({
               {/* Header */}
               <View style={styles.header}>
                 <Image source={D17Logo} style={styles.logo} resizeMode="contain" />
-                <Text style={[styles.title, isRTL && { textAlign: 'right' }]}>
+                <Text 
+                  style={[styles.title, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
                   {t('payWithD17')}
                 </Text>
-                <Text style={[styles.subtitle, isRTL && { textAlign: 'right' }]}>
+                <Text 
+                  style={[styles.subtitle, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
                   {t('d17ServiceDescription')}
                 </Text>
               </View>
 
               {/* Amount Card */}
               <View style={styles.amountCard}>
-                <Text style={[styles.amountLabel, isRTL && { textAlign: 'right' }]}>
+                <Text 
+                  style={[styles.amountLabel, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
                   {t('amountToPay')}
                 </Text>
-                <Text style={[styles.amountValue, isRTL && { textAlign: 'right' }]}>
+                <Text 
+                  style={[styles.amountValue, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
                   {paymentAmount} TND
                 </Text>
               </View>
 
               {/* Phone Number Input */}
               <View style={styles.inputSection}>
-                <Text style={[styles.inputLabel, isRTL && { textAlign: 'right' }]}>
+                <Text 
+                  style={[styles.inputLabel, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
                   {t('d17NumberMobile')}
                 </Text>
                 <View style={[
@@ -132,17 +148,21 @@ export default function D17PaymentScreen({
                     styles.countryCode,
                     isRTL && { 
                       borderRightWidth: 0, 
-                      borderLeftWidth: 1, 
+                      borderLeftWidth: normalize(1), 
                       borderLeftColor: '#ddd' 
                     }
                   ]}>
-                    <Text style={styles.countryFlag}>TN</Text>
-                    <Text style={styles.countryPrefix}>+216</Text>
+                    <Text style={styles.countryFlag} allowFontScaling={false}>
+                      TN
+                    </Text>
+                    <Text style={styles.countryPrefix} allowFontScaling={false}>
+                      +216
+                    </Text>
                   </View>
                   <TextInput
                     style={[
                       styles.phoneInput,
-                      isRTL ? { marginRight: 14, textAlign: 'right' } : { marginLeft: 14 }
+                      isRTL ? { marginRight: wp(3.5), textAlign: 'right' } : { marginLeft: wp(3.5) }
                     ]}
                     placeholder="98 123 456"
                     keyboardType="numeric"
@@ -150,9 +170,13 @@ export default function D17PaymentScreen({
                     onChangeText={(text) => setPhoneNumber(text.replace(/\D/g, "").slice(0, 8))}
                     maxLength={11}
                     editable={!loading}
+                    allowFontScaling={false}
                   />
                 </View>
-                <Text style={[styles.helpText, isRTL && { textAlign: 'right' }]}>
+                <Text 
+                  style={[styles.helpText, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
                   {t('enterPhoneNumber')}
                 </Text>
               </View>
@@ -166,11 +190,14 @@ export default function D17PaymentScreen({
                   styles.trustItem,
                   isRTL && { flexDirection: 'row-reverse' }
                 ]}>
-                  <MaterialCommunityIcons name="shield-check" size={20} color={LAPOSTE_BLUE} />
-                  <Text style={[
-                    styles.trustText,
-                    isRTL ? { marginRight: 8 } : { marginLeft: 8 }
-                  ]}>
+                  <MaterialCommunityIcons name="shield-check" size={normalize(20)} color={LAPOSTE_BLUE} />
+                  <Text 
+                    style={[
+                      styles.trustText,
+                      isRTL ? { marginRight: wp(2) } : { marginLeft: wp(2) }
+                    ]}
+                    allowFontScaling={false}
+                  >
                     {t('securedByLaPoste')}
                   </Text>
                 </View>
@@ -178,11 +205,14 @@ export default function D17PaymentScreen({
                   styles.trustItem,
                   isRTL && { flexDirection: 'row-reverse' }
                 ]}>
-                  <Feather name="lock" size={18} color={LAPOSTE_BLUE} />
-                  <Text style={[
-                    styles.trustText,
-                    isRTL ? { marginRight: 8 } : { marginLeft: 8 }
-                  ]}>
+                  <Feather name="lock" size={normalize(18)} color={LAPOSTE_BLUE} />
+                  <Text 
+                    style={[
+                      styles.trustText,
+                      isRTL ? { marginRight: wp(2) } : { marginLeft: wp(2) }
+                    ]}
+                    allowFontScaling={false}
+                  >
                     {t('encryption256')}
                   </Text>
                 </View>
@@ -201,10 +231,13 @@ export default function D17PaymentScreen({
                       isRTL && { flexDirection: 'row-reverse' }
                     ]}>
                       <ActivityIndicator color="#fff" />
-                      <Text style={[
-                        styles.payButtonText,
-                        isRTL ? { marginRight: 10 } : { marginLeft: 10 }
-                      ]}>
+                      <Text 
+                        style={[
+                          styles.payButtonText,
+                          isRTL ? { marginRight: wp(2.5) } : { marginLeft: wp(2.5) }
+                        ]}
+                        allowFontScaling={false}
+                      >
                         {t('processingInProgress')}
                       </Text>
                     </View>
@@ -213,14 +246,14 @@ export default function D17PaymentScreen({
                       styles.payButtonContent,
                       isRTL && { flexDirection: 'row-reverse' }
                     ]}>
-                      <Text style={styles.payButtonText}>
+                      <Text style={styles.payButtonText} allowFontScaling={false}>
                         {t('pay')} {paymentAmount} TND
                       </Text>
                       <Feather 
                         name={isRTL ? "arrow-left" : "arrow-right"} 
-                        size={22} 
+                        size={normalize(22)} 
                         color="#fff" 
-                        style={isRTL ? { marginRight: 10 } : { marginLeft: 10 }} 
+                        style={isRTL ? { marginRight: wp(2.5) } : { marginLeft: wp(2.5) }} 
                       />
                     </View>
                   )}
@@ -231,7 +264,9 @@ export default function D17PaymentScreen({
                   onPress={onClose} 
                   disabled={loading}
                 >
-                  <Text style={styles.cancelText}>{t('cancel')}</Text>
+                  <Text style={styles.cancelText} allowFontScaling={false}>
+                    {t('cancel')}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -242,7 +277,10 @@ export default function D17PaymentScreen({
                   style={styles.posteLogo}
                   resizeMode="contain"
                 />
-                <Text style={[styles.footerText, isRTL && { textAlign: 'right' }]}>
+                <Text 
+                  style={[styles.footerText, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
                   {t('officialPaymentService')} • La Poste Tunisienne
                 </Text>
               </View>
@@ -261,137 +299,137 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "#fff",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    paddingBottom: 40,
-    minHeight: "80%",
+    borderTopLeftRadius: normalize(28),
+    borderTopRightRadius: normalize(28),
+    padding: wp(6),
+    paddingBottom: hp(5),
+    minHeight: hp(80),
   },
   header: {
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: hp(3),
   },
   logo: {
-    width: 110,
-    height: 80,
-    marginBottom: 12,
+    width: wp(28),
+    height: hp(10),
+    marginBottom: hp(1.5),
   },
   title: {
-    fontSize: 26,
+    fontSize: normalize(26),
     fontWeight: "800",
     color: LAPOSTE_BLUE,
-    marginBottom: 6,
+    marginBottom: hp(0.8),
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: normalize(15),
     color: TEXT_LIGHT,
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: normalize(20),
   },
   amountCard: {
     backgroundColor: LAPOSTE_LIGHT_BLUE,
-    borderRadius: 18,
-    padding: 20,
+    borderRadius: normalize(18),
+    padding: wp(5),
     alignItems: "center",
-    marginBottom: 28,
-    borderWidth: 1.5,
+    marginBottom: hp(3.5),
+    borderWidth: normalize(1.5),
     borderColor: "#B3D7FF",
   },
   amountLabel: {
-    fontSize: 15,
+    fontSize: normalize(15),
     color: LAPOSTE_ACCENT,
     fontWeight: "600",
-    marginBottom: 8,
+    marginBottom: hp(1),
   },
   amountValue: {
-    fontSize: 36,
+    fontSize: normalize(36),
     fontWeight: "900",
     color: LAPOSTE_BLUE,
   },
   inputSection: {
-    marginBottom: 20,
+    marginBottom: hp(2.5),
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "700",
     color: TEXT_DARK,
-    marginBottom: 10,
+    marginBottom: hp(1.2),
   },
   phoneInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 2,
+    borderWidth: normalize(2),
     borderColor: LAPOSTE_BLUE,
-    borderRadius: 16,
+    borderRadius: normalize(16),
     backgroundColor: "#fff",
-    height: 60,
+    height: hp(7.5),
   },
   countryCode: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
-    borderRightWidth: 1,
+    paddingHorizontal: wp(3.5),
+    borderRightWidth: normalize(1),
     borderRightColor: "#ddd",
   },
   countryFlag: {
-    fontSize: 20,
-    marginRight: 6,
+    fontSize: normalize(20),
+    marginRight: wp(1.5),
   },
   countryPrefix: {
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
     color: LAPOSTE_BLUE,
   },
   phoneInput: {
     flex: 1,
-    fontSize: 18,
+    fontSize: normalize(18),
     color: TEXT_DARK,
     letterSpacing: 1,
   },
   helpText: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: "#666",
-    marginTop: 8,
+    marginTop: hp(1),
     textAlign: "center",
   },
   trustRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 24,
-    marginBottom: 28,
+    gap: wp(6),
+    marginBottom: hp(3.5),
   },
   trustItem: {
     flexDirection: "row",
     alignItems: "center",
   },
   trustText: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: TEXT_LIGHT,
     fontWeight: "600",
   },
   actions: {
-    gap: 12,
-    marginBottom: 20,
+    gap: hp(1.5),
+    marginBottom: hp(2.5),
   },
   payButton: {
     backgroundColor: LAPOSTE_BLUE,
-    paddingVertical: 18,
-    borderRadius: 16,
+    paddingVertical: hp(2.2),
+    borderRadius: normalize(16),
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     elevation: 6,
     shadowColor: LAPOSTE_BLUE,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: hp(0.5) },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: normalize(8),
   },
   payButtonDisabled: {
     backgroundColor: "#6699CC",
   },
   payButtonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: "700",
   },
   payButtonContent: {
@@ -404,29 +442,29 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: "#f0f0f0",
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: hp(2),
+    borderRadius: normalize(16),
     alignItems: "center",
-    borderWidth: 1.5,
+    borderWidth: normalize(1.5),
     borderColor: "#ddd",
   },
   cancelText: {
     color: "#555",
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
   },
   footer: {
     alignItems: "center",
-    marginTop: 10,
+    marginTop: hp(1.2),
   },
   posteLogo: {
-    width: 60,
-    height: 40,
+    width: wp(15),
+    height: hp(5),
     opacity: 0.7,
-    marginBottom: 8,
+    marginBottom: hp(1),
   },
   footerText: {
-    fontSize: 11,
+    fontSize: normalize(11),
     color: "#888",
     textAlign: "center",
   },

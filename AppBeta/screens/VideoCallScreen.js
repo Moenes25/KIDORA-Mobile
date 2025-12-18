@@ -1,7 +1,8 @@
 // VideoCallScreen.js
 import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar } from 'react-native';
 import Avatar from '../components/Avatar';
+import { normalize, wp, hp } from '../utils/responsive';
 
 export default function VideoCallScreen({ route, navigation }) {
   const { user } = route.params;
@@ -17,22 +18,48 @@ export default function VideoCallScreen({ route, navigation }) {
     <View style={styles.container}>
       {/* remote simulated video */}
       <View style={styles.remote}>
-        <Avatar uri={user.avatar} size={180} name={user.name} />
-        <Text style={{color:'#fff', fontSize:18, marginTop:12}}>{user.name}</Text>
+        <Avatar uri={user.avatar} size={normalize(180)} name={user.name} />
+        <Text 
+          style={styles.remoteName}
+          allowFontScaling={false}
+        >
+          {user.name}
+        </Text>
       </View>
 
       {/* local simulated video (small) */}
       <View style={styles.local}>
-        <Avatar uri={'https://www.gravatar.com/avatar/anon?s=80&d=identicon'} size={64} />
-        <Text style={{color:'#fff', fontSize:12, marginTop:6}}>You</Text>
+        <Avatar uri={'https://www.gravatar.com/avatar/anon?s=80&d=identicon'} size={normalize(64)} />
+        <Text 
+          style={styles.localName}
+          allowFontScaling={false}
+        >
+          You
+        </Text>
       </View>
 
       <View style={styles.controls}>
-        <TouchableOpacity style={[styles.controlBtn, {backgroundColor:'#e74c3c'}]} onPress={() => navigation.goBack()}>
-          <Text style={{color:'#fff', fontWeight:'700'}}>Hang Up</Text>
+        <TouchableOpacity 
+          style={[styles.controlBtn, {backgroundColor:'#e74c3c'}]} 
+          onPress={() => navigation.goBack()}
+        >
+          <Text 
+            style={styles.controlBtnText}
+            allowFontScaling={false}
+          >
+            Hang Up
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.controlBtn, {backgroundColor:'#2ecc71'}]} onPress={() => alert('Toggle mute (mock)')}>
-          <Text style={{color:'#fff', fontWeight:'700'}}>Mute</Text>
+        <TouchableOpacity 
+          style={[styles.controlBtn, {backgroundColor:'#2ecc71'}]} 
+          onPress={() => alert('Toggle mute (mock)')}
+        >
+          <Text 
+            style={styles.controlBtnText}
+            allowFontScaling={false}
+          >
+            Mute
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -40,9 +67,47 @@ export default function VideoCallScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex:1, backgroundColor:'#111', alignItems:'center', justifyContent:'center' },
-  remote: { alignItems:'center', justifyContent:'center' },
-  local: { position:'absolute', top:44, right:18, alignItems:'center' },
-  controls: { position:'absolute', bottom:44, flexDirection:'row', gap:12 },
-  controlBtn: { paddingHorizontal:18, paddingVertical:12, borderRadius:30, marginHorizontal:8 }
+  container: { 
+    flex: 1, 
+    backgroundColor: '#111', 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  remote: { 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  remoteName: {
+    color: '#fff', 
+    fontSize: normalize(18), 
+    marginTop: hp(1.5)
+  },
+  local: { 
+    position: 'absolute', 
+    top: Platform.OS === 'ios' ? hp(5.5) : (StatusBar.currentHeight || hp(3)), 
+    right: wp(4.5), 
+    alignItems: 'center' 
+  },
+  localName: {
+    color: '#fff', 
+    fontSize: normalize(12), 
+    marginTop: hp(0.7)
+  },
+  controls: { 
+    position: 'absolute', 
+    bottom: hp(5.5), 
+    flexDirection: 'row', 
+    gap: wp(3) 
+  },
+  controlBtn: { 
+    paddingHorizontal: wp(4.5), 
+    paddingVertical: hp(1.5), 
+    borderRadius: normalize(30), 
+    marginHorizontal: wp(2) 
+  },
+  controlBtnText: {
+    color: '#fff', 
+    fontWeight: '700',
+    fontSize: normalize(15)
+  }
 });

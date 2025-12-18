@@ -15,6 +15,7 @@ import TopNavBar from "../components/TopNavBar";
 import { useTheme } from "../context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { normalize, wp, hp, isSmallDevice } from "../utils/responsive";
 
 export default function FeedbackScreen({ navigation }) {
   const { colors, theme } = useTheme();
@@ -57,7 +58,10 @@ export default function FeedbackScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={{ height: Platform.OS === "android" ? StatusBar.currentHeight : 44, backgroundColor: "#6f42c1" }} />
+      <View style={{ 
+        height: Platform.OS === "android" ? StatusBar.currentHeight : hp(5.5), 
+        backgroundColor: "#6f42c1" 
+      }} />
       <StatusBar barStyle="light-content" />
       
       <LinearGradient colors={colors.headerGradient} style={styles.topSection}>
@@ -77,20 +81,31 @@ export default function FeedbackScreen({ navigation }) {
           <View style={styles.headerSection}>
             <Ionicons 
               name="mail-outline" 
-              size={48} 
+              size={normalize(isSmallDevice ? 40 : 48)} 
               color={isDark ? "#BB86FC" : "#6F42C1"} 
             />
-            <Text style={[styles.headerTitle, { color: colors.text }]}>
+            <Text 
+              style={[styles.headerTitle, { color: colors.text }]}
+              allowFontScaling={false}
+            >
               We'd Love to Hear From You
             </Text>
-            <Text style={[styles.headerSubtitle, { color: colors.subText }]}>
+            <Text 
+              style={[styles.headerSubtitle, { color: colors.subText }]}
+              allowFontScaling={false}
+            >
               Your feedback helps us improve the app and provide better service for you and your children.
             </Text>
           </View>
 
           {/* Feedback Type Selection */}
           <View style={styles.section}>
-            <Text style={[styles.label, { color: colors.text }]}>Feedback Type</Text>
+            <Text 
+              style={[styles.label, { color: colors.text }]}
+              allowFontScaling={false}
+            >
+              Feedback Type
+            </Text>
             <View style={styles.typeContainer}>
               {feedbackTypes.map((type) => (
                 <TouchableOpacity
@@ -113,7 +128,7 @@ export default function FeedbackScreen({ navigation }) {
                 >
                   <Ionicons
                     name={type.icon}
-                    size={20}
+                    size={normalize(isSmallDevice ? 16 : 20)}
                     color={
                       feedbackType === type.id
                         ? "white"
@@ -130,6 +145,7 @@ export default function FeedbackScreen({ navigation }) {
                           : colors.text 
                       },
                     ]}
+                    allowFontScaling={false}
                   >
                     {type.label}
                   </Text>
@@ -140,7 +156,12 @@ export default function FeedbackScreen({ navigation }) {
 
           {/* Subject Input */}
           <View style={styles.section}>
-            <Text style={[styles.label, { color: colors.text }]}>Subject</Text>
+            <Text 
+              style={[styles.label, { color: colors.text }]}
+              allowFontScaling={false}
+            >
+              Subject
+            </Text>
             <TextInput
               style={[
                 styles.input,
@@ -154,12 +175,18 @@ export default function FeedbackScreen({ navigation }) {
               placeholderTextColor={isDark ? "#888" : "#999"}
               value={subject}
               onChangeText={setSubject}
+              allowFontScaling={false}
             />
           </View>
 
           {/* Message Input */}
           <View style={styles.section}>
-            <Text style={[styles.label, { color: colors.text }]}>Message</Text>
+            <Text 
+              style={[styles.label, { color: colors.text }]}
+              allowFontScaling={false}
+            >
+              Message
+            </Text>
             <TextInput
               style={[
                 styles.input,
@@ -177,6 +204,7 @@ export default function FeedbackScreen({ navigation }) {
               multiline
               numberOfLines={6}
               textAlignVertical="top"
+              allowFontScaling={false}
             />
           </View>
 
@@ -189,8 +217,13 @@ export default function FeedbackScreen({ navigation }) {
             onPress={handleSubmit}
             activeOpacity={0.8}
           >
-            <Ionicons name="send" size={20} color="white" />
-            <Text style={styles.submitButtonText}>Submit Feedback</Text>
+            <Ionicons name="send" size={normalize(isSmallDevice ? 18 : 20)} color="white" />
+            <Text 
+              style={styles.submitButtonText}
+              allowFontScaling={false}
+            >
+              Submit Feedback
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -204,7 +237,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   topSection: {
-    paddingBottom: 10,
+    paddingBottom: hp(1.2),
   },
   keyboardView: {
     flex: 1,
@@ -213,86 +246,86 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+    padding: wp(5),
+    paddingBottom: hp(5),
   },
   headerSection: {
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: hp(3),
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: normalize(isSmallDevice ? 20 : 24),
     fontWeight: "700",
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: hp(2),
+    marginBottom: hp(1),
     textAlign: "center",
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: normalize(isSmallDevice ? 12 : 14),
     textAlign: "center",
-    lineHeight: 20,
-    paddingHorizontal: 10,
+    lineHeight: normalize(isSmallDevice ? 18 : 20),
+    paddingHorizontal: wp(3),
   },
   section: {
-    marginBottom: 24,
+    marginBottom: hp(3),
   },
   label: {
-    fontSize: 16,
+    fontSize: normalize(isSmallDevice ? 14 : 16),
     fontWeight: "600",
-    marginBottom: 12,
+    marginBottom: hp(1.5),
   },
   typeContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: wp(2.5),
   },
   typeButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: 6,
+    paddingVertical: hp(1.2),
+    paddingHorizontal: wp(4),
+    borderRadius: normalize(20),
+    borderWidth: normalize(1),
+    gap: wp(1.5),
   },
   typeButtonActive: {
     borderColor: "transparent",
   },
   typeButtonText: {
-    fontSize: 14,
+    fontSize: normalize(isSmallDevice ? 12 : 14),
     fontWeight: "500",
   },
   typeButtonTextActive: {
     color: "white",
   },
   input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 15,
+    borderWidth: normalize(1),
+    borderRadius: normalize(12),
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(1.6),
+    fontSize: normalize(isSmallDevice ? 13 : 15),
   },
   messageInput: {
-    minHeight: 140,
-    paddingTop: 14,
+    minHeight: hp(isSmallDevice ? 16 : 18),
+    paddingTop: hp(1.6),
   },
   submitButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 8,
-    marginTop: 10,
+    paddingVertical: hp(2),
+    borderRadius: normalize(12),
+    gap: wp(2),
+    marginTop: hp(1.2),
     shadowColor: "#6F42C1",
     shadowOpacity: 0.3,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: normalize(8),
+    shadowOffset: { width: 0, height: hp(0.5) },
     elevation: 6,
   },
   submitButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: normalize(isSmallDevice ? 14 : 16),
     fontWeight: "600",
   },
 });

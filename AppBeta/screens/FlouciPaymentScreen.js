@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTranslation } from "../context/TranslationContext";
+import { normalize, wp, hp } from "../utils/responsive";
 import FlouciLogo from "../assets/flouci.png";
 
 export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess, paymentAmount }) {
@@ -110,33 +111,45 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
           <Image source={FlouciLogo} style={styles.logo} resizeMode="contain" />
 
           {/* TITLE */}
-          <Text style={[
-            styles.title,
-            isRTL && { textAlign: 'right' }
-          ]}>
+          <Text 
+            style={[
+              styles.title,
+              isRTL && { textAlign: 'right' }
+            ]}
+            allowFontScaling={false}
+          >
             {t('payWithFlouci')}
           </Text>
 
           {/* DESCRIPTION */}
-          <Text style={[
-            styles.description,
-            isRTL && { textAlign: 'right' }
-          ]}>
+          <Text 
+            style={[
+              styles.description,
+              isRTL && { textAlign: 'right' }
+            ]}
+            allowFontScaling={false}
+          >
             {t('enterFlouciPhone')}
           </Text>
 
           {/* AMOUNT DISPLAY */}
           <View style={styles.amountBox}>
-            <Text style={[
-              styles.amountLabel,
-              isRTL && { textAlign: 'right' }
-            ]}>
+            <Text 
+              style={[
+                styles.amountLabel,
+                isRTL && { textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {t('amountToPay')}
             </Text>
-            <Text style={[
-              styles.amountValue,
-              isRTL && { textAlign: 'right' }
-            ]}>
+            <Text 
+              style={[
+                styles.amountValue,
+                isRTL && { textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {paymentAmount} TND
             </Text>
           </View>
@@ -148,11 +161,11 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
           ]}>
             <Feather 
               name="smartphone" 
-              size={20} 
+              size={normalize(20)} 
               color="#666" 
               style={[
                 styles.inputIcon,
-                isRTL && { marginLeft: 10, marginRight: 0 }
+                isRTL && { marginLeft: wp(2.5), marginRight: 0 }
               ]} 
             />
             <TextInput
@@ -165,6 +178,7 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               editable={!loading}
+              allowFontScaling={false}
             />
           </View>
 
@@ -173,11 +187,14 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
             styles.infoBox,
             isRTL && { flexDirection: 'row-reverse' }
           ]}>
-            <Feather name="info" size={16} color="#FF6B35" />
-            <Text style={[
-              styles.infoText,
-              isRTL && { marginRight: 8, marginLeft: 0, textAlign: 'right' }
-            ]}>
+            <Feather name="info" size={normalize(16)} color="#FF6B35" />
+            <Text 
+              style={[
+                styles.infoText,
+                isRTL && { marginRight: wp(2), marginLeft: 0, textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {t('redirectToFlouci')}
             </Text>
           </View>
@@ -196,11 +213,14 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
                   styles.payBtnContent,
                   isRTL && { flexDirection: 'row-reverse' }
                 ]}>
-                  <Feather name="check-circle" size={20} color="white" />
-                  <Text style={[
-                    styles.payBtnText,
-                    isRTL ? { marginRight: 8 } : { marginLeft: 8 }
-                  ]}>
+                  <Feather name="check-circle" size={normalize(20)} color="white" />
+                  <Text 
+                    style={[
+                      styles.payBtnText,
+                      isRTL ? { marginRight: wp(2) } : { marginLeft: wp(2) }
+                    ]}
+                    allowFontScaling={false}
+                  >
                     {t('continueToFlouci')}
                   </Text>
                 </View>
@@ -212,7 +232,9 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
               onPress={onClose}
               disabled={loading}
             >
-              <Text style={styles.cancelText}>{t('cancel')}</Text>
+              <Text style={styles.cancelText} allowFontScaling={false}>
+                {t('cancel')}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -221,11 +243,14 @@ export default function FlouciPaymentScreen({ visible, onClose, onPaymentSuccess
             styles.securityNote,
             isRTL && { flexDirection: 'row-reverse' }
           ]}>
-            <Feather name="lock" size={14} color="#999" />
-            <Text style={[
-              styles.securityText,
-              isRTL ? { marginRight: 6 } : { marginLeft: 6 }
-            ]}>
+            <Feather name="lock" size={normalize(14)} color="#999" />
+            <Text 
+              style={[
+                styles.securityText,
+                isRTL ? { marginRight: wp(1.5) } : { marginLeft: wp(1.5) }
+              ]}
+              allowFontScaling={false}
+            >
               {t('securedByFlouci')}
             </Text>
           </View>
@@ -244,61 +269,61 @@ const styles = StyleSheet.create({
   },
 
   popup: {
-    width: "90%",
-    maxWidth: 420,
+    width: wp(90),
+    maxWidth: wp(100),
     backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: normalize(20),
+    padding: wp(6),
     alignItems: "center",
     elevation: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: hp(0.5) },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: normalize(8),
   },
 
   logo: {
-    width: 80,
-    height: 80,
-    marginBottom: 16,
+    width: wp(20),
+    height: wp(20),
+    marginBottom: hp(2),
   },
 
   title: {
-    fontSize: 22,
+    fontSize: normalize(22),
     fontWeight: "700",
     color: "#FF6B35",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: hp(1),
   },
 
   description: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#666",
     textAlign: "center",
-    marginBottom: 20,
-    lineHeight: 20,
+    marginBottom: hp(2.5),
+    lineHeight: normalize(20),
   },
 
   amountBox: {
     width: "100%",
     backgroundColor: "#FFF5F2",
-    padding: 16,
-    borderRadius: 12,
+    padding: wp(4),
+    borderRadius: normalize(12),
     alignItems: "center",
-    marginBottom: 20,
-    borderWidth: 1,
+    marginBottom: hp(2.5),
+    borderWidth: normalize(1),
     borderColor: "#FFE0D6",
   },
 
   amountLabel: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: "#FF6B35",
     fontWeight: "600",
-    marginBottom: 4,
+    marginBottom: hp(0.5),
   },
 
   amountValue: {
-    fontSize: 28,
+    fontSize: normalize(28),
     fontWeight: "700",
     color: "#FF6B35",
   },
@@ -307,60 +332,60 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
+    borderWidth: normalize(1),
     borderColor: "#ddd",
-    borderRadius: 12,
-    paddingHorizontal: 14,
+    borderRadius: normalize(12),
+    paddingHorizontal: wp(3.5),
     backgroundColor: "#fafafa",
-    marginBottom: 16,
-    height: 54,
+    marginBottom: hp(2),
+    height: hp(6.7),
   },
 
   inputIcon: {
-    marginRight: 10,
+    marginRight: wp(2.5),
   },
 
   phoneInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: normalize(16),
     color: "#333",
   },
 
   infoBox: {
     flexDirection: "row",
     backgroundColor: "#FFF5F2",
-    padding: 12,
-    borderRadius: 10,
+    padding: wp(3),
+    borderRadius: normalize(10),
     alignItems: "center",
     width: "100%",
-    marginBottom: 20,
+    marginBottom: hp(2.5),
   },
 
   infoText: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#FF6B35",
-    marginLeft: 8,
+    marginLeft: wp(2),
     flex: 1,
-    lineHeight: 16,
+    lineHeight: normalize(16),
   },
 
   buttonContainer: {
     width: "100%",
-    marginBottom: 12,
+    marginBottom: hp(1.5),
   },
 
   payBtn: {
     backgroundColor: "#FF6B35",
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: hp(2),
+    borderRadius: normalize(12),
     width: "100%",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: hp(1.2),
     elevation: 2,
     shadowColor: "#FF6B35",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
   },
 
   payBtnDisabled: {
@@ -375,32 +400,32 @@ const styles = StyleSheet.create({
 
   payBtnText: {
     color: "white",
-    fontSize: 17,
+    fontSize: normalize(17),
     fontWeight: "700",
   },
 
   cancelBtn: {
     backgroundColor: "#f0f0f0",
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: hp(1.7),
+    borderRadius: normalize(12),
     width: "100%",
     alignItems: "center",
   },
 
   cancelText: {
     color: "#666",
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
   },
 
   securityNote: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: hp(1),
   },
 
   securityText: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#999",
   },
 });

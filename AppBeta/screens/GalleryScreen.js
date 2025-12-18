@@ -15,12 +15,15 @@ import { Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "../context/TranslationContext";
+import { normalize, wp, hp, screenHeight } from "../utils/responsive";
 
 import TopNavBar from "../components/TopNavBar";
 import PhotoScreen from "./PhotoScreen";
 
-const { width, height: screenHeight } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 const TOP_SECTION_HEIGHT = screenHeight * 0.20;
+const PHOTO_SIZE = wp(30);
+const PHOTO_SNAP_INTERVAL = PHOTO_SIZE + wp(4);
 
 export default function GalleryScreen({ navigation }) {
   const { colors, theme } = useTheme();
@@ -147,7 +150,7 @@ export default function GalleryScreen({ navigation }) {
           ))}
           
           {/* Bottom padding */}
-          <View style={{ height: 40 }} />
+          <View style={{ height: hp(5) }} />
         </ScrollView>
       </View>
 
@@ -197,9 +200,9 @@ function MonthCard({ monthBlock, openPhoto, index, isRTL, t }) {
           ]}>
             <View style={[
               styles.monthIconCircle,
-              isRTL && { marginLeft: 12, marginRight: 0 }
+              isRTL && { marginLeft: wp(3), marginRight: 0 }
             ]}>
-              <Feather name="calendar" size={18} color="#9b59b6" />
+              <Feather name="calendar" size={normalize(18)} color="#9b59b6" />
             </View>
             <Text style={[
               styles.monthTitle,
@@ -223,7 +226,7 @@ function MonthCard({ monthBlock, openPhoto, index, isRTL, t }) {
           showsHorizontalScrollIndicator={false}
           keyExtractor={(_, i) => i.toString()}
           contentContainerStyle={styles.photosContainer}
-          snapToInterval={130}
+          snapToInterval={PHOTO_SNAP_INTERVAL}
           decelerationRate="fast"
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { x: scrollX } } }],
@@ -231,9 +234,9 @@ function MonthCard({ monthBlock, openPhoto, index, isRTL, t }) {
           )}
           renderItem={({ item, index: photoIndex }) => {
             const inputRange = [
-              (photoIndex - 1) * 130, 
-              photoIndex * 130, 
-              (photoIndex + 1) * 130
+              (photoIndex - 1) * PHOTO_SNAP_INTERVAL, 
+              photoIndex * PHOTO_SNAP_INTERVAL, 
+              (photoIndex + 1) * PHOTO_SNAP_INTERVAL
             ];
 
             const scale = scrollX.interpolate({
@@ -260,7 +263,7 @@ function MonthCard({ monthBlock, openPhoto, index, isRTL, t }) {
                       transform: [{ scale }],
                       opacity,
                     },
-                    isRTL && { marginLeft: 16, marginRight: 0 }
+                    isRTL && { marginLeft: wp(4), marginRight: 0 }
                   ]}
                 >
                   <Image source={item} style={styles.photo} />
@@ -270,7 +273,7 @@ function MonthCard({ monthBlock, openPhoto, index, isRTL, t }) {
                     colors={["transparent", "rgba(0,0,0,0.4)"]}
                     style={styles.photoOverlay}
                   >
-                    <Feather name="maximize-2" size={16} color="#fff" />
+                    <Feather name="maximize-2" size={normalize(16)} color="#fff" />
                   </LinearGradient>
                 </Animated.View>
               </TouchableOpacity>
@@ -298,7 +301,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   safeArea: {
-    height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight,
+    height: Platform.OS === "ios" ? hp(5.5) : StatusBar.currentHeight,
   },
 
   whiteSection: {
@@ -306,42 +309,42 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderTopLeftRadius: 38,
-    borderTopRightRadius: 38,
+    borderTopLeftRadius: normalize(38),
+    borderTopRightRadius: normalize(38),
     overflow: "hidden",
     backgroundColor: "#ffffff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -5 },
+    shadowOffset: { width: 0, height: -hp(0.6) },
     shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowRadius: normalize(12),
     elevation: 12,
   },
 
   scrollContent: {
-    paddingTop: 32,
-    paddingBottom: 40,
+    paddingTop: hp(4),
+    paddingBottom: hp(5),
   },
 
   monthCardWrapper: {
-    marginHorizontal: 16,
-    marginBottom: 24,
+    marginHorizontal: wp(4),
+    marginBottom: hp(3),
   },
 
   monthCard: {
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: normalize(24),
+    padding: wp(5),
     elevation: 4,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.08,
-    shadowRadius: 12,
+    shadowRadius: normalize(12),
   },
 
   monthHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: hp(2),
   },
 
   monthTitleContainer: {
@@ -350,49 +353,49 @@ const styles = StyleSheet.create({
   },
 
   monthIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: wp(9),
+    height: wp(9),
+    borderRadius: wp(4.5),
     backgroundColor: "rgba(155, 89, 182, 0.15)",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
+    marginRight: wp(3),
   },
 
   monthTitle: {
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: "700",
     color: "#2d3436",
   },
 
   countBadge: {
     backgroundColor: "rgba(155, 89, 182, 0.15)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: wp(3),
+    paddingVertical: hp(0.7),
+    borderRadius: normalize(20),
   },
 
   countBadgeText: {
     color: "#9b59b6",
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "700",
   },
 
   photosContainer: {
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    paddingVertical: hp(2),
+    paddingHorizontal: wp(2),
   },
 
   photoWrapper: {
-    marginRight: 16,
+    marginRight: wp(4),
     position: "relative",
   },
 
   photo: {
-    width: 120,
-    height: 120,
-    borderRadius: 16,
-    borderWidth: 3,
+    width: PHOTO_SIZE,
+    height: PHOTO_SIZE,
+    borderRadius: normalize(16),
+    borderWidth: normalize(3),
     borderColor: "#fff",
   },
 
@@ -401,11 +404,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 40,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    height: hp(5),
+    borderBottomLeftRadius: normalize(16),
+    borderBottomRightRadius: normalize(16),
     justifyContent: "flex-end",
     alignItems: "flex-end",
-    padding: 8,
+    padding: wp(2),
   },
 });

@@ -6,41 +6,35 @@ import {
   Modal,
   Image,
   TouchableOpacity,
-  Dimensions,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "../context/TranslationContext";
 
+// Import responsive utilities
+import { wp, hp, normalize } from "../utils/responsive";
+
 // Import PaymentSuccessfulScreen
 import PaymentSuccessfulScreen from "./PaymentSuccessfulScreen";
-
-const { width } = Dimensions.get("window");
 
 export default function PaymentConfirmationScreen({
   visible,
   onClose,
   amount,
   method,
-  onPaymentSuccess, // NEW: callback to close PayMethodScreen
+  onPaymentSuccess,
 }) {
   const navigation = useNavigation();
   const { t, isRTL } = useTranslation();
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleConfirm = () => {
-    // Show the success screen
     setShowSuccess(true);
-
-    // Close this modal (confirmation screen)
     onClose();
-
-    // Close PayMethodScreen if callback is provided
     if (onPaymentSuccess) onPaymentSuccess();
 
-    // After 3 seconds, hide success screen and navigate to PaymentsScreen
     setTimeout(() => {
       setShowSuccess(false);
-      navigation.navigate("PaymentsScreen"); // Make sure this matches your navigator
+      navigation.navigate("PaymentsScreen");
     }, 1500);
   };
 
@@ -49,7 +43,7 @@ export default function PaymentConfirmationScreen({
       <Modal visible={visible} transparent animationType="fade">
         <View style={styles.overlay}>
           <View style={styles.container}>
-            {/* Payment Logo */}
+            {/* Payment Logo - Normalized for consistent physical size */}
             <Image
               source={require("../assets/confirm_pay.png")}
               style={styles.logo}
@@ -57,29 +51,39 @@ export default function PaymentConfirmationScreen({
             />
 
             {/* Title */}
-            <Text style={[
-              styles.title,
-              isRTL && { textAlign: 'right' }
-            ]}>
+            <Text 
+              style={[
+                styles.title,
+                isRTL && { textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {t('confirmPayment')}
             </Text>
 
             {/* Amount */}
-            <Text style={[
-              styles.amountText,
-              isRTL && { textAlign: 'right' }
-            ]}>
+            <Text 
+              style={[
+                styles.amountText,
+                isRTL && { textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {amount} {t('tnd')}
             </Text>
 
             {/* Confirm Button */}
             <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
-              <Text style={styles.confirmText}>{t('confirm')}</Text>
+              <Text style={styles.confirmText} allowFontScaling={false}>
+                {t('confirm')}
+              </Text>
             </TouchableOpacity>
 
             {/* Cancel Button */}
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
-              <Text style={styles.cancelText}>{t('cancel')}</Text>
+              <Text style={styles.cancelText} allowFontScaling={false}>
+                {t('cancel')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -97,68 +101,73 @@ export default function PaymentConfirmationScreen({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.5)", // Darkened slightly for better focus
     justifyContent: "center",
     alignItems: "center",
   },
 
   container: {
-    width: width * 0.85,
+    width: wp(85), // 85% of screen width
     backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 25,
+    borderRadius: normalize(16),
+    padding: wp(6), // Internal padding scales with width
     alignItems: "center",
     elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 
   logo: {
-    width: 90,
-    height: 90,
-    marginBottom: 10,
+    width: normalize(90),
+    height: normalize(90),
+    marginBottom: hp(1.5),
   },
 
   title: {
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "bold",
-    marginBottom: 15,
+    marginBottom: hp(2),
     textAlign: "center",
+    color: "#2d3436",
   },
 
   amountText: {
-    fontSize: 32,
+    fontSize: normalize(32),
     fontWeight: "900",
     color: "#6F42C1",
-    marginBottom: 25,
+    marginBottom: hp(3),
     textAlign: "center",
   },
 
   confirmBtn: {
     width: "100%",
-    paddingVertical: 12,
+    paddingVertical: hp(1.8), // Comfortable touch target height
     backgroundColor: "#6F42C1",
-    borderRadius: 10,
-    marginBottom: 10,
+    borderRadius: normalize(10),
+    marginBottom: hp(1.2),
   },
 
   confirmText: {
     textAlign: "center",
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: normalize(16),
   },
 
   cancelBtn: {
     width: "100%",
-    paddingVertical: 12,
-    backgroundColor: "#ccc",
-    borderRadius: 10,
-    marginBottom: 10,
+    paddingVertical: hp(1.8),
+    backgroundColor: "#f0f0f0", // Subtle grey for secondary action
+    borderRadius: normalize(10),
+    marginBottom: hp(1),
   },
 
   cancelText: {
     textAlign: "center",
-    color: "#555",
+    color: "#636e72",
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: normalize(16),
   },
 });

@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
-  Dimensions,
   ScrollView,
   Alert,
   Platform,
@@ -19,24 +18,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "../context/TranslationContext";
 import { useNotifications } from "../context/NotificationContext";
-
 import BottomNav from "../components/BottomNav";
 import SideBar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
 import NotificationPanel from "../components/NotificationPanel";
+import { normalize, wp, hp, screenWidth, screenHeight } from "../utils/responsive";
 
-const screenWidth = Dimensions.get("window").width;
-const screenHeight = Dimensions.get("window").height;
-
-//const TOP_SECTION_HEIGHT_RATIO = 0.42; 
 const getTopSectionHeight = () => {
-  const baseHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
-  const topBarHeight = 60;
-  const profileHeight = 70;
-  const testBtnHeight = 40;
-  const statsHeight = 150;
-  const padding = 40;
-  
+  const baseHeight = Platform.OS === 'ios' ? hp(5.5) : (StatusBar.currentHeight || hp(3));
+  const topBarHeight = hp(7.5);
+  const profileHeight = hp(8.5);
+  const testBtnHeight = hp(5);
+  const statsHeight = hp(18);
+  const padding = hp(5);
   return baseHeight + topBarHeight + profileHeight + testBtnHeight + statsHeight + padding;
 };
 
@@ -46,7 +40,6 @@ export default function HomeScreen({ navigation, route }) {
   const { colors } = useTheme();
   const { t, isRTL, getMonthName, getDayName } = useTranslation();
   const { sendChildAlert, unreadCount } = useNotifications();
-
   const [pressedCard, setPressedCard] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [notificationPanelVisible, setNotificationPanelVisible] = useState(false);
@@ -65,9 +58,7 @@ export default function HomeScreen({ navigation, route }) {
       { name: "Emma", status: "Arrived Home 🏠", location: "Home" },
       { name: "Liam", status: "Is Nearby 📍", location: "the Playground" },
     ];
-    
     const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-    
     if (sendChildAlert) {
       sendChildAlert(randomScenario.name, randomScenario.status, randomScenario.location);
     } else {
@@ -76,9 +67,39 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   const children = [
-    { id: 1, name: "John Doe", age: 8, grade: 3, present: true, completedTasks: 10, totalTasks: 15, performance: 85, avatar: require("../assets/child1.png") },
-    { id: 2, name: "Emma Smith", age: 7, grade: 2, present: false, completedTasks: 7, totalTasks: 12, performance: 50, avatar: require("../assets/child3.png") },
-    { id: 3, name: "Liam Brown", age: 9, grade: 4, present: true, completedTasks: 12, totalTasks: 15, performance: 25, avatar: require("../assets/child2.png") },
+    { 
+      id: 1, 
+      name: "John Doe", 
+      age: 8, 
+      grade: 3, 
+      present: true, 
+      completedTasks: 10, 
+      totalTasks: 15, 
+      performance: 85, 
+      avatar: require("../assets/child1.png") 
+    },
+    { 
+      id: 2, 
+      name: "Emma Smith", 
+      age: 7, 
+      grade: 2, 
+      present: false, 
+      completedTasks: 7, 
+      totalTasks: 12, 
+      performance: 50, 
+      avatar: require("../assets/child3.png") 
+    },
+    { 
+      id: 3, 
+      name: "Liam Brown", 
+      age: 9, 
+      grade: 4, 
+      present: true, 
+      completedTasks: 12, 
+      totalTasks: 15, 
+      performance: 25, 
+      avatar: require("../assets/child2.png") 
+    },
   ];
 
   const activityData = {
@@ -99,7 +120,6 @@ export default function HomeScreen({ navigation, route }) {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-
     const days = [];
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
@@ -114,15 +134,15 @@ export default function HomeScreen({ navigation, route }) {
     if (!date) return false;
     const today = new Date();
     return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear();
   };
 
   const isSameDay = (date1, date2) => {
     if (!date1 || !date2) return false;
     return date1.getDate() === date2.getDate() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getFullYear() === date2.getFullYear();
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear();
   };
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
@@ -142,52 +162,75 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   const getPerformanceColors = (performance) => {
-    if (performance >= 75) return { gradient: ["#6FCF97", "#27AE60"], icon: "#27AE60" };
-    if (performance >= 45) return { gradient: ["#F2C94C", "#F2994A"], icon: "#F2994A" };
-    return { gradient: ["#EB5757", "#E53935"], icon: "#E53935" };
+    if (performance >= 75) return { gradient: ["#6FCF97", "#27AE60"], icon: "#27AE60", border: "#27AE60" };
+    if (performance >= 45) return { gradient: ["#F2C94C", "#F2994A"], icon: "#F2994A", border: "#F2994A" };
+    return { gradient: ["#EB5757", "#E53935"], icon: "#E53935", border: "#E53935" };
   };
 
   const renderChildCard = ({ item }) => {
     const isPressed = pressedCard === item.id;
-    const { gradient } = getPerformanceColors(item.performance);
-    
+    const { gradient, border } = getPerformanceColors(item.performance);
+
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[
           styles.childCardWrapper,
           {
             shadowOpacity: isPressed ? 0.25 : 0.15,
             elevation: isPressed ? 8 : 4,
           }
-        ]} 
+        ]}
         activeOpacity={1}
         onPressIn={() => setPressedCard(item.id)}
         onPressOut={() => setPressedCard(null)}
       >
+        {/* Avatar positioned absolutely outside the gradient */}
+        <View style={[
+          styles.avatarContainer,
+          isRTL ? { right: -wp(2) } : { left: -wp(2) }
+        ]}>
+          <View style={[styles.avatarBorder, { borderColor: border }]}>
+            <Image
+              source={item.avatar}
+              style={styles.childAvatar}
+            />
+          </View>
+        </View>
+
         <LinearGradient colors={gradient} style={styles.childCard}>
           <View style={[styles.childHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-            <Image 
-              source={item.avatar} 
-              style={[
-                styles.childAvatar,
-                isRTL ? { marginLeft: 12, marginRight: 0 } : { marginRight: 12, marginLeft: 0 }
-              ]} 
-            />
+            {/* Empty space for avatar */}
+            <View style={styles.avatarSpacer} />
+            
             <View style={{ flex: 1 }}>
-              <Text style={[styles.childName, isRTL && { textAlign: 'right' }]}>{item.name}</Text>
-              <View style={[{ flexDirection: "row", alignItems: "center", marginTop: 4 }, isRTL && { flexDirection: 'row-reverse' }]}>
-                <Text style={[styles.childInfo, isRTL && { textAlign: 'right' }]}>
+              <Text 
+                style={[styles.childName, isRTL && { textAlign: 'right' }]}
+                allowFontScaling={false}
+              >
+                {item.name}
+              </Text>
+              <View style={[
+                { flexDirection: "row", alignItems: "center", marginTop: hp(0.5) },
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
+                <Text 
+                  style={[styles.childInfo, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
                   {t('age')}: {item.age} | {t('grade')}: {item.grade}
                 </Text>
               </View>
-              <View style={[{ flexDirection: "row", alignItems: "center", marginTop: 6 }, isRTL && { flexDirection: 'row-reverse' }]}>
-                <Feather 
-                  name={item.present ? "check-circle" : "x-circle"} 
-                  size={16} 
+              <View style={[
+                { flexDirection: "row", alignItems: "center", marginTop: hp(0.7) },
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
+                <Feather
+                  name={item.present ? "check-circle" : "x-circle"}
+                  size={normalize(16)}
                   color="#ffffff"
-                  style={isRTL ? { marginLeft: 4 } : { marginRight: 4 }} 
+                  style={isRTL ? { marginLeft: wp(1) } : { marginRight: wp(1) }}
                 />
-                <Text style={styles.statusText}>
+                <Text style={styles.statusText} allowFontScaling={false}>
                   {item.present ? t('present') : t('absent')}
                 </Text>
               </View>
@@ -196,25 +239,24 @@ export default function HomeScreen({ navigation, route }) {
 
           <View style={[styles.statsRow, isRTL && { flexDirection: 'row-reverse' }]}>
             <View style={[styles.statItem, isRTL && { flexDirection: 'row-reverse' }]}>
-              <Feather 
-                name="clipboard" 
-                size={16} 
-                color="#ffffff" 
-                style={isRTL ? { marginLeft: 4 } : { marginRight: 4 }} 
+              <Feather
+                name="clipboard"
+                size={normalize(16)}
+                color="#ffffff"
+                style={isRTL ? { marginLeft: wp(1) } : { marginRight: wp(1) }}
               />
-              <Text style={styles.statText}>
+              <Text style={styles.statText} allowFontScaling={false}>
                 {t('tasks')}: {item.completedTasks}/{item.totalTasks}
               </Text>
             </View>
-            
             <View style={[styles.statItem, isRTL && { flexDirection: 'row-reverse' }]}>
-              <Feather 
-                name="bar-chart-2" 
-                size={16} 
-                color="#ffffff" 
-                style={isRTL ? { marginLeft: 4 } : { marginRight: 4 }} 
+              <Feather
+                name="bar-chart-2"
+                size={normalize(16)}
+                color="#ffffff"
+                style={isRTL ? { marginLeft: wp(1) } : { marginRight: wp(1) }}
               />
-              <Text style={styles.statText}>
+              <Text style={styles.statText} allowFontScaling={false}>
                 {t('performance')}: {item.performance}%
               </Text>
             </View>
@@ -243,98 +285,121 @@ export default function HomeScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#6F42C1" />
-      
-      <SideBar 
-        visible={sidebarVisible} 
-        onClose={toggleSidebar} 
-        username={username} 
-        email={email} 
-        navigation={navigation} 
-        onLogout={handleLogout} 
+
+      <SideBar
+        visible={sidebarVisible}
+        onClose={toggleSidebar}
+        username={username}
+        email={email}
+        navigation={navigation}
+        onLogout={handleLogout}
       />
 
-      <NotificationPanel 
+      <NotificationPanel
         visible={notificationPanelVisible}
         onClose={toggleNotificationPanel}
       />
 
       <View style={styles.fixedTopSection}>
-        <LinearGradient colors={colors.headerGradient} style={[StyleSheet.absoluteFill, { borderBottomEndRadius: 38, borderBottomStartRadius: 38, overflow: 'hidden' }]}>
-
+        <LinearGradient
+          colors={colors.headerGradient}
+          style={[StyleSheet.absoluteFill, { 
+            borderBottomEndRadius: normalize(38), 
+            borderBottomStartRadius: normalize(38), 
+            overflow: 'hidden' 
+          }]}
+        >
           <View style={styles.safeArea} />
-          
-          <TopBar 
-            onMenuPress={toggleSidebar} 
+
+          <TopBar
+            onMenuPress={toggleSidebar}
             notificationCount={unreadCount}
             onNotificationPress={toggleNotificationPanel}
           />
-          
+
           <View style={[styles.profileSection, isRTL && { flexDirection: 'row-reverse' }]}>
-            <Image 
-              source={require("../assets/human.jpg")} 
-              style={[styles.profileAvatar, isRTL && { marginLeft: 12, marginRight: 0 }]} 
+            <Image
+              source={require("../assets/human.jpg")}
+              style={[
+                styles.profileAvatar,
+                isRTL && { marginLeft: wp(3), marginRight: 0 }
+              ]}
             />
             <View style={styles.greetingContainer}>
-              <Text style={[styles.greeting, isRTL && { textAlign: 'right' }]}>
+              <Text 
+                style={[styles.greeting, isRTL && { textAlign: 'right' }]}
+                allowFontScaling={false}
+              >
                 {t('greeting')}, <Text style={styles.userName}>{username}</Text>
               </Text>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.calendarIconButton}
               onPress={() => setCalendarModalVisible(true)}
               activeOpacity={0.7}
             >
-              <Feather name="calendar" size={22} color="#6F42C1" />
+              <Feather name="calendar" size={normalize(18)} color="#6F42C1" />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.testNotificationBtn}
             onPress={handleTestTrigger}
           >
-            <Feather name="alert-circle" size={16} color="#6F42C1" />
-            <Text style={styles.testNotificationText}>Simulate Child Alert</Text>
+            <Feather name="alert-circle" size={normalize(16)} color="#6F42C1" />
+            <Text style={styles.testNotificationText} allowFontScaling={false}>
+              Simulate Child Alert
+            </Text>
           </TouchableOpacity>
 
           <View style={[styles.activityStatsRow, isRTL && { flexDirection: 'row-reverse' }]}>
-            
             <View style={styles.statCard}>
               <LinearGradient colors={['#EC4899', '#DB2777']} style={styles.statCardGradient}>
                 <View style={styles.statIconCircle}>
-                  <Feather name="users" size={16} color="#FFFFFF" />
+                  <Feather name="users" size={normalize(16)} color="#FFFFFF" />
                 </View>
-                <Text style={styles.statCardValue}>{currentActivity?.attendance || 0}</Text>
-                <Text style={styles.statCardLabel}>{t('attendance')}</Text>
+                <Text style={styles.statCardValue} allowFontScaling={false}>
+                  {currentActivity?.attendance || 0}
+                </Text>
+                <Text style={styles.statCardLabel} allowFontScaling={false}>
+                  {t('attendance')}
+                </Text>
               </LinearGradient>
             </View>
 
             <View style={styles.statCard}>
               <LinearGradient colors={['#A855F7', '#9333EA']} style={styles.statCardGradient}>
                 <View style={styles.statIconCircle}>
-                  <Feather name="check-circle" size={16} color="#FFFFFF" />
+                  <Feather name="check-circle" size={normalize(16)} color="#FFFFFF" />
                 </View>
-                <Text style={styles.statCardValue}>{currentActivity?.tasks || 0}</Text>
-                <Text style={styles.statCardLabel}>{t('completed')}</Text>
+                <Text style={styles.statCardValue} allowFontScaling={false}>
+                  {currentActivity?.tasks || 0}
+                </Text>
+                <Text style={styles.statCardLabel} allowFontScaling={false}>
+                  {t('completed')}
+                </Text>
               </LinearGradient>
             </View>
 
             <View style={styles.statCard}>
               <LinearGradient colors={['#6366F1', '#4F46E5']} style={styles.statCardGradient}>
                 <View style={styles.statIconCircle}>
-                  <Feather name="trending-up" size={16} color="#FFFFFF" />
+                  <Feather name="trending-up" size={normalize(16)} color="#FFFFFF" />
                 </View>
-                <Text style={styles.statCardValue}>{currentActivity?.performance || 0}%</Text>
-                <Text style={styles.statCardLabel}>{t('performance')}</Text>
-                
+                <Text style={styles.statCardValue} allowFontScaling={false}>
+                  {currentActivity?.performance || 0}%
+                </Text>
+                <Text style={styles.statCardLabel} allowFontScaling={false}>
+                  {t('performance')}
+                </Text>
                 <View style={styles.incompleteBadge}>
-                  <Text style={styles.incompleteText}>
+                  <Text style={styles.incompleteText} allowFontScaling={false}>
                     {currentActivity ? (20 - currentActivity.tasks) : 20} {t('incomplete')}
                   </Text>
                 </View>
               </LinearGradient>
             </View>
           </View>
-
         </LinearGradient>
       </View>
 
@@ -344,38 +409,61 @@ export default function HomeScreen({ navigation, route }) {
         animationType="fade"
         onRequestClose={() => setCalendarModalVisible(false)}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setCalendarModalVisible(false)}
         >
-          <View style={styles.calendarModalContent} onStartShouldSetResponder={() => true}>
-            <LinearGradient colors={colors.headerGradient || ["#6f42c1", "#8e44ad"]} style={styles.popupGradient}>
-              
-              <TouchableOpacity 
-                style={[styles.modalCloseButton, isRTL && { left: 15, right: 'auto' }]}
+          <View
+            style={styles.calendarModalContent}
+            onStartShouldSetResponder={() => true}
+          >
+            <LinearGradient
+              colors={colors.headerGradient || ["#6f42c1", "#8e44ad"]}
+              style={styles.popupGradient}
+            >
+              <TouchableOpacity
+                style={[styles.modalCloseButton, isRTL && { left: wp(4), right: 'auto' }]}
                 onPress={() => setCalendarModalVisible(false)}
               >
-                <Feather name="x" size={24} color="#fff" />
+                <Feather name="x" size={normalize(24)} color="#fff" />
               </TouchableOpacity>
 
               <View style={[styles.modalMonthNavigation, isRTL && { flexDirection: 'row-reverse' }]}>
-                <TouchableOpacity onPress={isRTL ? nextMonth : previousMonth} style={styles.modalMonthNavBtn}>
-                  <Feather name={isRTL ? "chevron-right" : "chevron-left"} size={22} color="#fff" />
+                <TouchableOpacity
+                  onPress={isRTL ? nextMonth : previousMonth}
+                  style={styles.modalMonthNavBtn}
+                >
+                  <Feather
+                    name={isRTL ? "chevron-right" : "chevron-left"}
+                    size={normalize(22)}
+                    color="#fff"
+                  />
                 </TouchableOpacity>
+
                 <View style={styles.monthLabelContainer}>
-                  <Text style={styles.modalMonthText}>
+                  <Text style={styles.modalMonthText} allowFontScaling={false}>
                     {getMonthName(currentMonth.getMonth())} {currentMonth.getFullYear()}
                   </Text>
                 </View>
-                <TouchableOpacity onPress={isRTL ? previousMonth : nextMonth} style={styles.modalMonthNavBtn}>
-                  <Feather name={isRTL ? "chevron-left" : "chevron-right"} size={22} color="#fff" />
+
+                <TouchableOpacity
+                  onPress={isRTL ? previousMonth : nextMonth}
+                  style={styles.modalMonthNavBtn}
+                >
+                  <Feather
+                    name={isRTL ? "chevron-left" : "chevron-right"}
+                    size={normalize(22)}
+                    color="#fff"
+                  />
                 </TouchableOpacity>
               </View>
 
               <View style={[styles.modalDayHeaderRow, isRTL && { flexDirection: 'row-reverse' }]}>
-                {[0,1,2,3,4,5,6].map((idx) => (
-                  <Text key={idx} style={styles.modalDayHeader}>{getDayName(idx)}</Text>
+                {[0, 1, 2, 3, 4, 5, 6].map((idx) => (
+                  <Text key={idx} style={styles.modalDayHeader} allowFontScaling={false}>
+                    {getDayName(idx)}
+                  </Text>
                 ))}
               </View>
 
@@ -395,14 +483,19 @@ export default function HomeScreen({ navigation, route }) {
                       style={[styles.modalDayCell, isSelected && styles.modalDayCellActive]}
                       activeOpacity={0.7}
                     >
-                      <View style={[
-                        isSelected ? styles.selectedCircle : styles.normalCircle,
-                        isTodayDate && !isSelected && styles.todayCircle
-                      ]}>
-                        <Text style={[
-                          isSelected ? styles.selectedDateText : styles.normalDateText,
-                          isTodayDate && !isSelected && styles.todayDateText
-                        ]}>
+                      <View
+                        style={[
+                          isSelected ? styles.selectedCircle : styles.normalCircle,
+                          isTodayDate && !isSelected && styles.todayCircle
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            isSelected ? styles.selectedDateText : styles.normalDateText,
+                            isTodayDate && !isSelected && styles.todayDateText
+                          ]}
+                          allowFontScaling={false}
+                        >
                           {day.getDate()}
                         </Text>
                       </View>
@@ -421,10 +514,13 @@ export default function HomeScreen({ navigation, route }) {
                       selectedPeriod === period && styles.modalPeriodBtnSelected
                     ]}
                   >
-                    <Text style={[
-                      styles.modalPeriodText,
-                      selectedPeriod === period && styles.modalPeriodTextSelected
-                    ]}>
+                    <Text
+                      style={[
+                        styles.modalPeriodText,
+                        selectedPeriod === period && styles.modalPeriodTextSelected
+                      ]}
+                      allowFontScaling={false}
+                    >
                       {t(period)}
                     </Text>
                   </TouchableOpacity>
@@ -436,21 +532,27 @@ export default function HomeScreen({ navigation, route }) {
       </Modal>
 
       <View style={styles.scrollableBottomSection}>
-        <ScrollView contentContainerStyle={styles.bottomScroll} showsVerticalScrollIndicator={false}>
-          <Text style={[styles.childrenTitle, isRTL && { textAlign: 'right' }]}>
+        <ScrollView
+          contentContainerStyle={styles.bottomScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text 
+            style={[styles.childrenTitle, isRTL && { textAlign: 'right' }]}
+            allowFontScaling={false}
+          >
             {t('childrenDetails')}
           </Text>
-          
+
           {children.map((child) => (
-            <View key={child.id} style={{ marginBottom: 16 }}>
+            <View key={child.id} style={{ marginBottom: hp(2) }}>
               {renderChildCard({ item: child })}
             </View>
           ))}
 
-          <View style={{ height: 20 }} />
+          <View style={{ height: hp(2.5) }} />
         </ScrollView>
       </View>
-      
+
       <View style={styles.bottomNavContainer}>
         <BottomNav navigation={navigation} activeScreen="home" />
       </View>
@@ -459,42 +561,44 @@ export default function HomeScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-  
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5"
+  },
   fixedTopSection: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    //height: screenHeight * TOP_SECTION_HEIGHT_RATIO,
     height: TOP_SECTION_HEIGHT,
     zIndex: 1,
-    borderBottomEndRadius: 38,
-    borderBottomStartRadius: 38,
+    borderBottomEndRadius: normalize(38),
+    borderBottomStartRadius: normalize(38),
   },
-  safeArea: { height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight },
-  
+  safeArea: {
+    height: Platform.OS === "ios" ? hp(5.5) : StatusBar.currentHeight
+  },
   profileSection: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
-    marginTop: 6,
-    marginBottom: 12,
+    paddingHorizontal: wp(5),
+    marginTop: hp(0.7),
+    marginBottom: hp(1.5),
   },
   profileAvatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 3,
+    width: wp(13),
+    height: wp(13),
+    borderRadius: wp(6.5),
+    borderWidth: normalize(3),
     borderColor: "white",
     backgroundColor: "white",
-    marginRight: 12,
+    marginRight: wp(3),
   },
   greetingContainer: {
     flex: 1,
   },
   greeting: {
-    fontSize: 20,
+    fontSize: normalize(20),
     color: "#FFFFFF",
   },
   userName: {
@@ -502,16 +606,16 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   calendarIconButton: {
-    width: 44,
-    height: 44,
+    width: wp(9.5),
+    height: wp(9.5),
     backgroundColor: "#FFD700",
-    borderRadius: 22,
+    borderRadius: normalize(12),
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
     elevation: 4,
   },
   testNotificationBtn: {
@@ -519,75 +623,73 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'center',
     backgroundColor: '#FFD700',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginBottom: 12,
-    gap: 6,
+    paddingVertical: hp(1),
+    paddingHorizontal: wp(4),
+    borderRadius: normalize(20),
+    marginBottom: hp(1.5),
+    gap: wp(1.5),
   },
   testNotificationText: {
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: '700',
     color: '#6F42C1',
   },
-
   activityStatsRow: {
     flexDirection: "row",
-    paddingHorizontal: 20,
-    gap: 9,
-    marginBottom: 16,
-    alignItems: 'stretch', 
+    paddingHorizontal: wp(5),
+    gap: wp(2.2),
+    marginBottom: hp(2),
+    alignItems: 'stretch',
   },
   statCard: {
     flex: 1,
-    borderRadius: 16,
+    borderRadius: normalize(16),
     overflow: "hidden",
-    minHeight: 130,
+    minHeight: hp(16),
   },
   statCardGradient: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: hp(1.5),
+    paddingHorizontal: wp(2),
     alignItems: "center",
-    justifyContent: "start-end", 
-    borderRadius: 16,
+    justifyContent: "start-end",
+    borderRadius: normalize(16),
   },
   statIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: wp(8.5),
+    height: wp(8.5),
+    borderRadius: wp(4.25),
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: hp(0.7),
   },
   statCardValue: {
-    fontSize: 22,
+    fontSize: normalize(22),
     fontWeight: "700",
     color: "#FFFFFF",
-    marginBottom: 2,
+    marginBottom: hp(0.25),
   },
   statCardLabel: {
-    fontSize: 11,
+    fontSize: normalize(11),
     fontWeight: "600",
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
-    marginTop: 2,
+    marginTop: hp(0.25),
   },
   incompleteBadge: {
-    marginTop: 6,
+    marginTop: hp(0.7),
     backgroundColor: "rgba(0, 0, 0, 0.15)",
-    paddingVertical: 4,
-    paddingHorizontal: 6,
-    borderRadius: 8,
+    paddingVertical: hp(0.5),
+    paddingHorizontal: wp(1.5),
+    borderRadius: normalize(8),
   },
   incompleteText: {
-    fontSize: 9,
+    fontSize: normalize(9),
     color: "rgba(255, 255, 255, 0.95)",
     fontWeight: "900",
     textAlign: "center",
   },
-
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -595,61 +697,60 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   calendarModalContent: {
-    width: screenWidth * 0.9,
-    maxWidth: 400,
-    borderRadius: 25,
+    width: wp(80),
+    borderRadius: normalize(20),
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
+    shadowOffset: { width: 0, height: hp(1) },
     shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowRadius: normalize(20),
+    elevation: 15,
     backgroundColor: "transparent",
   },
   popupGradient: {
-    padding: 20,
-    paddingBottom: 30,
-    borderRadius: 25,
+    padding: wp(4),
+    paddingBottom: hp(2),
+    borderRadius: normalize(20),
   },
   modalCloseButton: {
     position: "absolute",
-    top: 15,
-    right: 15,
+    top: hp(1.5),
+    right: wp(3),
     zIndex: 10,
     backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 20,
-    padding: 8,
+    borderRadius: normalize(15),
+    padding: wp(1.5),
   },
   modalMonthNavigation: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-    marginTop: 10,
+    marginBottom: hp(1.5),
+    marginTop: hp(1),
   },
   modalMonthNavBtn: {
-    padding: 10,
+    padding: wp(1.5),
     backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 14,
+    borderRadius: normalize(10),
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: hp(0.12) },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: normalize(2),
     elevation: 2,
   },
   monthLabelContainer: {
     backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 22,
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(0.6),
+    borderRadius: normalize(15),
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
     elevation: 3,
   },
   modalMonthText: {
-    fontSize: 17,
+    fontSize: normalize(14),
     fontWeight: "700",
     color: "#fff",
     letterSpacing: 0.3,
@@ -657,14 +758,14 @@ const styles = StyleSheet.create({
   modalDayHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
-    paddingHorizontal: 2,
+    marginBottom: hp(1),
+    paddingHorizontal: wp(0.5),
   },
   modalDayHeader: {
-    width: (screenWidth * 0.9 - 40) / 7,
+    width: (wp(80) - wp(8)) / 7,
     textAlign: "center",
-    fontSize: 13,
-    color: "rgba(255,255,255,0.85)",
+    fontSize: normalize(10),
+    color: "rgba(255,255,255,0.7)",
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -673,50 +774,50 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "flex-start",
-    paddingHorizontal: 2,
+    paddingHorizontal: wp(0.5),
   },
   modalDayCell: {
-    width: (screenWidth * 0.9 - 40) / 7,
-    height: 48,
+    width: (wp(80) - wp(8)) / 7,
+    height: normalize(34),
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 4,
+    marginBottom: hp(0),
   },
   modalDayCellActive: {
     transform: [{ scale: 1.05 }],
   },
   selectedCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: normalize(28),
+    height: normalize(28),
+    borderRadius: normalize(8),
     backgroundColor: "#FFD700",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#FFD700",
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: hp(0.3) },
     shadowOpacity: 0.4,
-    shadowRadius: 5,
+    shadowRadius: normalize(5),
     elevation: 5,
   },
   normalCircle: {
-    width: 40,
-    height: 40,
+    width: normalize(28),
+    height: normalize(28),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 12,
+    borderRadius: normalize(8),
   },
   todayCircle: {
     backgroundColor: "rgba(255,255,255,0.25)",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.5)",
+    borderWidth: normalize(1.5),
+    borderColor: "rgba(255,255,255,0.6)",
   },
   selectedDateText: {
-    fontSize: 16,
+    fontSize: normalize(12),
     fontWeight: "800",
     color: "#6F42C1",
   },
   normalDateText: {
-    fontSize: 16,
+    fontSize: normalize(12),
     color: "rgba(255,255,255,0.95)",
     fontWeight: "600",
   },
@@ -727,121 +828,138 @@ const styles = StyleSheet.create({
   modalPeriodSelector: {
     flexDirection: "row",
     backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 12,
-    padding: 4,
-    marginTop: 16,
+    borderRadius: normalize(12),
+    padding: wp(1),
+    marginTop: hp(2),
   },
   modalPeriodBtn: {
     flex: 1,
-    paddingVertical: 10,
+    paddingVertical: hp(1.2),
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: normalize(10),
   },
   modalPeriodBtnSelected: {
     backgroundColor: "#FFD700",
   },
   modalPeriodText: {
     color: "rgba(255,255,255,0.8)",
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "500",
   },
   modalPeriodTextSelected: {
     color: "#6F42C1",
     fontWeight: "700",
   },
-
   scrollableBottomSection: {
     position: "absolute",
-    //top: screenHeight * TOP_SECTION_HEIGHT_RATIO, 
     top: TOP_SECTION_HEIGHT,
     left: 0,
     right: 0,
     bottom: 0,
     backgroundColor: "#ffffff",
-    borderTopLeftRadius: 38,
-    borderTopRightRadius: 38,
+    borderTopLeftRadius: normalize(38),
+    borderTopRightRadius: normalize(38),
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
+    shadowOffset: { width: 0, height: hp(-0.5) },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: normalize(8),
     elevation: 8,
   },
-  bottomScroll: { 
-    paddingHorizontal: 16, 
-    paddingTop: 32, 
-    paddingBottom: 100 
+  bottomScroll: {
+    paddingHorizontal: wp(4),
+    paddingTop: hp(4),
+    paddingBottom: hp(12.5)
   },
-  bottomNavContainer: { 
-    position: "absolute", 
-    bottom: 0, 
-    left: 0, 
-    right: 0, 
-    zIndex: 10, 
-    backgroundColor: "#ffffff" 
+  bottomNavContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    backgroundColor: "#ffffff"
   },
-  childrenTitle: { 
-    fontSize: 20, 
-    fontWeight: "700", 
-    marginBottom: 12, 
-    color: "#1a1a2e" 
+  childrenTitle: {
+    fontSize: normalize(20),
+    fontWeight: "700",
+    marginBottom: hp(1.5),
+    color: "#1a1a2e"
   },
-  childCardWrapper: { 
-    width: "100%", 
-    borderRadius: 20, 
-    overflow: "hidden", 
+  childCardWrapper: {
+    width: "100%",
+    borderRadius: normalize(20),
+    overflow: "visible",
     shadowColor: "#000",
-    shadowRadius: 8, 
-    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: normalize(8),
+    shadowOffset: { width: 0, height: hp(0.5) },
+    position: "relative",
   },
-  childCard: { 
-    borderRadius: 20, 
-    padding: 18 
+  avatarContainer: {
+    position: "absolute",
+    top: hp(2),
+    zIndex: 2,
   },
-  childHeader: { 
-    flexDirection: "row", 
-    alignItems: "flex-start", 
-    marginBottom: 16 
+  avatarBorder: {
+    width: wp(16),
+    height: wp(16),
+    borderRadius: wp(8),
+    borderWidth: normalize(4),
+    padding: normalize(2),
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  childAvatar: { 
-    width: 56, 
-    height: 56, 
-    borderRadius: 28, 
-    borderWidth: 3, 
-    borderColor: "white" 
+  childAvatar: {
+    width: "100%",
+    height: "100%",
+    borderRadius: wp(7),
   },
-  childName: { 
-    fontSize: 18, 
-    fontWeight: "700", 
-    marginBottom: 2, 
-    color: "#ffffff" 
+  avatarSpacer: {
+    width: wp(14),
+    height: wp(14),
   },
-  childInfo: { 
-    fontSize: 13, 
-    fontWeight: "500", 
-    color: "rgba(255,255,255,0.9)" 
+  childCard: {
+    borderRadius: normalize(20),
+    padding: wp(4.5),
+    overflow: "hidden",
   },
-  statusText: { 
-    fontSize: 13, 
-    fontWeight: "600", 
-    color: "#ffffff" 
+  childHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: hp(2)
   },
-  statsRow: { 
-    flexDirection: "row", 
+  childName: {
+    fontSize: normalize(18),
+    fontWeight: "700",
+    marginBottom: hp(0.25),
+    color: "#ffffff"
+  },
+  childInfo: {
+    fontSize: normalize(13),
+    fontWeight: "500",
+    color: "rgba(255,255,255,0.9)"
+  },
+  statusText: {
+    fontSize: normalize(13),
+    fontWeight: "600",
+    color: "#ffffff"
+  },
+  statsRow: {
+    flexDirection: "row",
     justifyContent: "space-between",
-    paddingTop: 12,
-    borderTopWidth: 1,
+    paddingTop: hp(1.5),
+    borderTopWidth: normalize(1),
     borderTopColor: "rgba(255,255,255,0.3)",
-    gap: 8,
+    gap: wp(2),
   },
-  statItem: { 
-    flexDirection: "row", 
+  statItem: {
+    flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
-  statText: { 
-    fontSize: 13, 
-    fontWeight: "600", 
+  statText: {
+    fontSize: normalize(13),
+    fontWeight: "600",
     color: "#ffffff",
     flexShrink: 1,
   },

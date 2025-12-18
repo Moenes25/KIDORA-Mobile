@@ -14,11 +14,13 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "../context/TranslationContext";
+import { normalize, wp, hp, screenHeight } from "../utils/responsive";
 import BottomNav from "../components/BottomNav";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-const TIMELINE_WIDTH = 60;
+const { width: screenWidth } = Dimensions.get("window");
+const TIMELINE_WIDTH = wp(15);
 const TOP_SECTION_HEIGHT = screenHeight * 0.20;
+const CIRCLE_SIZE = wp(17.5);
 
 export default function ImprovementsScreen({ navigation }) {
   const { colors, theme } = useTheme();
@@ -69,25 +71,25 @@ export default function ImprovementsScreen({ navigation }) {
               onPress={() => navigation.goBack()} 
               style={[
                 styles.backButton,
-                isRTL && { marginLeft: 8, marginRight: 0 }
+                isRTL && { marginLeft: wp(2), marginRight: 0 }
               ]}
             >
               <Feather 
                 name={isRTL ? "chevron-right" : "chevron-left"} 
-                size={28} 
+                size={normalize(28)} 
                 color="#fff" 
               />
             </TouchableOpacity>
             <Text style={[
               styles.headerTitle,
-              isRTL && { textAlign: 'center', marginLeft: 40, marginRight: 0 }
+              isRTL && { textAlign: 'center', marginLeft: wp(10), marginRight: 0 }
             ]}>
               {t('childDevelopment')}
             </Text>
           </View>
           
           {/* Spacer for rounded section */}
-          <View style={{ height: 30 }} />
+          <View style={{ height: hp(3.7) }} />
         </LinearGradient>
       </View>
 
@@ -117,9 +119,9 @@ export default function ImprovementsScreen({ navigation }) {
                     ]}
                   >
                     {milestone.completed ? (
-                      <Feather name="check" size={18} color="#fff" />
+                      <Feather name="check" size={normalize(18)} color="#fff" />
                     ) : (
-                      <Feather name="lock" size={18} color="#666" />
+                      <Feather name="lock" size={normalize(18)} color="#666" />
                     )}
                   </View>
                   {index < milestonesData.length - 1 && (
@@ -131,7 +133,7 @@ export default function ImprovementsScreen({ navigation }) {
                         styles.timelineConnector,
                         { 
                           backgroundColor: milestone.completed ? "#9b59b6" : "#ccc",
-                          height: expandedMilestone === milestone.id ? 280 : 50,
+                          height: expandedMilestone === milestone.id ? hp(35) : hp(6.2),
                         },
                       ]}
                     />
@@ -143,7 +145,7 @@ export default function ImprovementsScreen({ navigation }) {
             {/* Milestones Cards */}
             <View style={[
               styles.cardsContainer,
-              isRTL && { paddingRight: 12, paddingLeft: 0 }
+              isRTL && { paddingRight: wp(3), paddingLeft: 0 }
             ]}>
               {milestonesData.map((milestone) => (
                 <TouchableOpacity
@@ -166,10 +168,10 @@ export default function ImprovementsScreen({ navigation }) {
                       style={[
                         styles.iconCircle,
                         { backgroundColor: milestone.completed ? "#fff" : "#ccc" },
-                        isRTL && { marginLeft: 12, marginRight: 0 }
+                        isRTL && { marginLeft: wp(3), marginRight: 0 }
                       ]}
                     >
-                      {milestone.completed && <Feather name="award" size={18} color="#9b59b6" />}
+                      {milestone.completed && <Feather name="award" size={normalize(18)} color="#9b59b6" />}
                     </View>
                     <Text
                       style={[
@@ -182,7 +184,7 @@ export default function ImprovementsScreen({ navigation }) {
                     </Text>
                     <Ionicons
                       name={isRTL ? "chevron-back" : "chevron-forward"}
-                      size={24}
+                      size={normalize(24)}
                       color={milestone.completed ? "#fff" : "#888"}
                     />
                   </View>
@@ -190,7 +192,6 @@ export default function ImprovementsScreen({ navigation }) {
                   {/* Expanded Details */}
                   {expandedMilestone === milestone.id && milestone.completed && (
                     <View style={styles.expandedContent}>
-                      {/* First Row: Language and Motor */}
                       {/* First Row: Language and Motor */}
                       <View style={[
                         styles.circularProgressRow,
@@ -225,7 +226,6 @@ export default function ImprovementsScreen({ navigation }) {
                         })}
                       </View>
 
-                      {/* Second Row: Cognition and Social */}
                       {/* Second Row: Cognition and Social */}
                       <View style={[
                         styles.circularProgressRow,
@@ -265,7 +265,7 @@ export default function ImprovementsScreen({ navigation }) {
               ))}
             </View>
           </View>
-          <View style={{ height: 100 }} />
+          <View style={{ height: hp(12.5) }} />
         </ScrollView>
       </View>
 
@@ -286,32 +286,32 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
     overflow: "hidden",
-    borderBottomEndRadius: 38,
-    borderBottomStartRadius: 38,
+    borderBottomEndRadius: normalize(38),
+    borderBottomStartRadius: normalize(38),
   },
 
   safeArea: {
-    height: Platform.OS === "android" ? StatusBar.currentHeight : 44,
+    height: Platform.OS === "android" ? StatusBar.currentHeight : hp(5.5),
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 20,
+    paddingHorizontal: wp(4),
+    paddingTop: hp(1.5),
+    paddingBottom: hp(2.5),
   },
   backButton: { 
-    padding: 8,
-    marginRight: 8,
+    padding: wp(2),
+    marginRight: wp(2),
   },
   headerTitle: { 
-    fontSize: 22, 
+    fontSize: normalize(22), 
     fontWeight: "700", 
     color: "#fff",
     flex: 1,
     textAlign: "center",
-    marginRight: 40,
+    marginRight: wp(10),
   },
 
   whiteSection: {
@@ -319,100 +319,100 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    borderTopLeftRadius: 38,
-    borderTopRightRadius: 38,
+    borderTopLeftRadius: normalize(38),
+    borderTopRightRadius: normalize(38),
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -5 },
+    shadowOffset: { width: 0, height: -hp(0.6) },
     shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowRadius: normalize(12),
     elevation: 12,
   },
 
   scrollContent: { 
-    paddingTop: 32, 
-    paddingHorizontal: 20,
-    paddingBottom: 120,
+    paddingTop: hp(4), 
+    paddingHorizontal: wp(5),
+    paddingBottom: hp(15),
   },
   bottomInner: { flexDirection: "row" },
 
   timeline: { 
     width: TIMELINE_WIDTH, 
     alignItems: "center", 
-    paddingTop: 12 
+    paddingTop: hp(1.5) 
   },
   timelineItem: { 
     alignItems: "center", 
     flexDirection: "column" 
   },
   timelineNode: { 
-    width: 28, 
-    height: 28, 
-    borderRadius: 14, 
+    width: wp(7), 
+    height: wp(7), 
+    borderRadius: wp(3.5), 
     justifyContent: "center", 
     alignItems: "center", 
-    marginVertical: 4 
+    marginVertical: hp(0.5) 
   },
   timelineConnector: { 
-    width: 4, 
-    height: 50, 
-    borderRadius: 2 
+    width: normalize(4), 
+    height: hp(6.2), 
+    borderRadius: normalize(2) 
   },
 
   cardsContainer: { 
     flex: 1, 
-    paddingLeft: 12 
+    paddingLeft: wp(3) 
   },
   milestoneCard: { 
-    borderRadius: 24, 
-    padding: 16, 
-    marginBottom: 18 
+    borderRadius: normalize(24), 
+    padding: wp(4), 
+    marginBottom: hp(2.2) 
   },
   cardHeader: { 
     flexDirection: "row", 
     alignItems: "center" 
   },
   iconCircle: { 
-    width: 28, 
-    height: 28, 
-    borderRadius: 14, 
+    width: wp(7), 
+    height: wp(7), 
+    borderRadius: wp(3.5), 
     justifyContent: "center", 
     alignItems: "center", 
-    marginRight: 12 
+    marginRight: wp(3) 
   },
   cardTitle: { 
-    fontSize: 16, 
+    fontSize: normalize(16), 
     fontWeight: "700", 
     flex: 1 
   },
 
   expandedContent: { 
-    marginTop: 16,
+    marginTop: hp(2),
   },
 
   circularProgressRow: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    marginVertical: 4,
+    marginVertical: hp(0.5),
   },
 
   circularProgressItem: {
     alignItems: "center",
     width: "50%",
-    marginVertical: 8,
+    marginVertical: hp(1),
   },
 
   circularProgress: {
-    width: 70,
-    height: 70,
-    marginBottom: 8,
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    marginBottom: hp(1),
   },
 
   circularProgressOuter: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    borderRadius: CIRCLE_SIZE / 2,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -421,17 +421,17 @@ const styles = StyleSheet.create({
 
   circularProgressInner: {
     position: "absolute",
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 6,
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    borderRadius: CIRCLE_SIZE / 2,
+    borderWidth: normalize(6),
     borderColor: "transparent",
   },
 
   circularProgressCenter: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: CIRCLE_SIZE * 0.77,
+    height: CIRCLE_SIZE * 0.77,
+    borderRadius: (CIRCLE_SIZE * 0.77) / 2,
     backgroundColor: "#9b59b6",
     justifyContent: "center",
     alignItems: "center",
@@ -439,13 +439,13 @@ const styles = StyleSheet.create({
 
   circularProgressText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "700",
   },
 
   skillLabel: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "600",
     textAlign: "center",
   },

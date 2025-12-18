@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import OTPScreen from "./OTPScreen";
+import { normalize, wp, hp } from "../utils/responsive";
 
 export default function VerifyNumberScreen({ visible, onClose, onPaymentSuccess, paymentAmount }) {
   const [selectedCode, setSelectedCode] = useState("+216");
@@ -120,20 +121,24 @@ export default function VerifyNumberScreen({ visible, onClose, onPaymentSuccess,
           <View style={styles.popup}>
             {/* ICON */}
             <View style={styles.iconCircle}>
-              <Feather name="credit-card" size={32} color="#6F42C1" />
+              <Feather name="credit-card" size={normalize(32)} color="#6F42C1" />
             </View>
 
             {/* TITLE */}
-            <Text style={styles.title}>D17 Payment - La Poste</Text>
+            <Text style={styles.title} allowFontScaling={false}>
+              D17 Payment - La Poste
+            </Text>
 
             {/* DESCRIPTION */}
-            <Text style={styles.description}>
+            <Text style={styles.description} allowFontScaling={false}>
               Enter your phone number and amount. You'll receive a verification code via SMS to confirm your payment.
             </Text>
 
             {/* AMOUNT INPUT */}
             <View style={styles.amountContainer}>
-              <Text style={styles.label}>Amount (TND)</Text>
+              <Text style={styles.label} allowFontScaling={false}>
+                Amount (TND)
+              </Text>
               <View style={styles.amountInputWrapper}>
                 <TextInput
                   style={styles.amountInput}
@@ -142,14 +147,19 @@ export default function VerifyNumberScreen({ visible, onClose, onPaymentSuccess,
                   value={amount}
                   onChangeText={setAmount}
                   editable={!paymentAmount} // Disable if amount is passed as prop
+                  allowFontScaling={false}
                 />
-                <Text style={styles.currency}>TND</Text>
+                <Text style={styles.currency} allowFontScaling={false}>
+                  TND
+                </Text>
               </View>
             </View>
 
             {/* PHONE INPUT WRAPPER */}
             <View style={styles.inputWrapper}>
-              <Text style={styles.label}>Phone Number</Text>
+              <Text style={styles.label} allowFontScaling={false}>
+                Phone Number
+              </Text>
               <View style={styles.inputRow}>
                 {/* COUNTRY CODE SELECTOR */}
                 <View style={styles.selectorWrapper}>
@@ -158,10 +168,12 @@ export default function VerifyNumberScreen({ visible, onClose, onPaymentSuccess,
                     onPress={() => setDropdownOpen(!dropdownOpen)}
                     disabled={loading}
                   >
-                    <Text style={styles.selectorText}>{selectedCode}</Text>
+                    <Text style={styles.selectorText} allowFontScaling={false}>
+                      {selectedCode}
+                    </Text>
                     <Feather
                       name={dropdownOpen ? "chevron-up" : "chevron-down"}
-                      size={18}
+                      size={normalize(18)}
                       color="#555"
                     />
                   </TouchableOpacity>
@@ -178,7 +190,9 @@ export default function VerifyNumberScreen({ visible, onClose, onPaymentSuccess,
                             setDropdownOpen(false);
                           }}
                         >
-                          <Text style={styles.dropdownText}>{code}</Text>
+                          <Text style={styles.dropdownText} allowFontScaling={false}>
+                            {code}
+                          </Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -193,20 +207,21 @@ export default function VerifyNumberScreen({ visible, onClose, onPaymentSuccess,
                   value={phone}
                   onChangeText={setPhone}
                   editable={!loading}
+                  allowFontScaling={false}
                 />
               </View>
             </View>
 
             {/* INFO BOX */}
             <View style={styles.infoBox}>
-              <Feather name="info" size={16} color="#6F42C1" />
-              <Text style={styles.infoText}>
+              <Feather name="info" size={normalize(16)} color="#6F42C1" />
+              <Text style={styles.infoText} allowFontScaling={false}>
                 You will receive an SMS code from La Poste to authorize this payment
               </Text>
             </View>
 
             {/* BUTTONS */}
-            <View style={{ marginTop: 10, width: "100%" }}>
+            <View style={{ marginTop: hp(1.2), width: "100%" }}>
               <TouchableOpacity
                 style={[styles.sendBtn, loading && styles.sendBtnDisabled]}
                 onPress={initiateD17Payment}
@@ -215,7 +230,9 @@ export default function VerifyNumberScreen({ visible, onClose, onPaymentSuccess,
                 {loading ? (
                   <ActivityIndicator color="white" />
                 ) : (
-                  <Text style={styles.sendText}>Proceed to Payment</Text>
+                  <Text style={styles.sendText} allowFontScaling={false}>
+                    Proceed to Payment
+                  </Text>
                 )}
               </TouchableOpacity>
 
@@ -224,7 +241,9 @@ export default function VerifyNumberScreen({ visible, onClose, onPaymentSuccess,
                 onPress={onClose}
                 disabled={loading}
               >
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText} allowFontScaling={false}>
+                  Cancel
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -255,88 +274,88 @@ const styles = StyleSheet.create({
   },
 
   popup: {
-    width: "90%",
-    maxWidth: 400,
+    width: wp(90),
+    maxWidth: wp(100),
     backgroundColor: "#fff",
-    borderRadius: 18,
-    padding: 24,
+    borderRadius: normalize(18),
+    padding: wp(6),
     alignItems: "center",
     elevation: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: hp(0.5) },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: normalize(8),
   },
 
   iconCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: normalize(70),
+    height: normalize(70),
+    borderRadius: normalize(35),
     backgroundColor: "#f3e9ff",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: hp(1.5),
   },
 
   title: {
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "700",
     color: "#5a2e84",
     textAlign: "center",
   },
 
   description: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: "#666",
     textAlign: "center",
-    marginTop: 6,
-    marginBottom: 20,
-    lineHeight: 18,
+    marginTop: hp(0.7),
+    marginBottom: hp(2.5),
+    lineHeight: normalize(18),
   },
 
   label: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "600",
     color: "#333",
-    marginBottom: 8,
+    marginBottom: hp(1),
     alignSelf: "flex-start",
   },
 
   amountContainer: {
     width: "100%",
-    marginBottom: 18,
+    marginBottom: hp(2.2),
   },
 
   amountInputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
+    borderWidth: normalize(1),
     borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderRadius: normalize(8),
+    paddingHorizontal: wp(3),
     backgroundColor: "#fafafa",
-    height: 50,
+    height: hp(6.2),
   },
 
   amountInput: {
     flex: 1,
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: "600",
     color: "#333",
   },
 
   currency: {
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
     color: "#6F42C1",
-    marginLeft: 8,
+    marginLeft: wp(2),
   },
 
   inputWrapper: {
     width: "100%",
     zIndex: 20,
     elevation: 20,
-    marginBottom: 16,
+    marginBottom: hp(2),
   },
 
   inputRow: {
@@ -347,17 +366,17 @@ const styles = StyleSheet.create({
   },
 
   selectorWrapper: {
-    width: 90,
+    width: wp(22.5),
     zIndex: 30,
     elevation: 30,
   },
 
   selector: {
-    height: 50,
-    borderRadius: 8,
-    borderWidth: 1,
+    height: hp(6.2),
+    borderRadius: normalize(8),
+    borderWidth: normalize(1),
     borderColor: "#ccc",
-    paddingHorizontal: 10,
+    paddingHorizontal: wp(2.5),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -365,82 +384,82 @@ const styles = StyleSheet.create({
   },
 
   selectorText: {
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
     color: "#333",
   },
 
   dropdown: {
     position: "absolute",
-    top: 55,
+    top: hp(6.8),
     width: "100%",
     backgroundColor: "#fff",
-    borderWidth: 1,
+    borderWidth: normalize(1),
     borderColor: "#ccc",
-    borderRadius: 8,
+    borderRadius: normalize(8),
     zIndex: 999,
     elevation: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
   },
 
   dropdownItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
+    paddingVertical: hp(1.5),
+    paddingHorizontal: wp(3),
+    borderBottomWidth: normalize(1),
     borderBottomColor: "#f0f0f0",
   },
 
   dropdownText: {
-    fontSize: 15,
+    fontSize: normalize(15),
     color: "#333",
   },
 
   phoneInput: {
     flex: 1,
-    height: 50,
-    marginLeft: 10,
-    borderWidth: 1,
+    height: hp(6.2),
+    marginLeft: wp(2.5),
+    borderWidth: normalize(1),
     borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderRadius: normalize(8),
+    paddingHorizontal: wp(3),
     backgroundColor: "#fafafa",
-    fontSize: 15,
+    fontSize: normalize(15),
     color: "#333",
   },
 
   infoBox: {
     flexDirection: "row",
     backgroundColor: "#f3e9ff",
-    padding: 12,
-    borderRadius: 8,
+    padding: wp(3),
+    borderRadius: normalize(8),
     alignItems: "center",
     width: "100%",
-    marginBottom: 20,
+    marginBottom: hp(2.5),
   },
 
   infoText: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#5a2e84",
-    marginLeft: 8,
+    marginLeft: wp(2),
     flex: 1,
-    lineHeight: 16,
+    lineHeight: normalize(16),
   },
 
   sendBtn: {
     backgroundColor: "#6F42C1",
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: hp(1.7),
+    borderRadius: normalize(12),
     width: "100%",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: hp(1.2),
     elevation: 2,
     shadowColor: "#6F42C1",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
   },
 
   sendBtnDisabled: {
@@ -449,21 +468,21 @@ const styles = StyleSheet.create({
 
   sendText: {
     color: "white",
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "700",
   },
 
   cancelBtn: {
     backgroundColor: "#eee",
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: hp(1.7),
+    borderRadius: normalize(12),
     width: "100%",
     alignItems: "center",
   },
 
   cancelText: {
     color: "#555",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
   },
 });

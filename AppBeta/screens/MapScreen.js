@@ -13,14 +13,19 @@ import { Feather } from "@expo/vector-icons";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import polyline from "@mapbox/polyline";
-import { supabase } from "../utils/supabase.js"; // Ensure this path is correct
+import { supabase } from "../utils/supabase.js";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
 import TopNavBar from "../components/TopNavBar";
+import { wp, hp, normalize } from "../utils/responsive";
 
 export default function MapScreen({ navigation, route }) {
   const { colors } = useTheme();
   const mapRef = useRef(null);
+
+  // Get childId and childName from route params
+  const childId = route?.params?.childId;
+  const childName = route?.params?.childName || "Child";
 
   const [parentLocation, setParentLocation] = useState(null);
   const [childLocation, setChildLocation] = useState(null);
@@ -32,10 +37,7 @@ export default function MapScreen({ navigation, route }) {
   const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState(null);
 
-  const childName = route?.params?.childName?.trim() || "My Child";
-  const childId = route?.params?.childId || "child_1";
-
-  // ✅ FIX 1: Secure Parent Location Tracking (Prevents 'stopTracking of undefined' crash)
+  // Parent Location Tracking
   useEffect(() => {
     let locationSubscription = null;
 
@@ -50,7 +52,9 @@ export default function MapScreen({ navigation, route }) {
         }
 
         // Get initial position quickly
-        const currentPos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        const currentPos = await Location.getCurrentPositionAsync({ 
+          accuracy: Location.Accuracy.Balanced 
+        });
         setParentLocation({
           latitude: currentPos.coords.latitude,
           longitude: currentPos.coords.longitude,
@@ -61,8 +65,8 @@ export default function MapScreen({ navigation, route }) {
         locationSubscription = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.High,
-            timeInterval: 5000, // Update every 5 seconds
-            distanceInterval: 10, // Or every 10 meters
+            timeInterval: 5000,
+            distanceInterval: 10,
           },
           (loc) => {
             setParentLocation({
@@ -80,7 +84,6 @@ export default function MapScreen({ navigation, route }) {
 
     startTracking();
 
-    // 🔴 CRITICAL FIX: Check if subscription exists before removing
     return () => {
       if (locationSubscription) {
         locationSubscription.remove();
@@ -88,7 +91,7 @@ export default function MapScreen({ navigation, route }) {
     };
   }, []);
 
-  // ✅ FIX 2: Supabase Child Tracking
+  // Child Location Tracking (Supabase)
   useEffect(() => {
     if (!childId) return;
 
@@ -110,14 +113,14 @@ export default function MapScreen({ navigation, route }) {
       } catch (err) {
         console.log("Supabase fetch error (ignoring if table empty):", err.message);
         // Fallback for demo if no data exists
-        setChildLocation({ latitude: 36.8065, longitude: 10.1815 }); 
+        setChildLocation({ latitude: 36.8065, longitude: 10.1815 });
       }
     };
 
     fetchInitial();
 
     const subscription = supabase
-      .channel("child_locations_channel")
+      .channel(`child_location_${childId}`)
       .on(
         "postgres_changes",
         {
@@ -142,7 +145,7 @@ export default function MapScreen({ navigation, route }) {
     };
   }, [childId]);
 
-  // ✅ FIX 3: Routing Logic (Only fetch if both locations exist)
+  // Route Fetching
   useEffect(() => {
     if (parentLocation && childLocation) {
       fetchRoute();
@@ -154,14 +157,13 @@ export default function MapScreen({ navigation, route }) {
 
     try {
       const url = `https://router.project-osrm.org/route/v1/driving/${parentLocation.longitude},${parentLocation.latitude};${childLocation.longitude},${childLocation.latitude}?overview=full&geometries=polyline`;
-      
+
       const res = await fetch(url);
       const json = await res.json();
 
-      if (json.routes?.length) {
-        const points = polyline.decode(json.routes[0].geometry);
-        const coords = points.map((p) => ({ latitude: p[0], longitude: p[1] }));
-        setRouteCoordinates(coords);
+      if (json.routes && json.routes[0]) {
+        const coords = polyline.decode(json.routes[0].geometry);
+        setRouteCoordinates(coords.map((c) => ({ latitude: c[0], longitude: c[1] })));
         setDistance((json.routes[0].distance / 1000).toFixed(1));
         setDuration(Math.ceil(json.routes[0].duration / 60));
 
@@ -180,7 +182,7 @@ export default function MapScreen({ navigation, route }) {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <Feather name="map-pin" size={48} color="#6f42c1" />
+        <Feather name="map-pin" size={normalize(48)} color="#6f42c1" />
         <Text style={styles.loadingText}>Locating...</Text>
       </View>
     );
@@ -188,10 +190,12 @@ export default function MapScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      {/* Spacer for Status Bar */}
-      <View style={{ height: Platform.OS === "android" ? StatusBar.currentHeight : 44, backgroundColor: "#6f42c1" }} />
+      <View style={{ 
+        height: Platform.OS === "android" ? StatusBar.currentHeight : hp(5), 
+        backgroundColor: "#6f42c1" 
+      }} />
       <StatusBar barStyle="light-content" />
-      
+
       <LinearGradient colors={colors.headerGradient} style={styles.topSection}>
         <TopNavBar title={`Tracking ${childName}`} navigation={navigation} />
       </LinearGradient>
@@ -201,7 +205,6 @@ export default function MapScreen({ navigation, route }) {
           {parentLocation && (
             <MapView
               ref={mapRef}
-              // ✅ Fix for Android Maps
               provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : null}
               style={styles.map}
               showsUserLocation={true}
@@ -213,19 +216,19 @@ export default function MapScreen({ navigation, route }) {
                 longitudeDelta: 0.05,
               }}
             >
-              {/* Child Marker */}
               {childLocation && (
                 <Marker coordinate={childLocation} title={`${childName}'s Location`}>
                   <View style={styles.childMarker}>
                     <View style={styles.childMarkerInner} />
-                    <View style={styles.markerTriangle} />
                   </View>
                 </Marker>
               )}
-
-              {/* Route Line */}
               {routeCoordinates.length > 0 && (
-                <Polyline coordinates={routeCoordinates} strokeColor="#6F42C1" strokeWidth={4} />
+                <Polyline 
+                  coordinates={routeCoordinates} 
+                  strokeColor="#6F42C1" 
+                  strokeWidth={4} 
+                />
               )}
             </MapView>
           )}
@@ -238,10 +241,9 @@ export default function MapScreen({ navigation, route }) {
           )}
         </View>
 
-        {/* Info Cards */}
         <View style={styles.infoCard}>
           <View style={styles.distanceRow}>
-            <Feather name="navigation" size={26} color={colors.primary} />
+            <Feather name="navigation" size={normalize(26)} color={colors.primary} />
             <View style={styles.distanceText}>
               <Text style={styles.distanceMain}>
                 {distance ? `${distance} km away` : "Calculating..."}
@@ -256,38 +258,41 @@ export default function MapScreen({ navigation, route }) {
         <View style={styles.safetyCard}>
           <View style={styles.safetyRow}>
             <View style={styles.shieldIcon}>
-              <Feather name="shield" size={26} color="#4CAF50" />
+              <Feather name="shield" size={normalize(26)} color="#4CAF50" />
             </View>
             <View style={styles.safetyInfo}>
               <Text style={styles.safetyTitle}>{childName} is safe</Text>
               <View style={styles.safetyDetail}>
-                <Feather name="clock" size={14} color="#666666" />
-                <Text style={styles.detailText}>Updated: {lastUpdated || "Just now"}</Text>
+                <Feather name="clock" size={normalize(14)} color="#666666" />
+                <Text style={styles.detailText}>
+                  Updated: {lastUpdated || "Just now"}
+                </Text>
               </View>
               <View style={styles.safetyDetail}>
-                <Feather name="battery-charging" size={14} color="#666666" />
-                <Text style={styles.detailText}>Battery: {childBattery !== null ? `${childBattery}%` : "—"}</Text>
+                <Feather name="battery-charging" size={normalize(14)} color="#666666" />
+                <Text style={styles.detailText}>
+                  Battery: {childBattery !== null ? `${childBattery}%` : "—"}
+                </Text>
               </View>
             </View>
           </View>
         </View>
 
-        {/* Action Buttons */}
         <View style={styles.actionsCard}>
           <Text style={styles.actionsTitle}>Quick Actions</Text>
           <View style={styles.actionButtonsRow}>
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: "#FFC75F" }]}>
-              <Feather name="phone" size={20} color="#ffffff" />
+              <Feather name="phone" size={normalize(20)} color="#ffffff" />
               <Text style={styles.actionBtnText}>Call</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: "#FFC75F" }]}>
-              <Feather name="message-circle" size={20} color="#ffffff" />
+              <Feather name="message-circle" size={normalize(20)} color="#ffffff" />
               <Text style={styles.actionBtnText}>Msg</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.actionBtn, { backgroundColor: "#FFC75F" }]}>
-              <Feather name="bell" size={20} color="#ffffff" />
+              <Feather name="bell" size={normalize(20)} color="#ffffff" />
               <Text style={styles.actionBtnText}>Alert</Text>
             </TouchableOpacity>
           </View>
@@ -300,63 +305,283 @@ export default function MapScreen({ navigation, route }) {
 
         <View style={styles.bottomButtons}>
           <TouchableOpacity style={styles.navigateBtn}>
-            <Feather name="compass" size={22} color="#fff" />
+            <Feather name="compass" size={normalize(22)} color="#fff" />
             <Text style={styles.navigateText}>Navigate</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.historyBtn}>
-            <Feather name="clock" size={22} color="#6F42C1" />
+            <Feather name="clock" size={normalize(22)} color="#6F42C1" />
             <Text style={styles.historyText}>History</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: hp(12) }} />
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
-  centerContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#f5f5f5" },
-  topSection: { paddingBottom: 10 },
-  mapCard: { marginHorizontal: 16, marginTop: 20, height: 340, borderRadius: 24, overflow: "hidden", elevation: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 12 },
-  map: { flex: 1 },
-  childMarker: { width: 30, height: 30, borderRadius: 15, backgroundColor: "#FF6B9D", alignItems: "center", justifyContent: "center" },
-  childMarkerInner: { width: 15, height: 15, borderRadius: 7.5, backgroundColor: "#FF6B9D", borderWidth: 2, borderColor: "#fff" },
-  markerTriangle: { position: "absolute", bottom: -8, width: 0, height: 0, borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 8, borderLeftColor: "transparent", borderRightColor: "transparent", borderTopColor: "#FF6B9D" },
-  floatingLabel: { position: "absolute", top: 20, right: 20, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: "#ffffff", borderRadius: 20, flexDirection: "row", alignItems: "center", elevation: 6, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 8 },
-  labelDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#FF6B9D", marginRight: 8 },
-  labelText: { fontSize: 15, fontWeight: "700", color: "#1a1a2e" },
-  infoCard: { marginHorizontal: 20, marginTop: 16, padding: 18, backgroundColor: "#ffffff", borderRadius: 20, elevation: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  distanceRow: { flexDirection: "row", alignItems: "center" },
-  distanceText: { marginLeft: 16, flex: 1 },
-  distanceMain: { fontSize: 20, fontWeight: "700", color: "#000000" },
-  distanceSub: { fontSize: 14, marginTop: 4, color: "#666666" },
-  safetyCard: { marginHorizontal: 20, marginTop: 12, padding: 18, backgroundColor: "#ffffff", borderRadius: 20, elevation: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  safetyRow: { flexDirection: "row" },
-  shieldIcon: { width: 56, height: 56, borderRadius: 16, backgroundColor: "#E8F5E9", justifyContent: "center", alignItems: "center" },
-  safetyInfo: { marginLeft: 16, flex: 1 },
-  safetyTitle: { fontSize: 18, fontWeight: "700", color: "#000000" },
-  safetyDetail: { flexDirection: "row", alignItems: "center", marginTop: 8 },
-  detailText: { fontSize: 14, marginLeft: 8, color: "#666666" },
-  actionsCard: { marginHorizontal: 20, marginTop: 12, padding: 20, backgroundColor: "#ffffff", borderRadius: 20, elevation: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  actionsTitle: { fontSize: 18, fontWeight: "700", color: "#000000", marginBottom: 16 },
-  actionButtonsRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 16 },
-  actionBtn: { flex: 1, alignItems: "center", paddingVertical: 14, borderRadius: 16, marginHorizontal: 6, shadowColor: "#FFC75F", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
-  actionBtnText: { marginTop: 8, fontSize: 14, fontWeight: "600", color: "#ffffff" },
-  activeStatus: { flexDirection: "row", alignItems: "center", paddingTop: 16, borderTopWidth: 1, borderTopColor: "#f0f0f0" },
-  statusDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: "#4CAF50", marginRight: 10 },
-  statusText: { fontSize: 14, fontWeight: "500", color: "#666666" },
-  bottomButtons: { flexDirection: "row", marginHorizontal: 20, marginTop: 20, gap: 12 },
-  navigateBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 18, backgroundColor: "#4CAF50", borderRadius: 16, elevation: 6, shadowColor: "#4CAF50", shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.3, shadowRadius: 8 },
-  navigateText: { color: "#fff", fontSize: 17, fontWeight: "700", marginLeft: 10 },
-  historyBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 18, backgroundColor: "#ffffff", borderRadius: 16, borderWidth: 2, borderColor: "#6F42C1", elevation: 4, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  historyText: { fontSize: 17, fontWeight: "700", marginLeft: 10, color: "#6F42C1" },
-  loadingText: { fontSize: 16, marginTop: 16, fontWeight: "500", color: "#000000" },
-  debugText: { fontSize: 12, marginTop: 8, color: "#666666" },
-  errorText: { fontSize: 18, fontWeight: "700", color: "#ff6b6b", marginTop: 16 },
-  errorDetail: { fontSize: 14, color: "#666666", marginTop: 8, textAlign: "center" },
-  retryButton: { marginTop: 20, paddingHorizontal: 30, paddingVertical: 12, backgroundColor: "#6f42c1", borderRadius: 12 },
-  retryText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#f5f5f5" 
+  },
+  centerContainer: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center", 
+    backgroundColor: "#f5f5f5" 
+  },
+  topSection: { 
+    paddingBottom: hp(1) 
+  },
+
+  // Map Card
+  mapCard: {
+    marginHorizontal: wp(4),
+    marginTop: hp(2),
+    height: hp(40),
+    borderRadius: normalize(24),
+    overflow: "hidden",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+  },
+  map: { 
+    flex: 1 
+  },
+
+  // Markers
+  childMarker: {
+    width: normalize(30),
+    height: normalize(30),
+    borderRadius: normalize(15),
+    backgroundColor: "#FF6B9D",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  childMarkerInner: {
+    width: normalize(15),
+    height: normalize(15),
+    borderRadius: normalize(7.5),
+    backgroundColor: "#ffffff",
+    borderWidth: 2,
+    borderColor: "#FF6B9D",
+  },
+
+  floatingLabel: {
+    position: "absolute",
+    top: hp(2),
+    right: wp(5),
+    paddingHorizontal: wp(3.5),
+    paddingVertical: hp(1),
+    backgroundColor: "#ffffff",
+    borderRadius: normalize(20),
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  labelDot: {
+    width: normalize(8),
+    height: normalize(8),
+    borderRadius: normalize(4),
+    backgroundColor: "#FF6B9D",
+    marginRight: wp(2),
+  },
+  labelText: { 
+    fontSize: normalize(15), 
+    fontWeight: "700", 
+    color: "#1a1a2e" 
+  },
+
+  // Info Cards
+  infoCard: {
+    marginHorizontal: wp(5),
+    marginTop: hp(2),
+    padding: wp(4.5),
+    backgroundColor: "#ffffff",
+    borderRadius: normalize(20),
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+  },
+  distanceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  distanceText: {
+    marginLeft: wp(4),
+    flex: 1,
+  },
+  distanceMain: { 
+    fontSize: normalize(20), 
+    fontWeight: "700", 
+    color: "#000000" 
+  },
+  distanceSub: { 
+    fontSize: normalize(14), 
+    marginTop: hp(0.5), 
+    color: "#666666" 
+  },
+
+  // Safety Card
+  safetyCard: {
+    marginHorizontal: wp(5),
+    marginTop: hp(1.5),
+    padding: wp(4.5),
+    backgroundColor: "#ffffff",
+    borderRadius: normalize(20),
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+  },
+  safetyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  shieldIcon: {
+    width: normalize(56),
+    height: normalize(56),
+    borderRadius: normalize(16),
+    backgroundColor: "#E8F5E9",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  safetyInfo: {
+    marginLeft: wp(4),
+    flex: 1,
+  },
+  safetyTitle: { 
+    fontSize: normalize(18), 
+    fontWeight: "700", 
+    color: "#000000" 
+  },
+  safetyDetail: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: hp(0.8),
+  },
+  detailText: { 
+    fontSize: normalize(14), 
+    marginLeft: wp(2), 
+    color: "#666666" 
+  },
+
+  // Actions Card
+  actionsCard: {
+    marginHorizontal: wp(5),
+    marginTop: hp(1.5),
+    padding: wp(5),
+    backgroundColor: "#ffffff",
+    borderRadius: normalize(20),
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+  },
+  actionsTitle: { 
+    fontSize: normalize(18), 
+    fontWeight: "700", 
+    color: "#000000", 
+    marginBottom: hp(2) 
+  },
+  actionButtonsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  actionBtn: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: hp(1.5),
+    borderRadius: normalize(16),
+    marginHorizontal: wp(1.5),
+  },
+  actionBtnText: { 
+    marginTop: hp(0.8), 
+    fontSize: normalize(14), 
+    fontWeight: "600", 
+    color: "#ffffff" 
+  },
+  activeStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: hp(2),
+  },
+  statusDot: {
+    width: normalize(8),
+    height: normalize(8),
+    borderRadius: normalize(4),
+    backgroundColor: "#4CAF50",
+    marginRight: wp(2),
+  },
+  statusText: {
+    fontSize: normalize(14),
+    color: "#666666",
+    fontWeight: "500",
+  },
+
+  // Bottom Buttons
+  bottomButtons: { 
+    flexDirection: "row", 
+    marginHorizontal: wp(5), 
+    marginTop: hp(2.5), 
+    gap: wp(3) 
+  },
+  navigateBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: hp(2),
+    backgroundColor: "#4CAF50",
+    borderRadius: normalize(16),
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  navigateText: { 
+    color: "#fff", 
+    fontSize: normalize(17), 
+    fontWeight: "700", 
+    marginLeft: wp(2) 
+  },
+
+  historyBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: hp(2),
+    backgroundColor: "#ffffff",
+    borderRadius: normalize(16),
+    borderWidth: 2,
+    borderColor: "#6F42C1",
+  },
+  historyText: { 
+    fontSize: normalize(17), 
+    fontWeight: "700", 
+    marginLeft: wp(2), 
+    color: "#6F42C1" 
+  },
+
+  loadingText: { 
+    fontSize: normalize(16), 
+    marginTop: hp(2), 
+    fontWeight: "500", 
+    color: "#000000" 
+  },
 });

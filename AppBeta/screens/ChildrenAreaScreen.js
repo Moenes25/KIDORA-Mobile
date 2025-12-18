@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation'; 
 import { useTheme } from '../context/ThemeContext';
+import { normalize, wp, hp } from '../utils/responsive';
 
 // Import Sub-Screens from children folder
 import AgeSelectionScreen from './children/AgeSelectionScreen';
@@ -47,7 +48,10 @@ export default function ChildrenAreaScreen({ navigation }) {
       return (
         <AgeSelectionScreen 
           setScreen={setScreen} 
-          setSelectedAge={setSelectedAge} 
+          setSelectedAge={setSelectedAge}
+          normalize={normalize}
+          wp={wp}
+          hp={hp}
         />
       );
     case 'home':
@@ -60,6 +64,9 @@ export default function ChildrenAreaScreen({ navigation }) {
           level={level}
           isDark={isDark} 
           colors={colors}
+          normalize={normalize}
+          wp={wp}
+          hp={hp}
         />
       );
     case 'modules':
@@ -70,6 +77,9 @@ export default function ChildrenAreaScreen({ navigation }) {
           setSelectedModule={setSelectedModule}
           isDark={isDark}
           colors={colors}
+          normalize={normalize}
+          wp={wp}
+          hp={hp}
         />
       );
     case 'lesson':
@@ -80,6 +90,9 @@ export default function ChildrenAreaScreen({ navigation }) {
           setCoins={setCoins}
           isDark={isDark}
           colors={colors}
+          normalize={normalize}
+          wp={wp}
+          hp={hp}
         />
       );
     case 'games':
@@ -88,6 +101,9 @@ export default function ChildrenAreaScreen({ navigation }) {
           setScreen={setScreen}
           isDark={isDark}
           colors={colors}
+          normalize={normalize}
+          wp={wp}
+          hp={hp}
         />
       );
     case 'ai-tutor':
@@ -96,6 +112,9 @@ export default function ChildrenAreaScreen({ navigation }) {
           setScreen={setScreen}
           isDark={isDark}
           colors={colors}
+          normalize={normalize}
+          wp={wp}
+          hp={hp}
         />
       );
     case 'store':
@@ -110,6 +129,9 @@ export default function ChildrenAreaScreen({ navigation }) {
           setEquippedSkin={setEquippedSkin}
           isDark={isDark}
           colors={colors}
+          normalize={normalize}
+          wp={wp}
+          hp={hp}
         />
       );
     default:

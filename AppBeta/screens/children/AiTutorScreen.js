@@ -17,9 +17,9 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Speech from 'expo-speech'; 
 import { Audio } from 'expo-av';
-import { PERPLEXITY_API_KEY } from '../../secrets';
+{/*import { PERPLEXITY_API_KEY } from '../../secrets';*/}
 
-const apiKey = PERPLEXITY_API_KEY; ;
+const apiKey = "<YOUR_API_KEY_HERE>"; // Replace with your actual API key;
 
 export default function AiTutorScreen({ setScreen, isDark, colors }) {
   const [chatInput, setChatInput] = useState('');

@@ -21,9 +21,9 @@ import NotificationPanel from "../components/NotificationPanel";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "../context/TranslationContext";
 import { useNotifications } from "../context/NotificationContext";
+import { normalize, wp, hp, screenHeight } from "../utils/responsive";
 
 const childrenGif = require("../assets/children.gif");
-const screenHeight = Dimensions.get("window").height;
 const TOP_SECTION_HEIGHT_RATIO = 0.28;
 
 export default function ChildrenListScreen({ navigation, route }) {
@@ -102,10 +102,10 @@ export default function ChildrenListScreen({ navigation, route }) {
     );
   };
 
-  const getGradient = (performance) => {
-    if (performance >= 75) return ["#6FCF97", "#27AE60"];
-    if (performance >= 45) return ["#F2C94C", "#F2994A"];
-    return ["#EB5757", "#E53935"];
+  const getPerformanceColors = (performance) => {
+    if (performance >= 75) return { gradient: ["#6FCF97", "#27AE60"], border: "#27AE60" };
+    if (performance >= 45) return { gradient: ["#F2C94C", "#F2994A"], border: "#F2994A" };
+    return { gradient: ["#EB5757", "#E53935"], border: "#E53935" };
   };
 
   return (
@@ -132,7 +132,7 @@ export default function ChildrenListScreen({ navigation, route }) {
       <View style={styles.fixedTopSection}>
         <LinearGradient 
           colors={colors.headerGradient || ["#6F42C1", "#9b59b6"]} 
-          style={[StyleSheet.absoluteFill, { borderBottomEndRadius: 38, borderBottomStartRadius: 38, overflow: 'hidden' }]}
+          style={[StyleSheet.absoluteFill, { borderBottomEndRadius: normalize(38), borderBottomStartRadius: normalize(38), overflow: 'hidden' }]}
         >
           <View style={styles.safeArea} />
           
@@ -145,7 +145,7 @@ export default function ChildrenListScreen({ navigation, route }) {
 
           {/* Header Content */}
           <View style={styles.headerContent}>
-            <Text style={[styles.headerTitle, isRTL && { textAlign: 'right' }]}>
+            <Text style={[styles.headerTitle, isRTL && { textAlign: 'right' }]} allowFontScaling={false}>
               {t('myChildren')}
             </Text>
             <Image source={childrenGif} style={styles.gif} />
@@ -159,63 +159,82 @@ export default function ChildrenListScreen({ navigation, route }) {
           contentContainerStyle={styles.scrollContent} 
           showsVerticalScrollIndicator={false}
         >
-          {children.map((child) => (
-            <TouchableOpacity
-              key={child.id}
-              style={styles.childCardWrapper}
-              onPress={() => navigation.navigate("ChildDetailScreen", { child })}
-              activeOpacity={0.8}
-            >
-              <LinearGradient colors={getGradient(child.performance)} style={styles.childCard}>
-                <View style={[styles.childHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                  <Image source={child.avatar} style={styles.childAvatar} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.childName, isRTL && { textAlign: 'right' }]}>
-                      {child.name}
-                    </Text>
-                    <Text style={[styles.childInfo, isRTL && { textAlign: 'right' }]}>
-                      {t('age')}: {child.age} | {t('grade')}: {child.grade} | {child.presence ? t('present') : t('absent')}
-                    </Text>
-                    <View style={[{ flexDirection: "row", alignItems: "center", marginTop: 6 }, isRTL && { flexDirection: 'row-reverse' }]}>
-                      <Feather 
-                        name="clipboard" 
-                        size={16} 
-                        color="white" 
-                        style={isRTL ? { marginLeft: 6 } : { marginRight: 6 }} 
-                      />
-                      <Text style={styles.taskText}>{t('tasks')}:</Text>
-                      <View style={styles.taskBarBackground}>
-                        <View
-                          style={[
-                            styles.taskBarProgress,
-                            { width: `${(child.completedTasks / child.totalTasks) * 100}%` },
-                          ]}
-                        />
-                      </View>
-                      <Text style={styles.taskNumber}>{child.completedTasks}/{child.totalTasks}</Text>
-                    </View>
-                    <View style={[{ flexDirection: "row", alignItems: "center", marginTop: 4 }, isRTL && { flexDirection: 'row-reverse' }]}>
-                      <Feather 
-                        name="bar-chart-2" 
-                        size={16} 
-                        color="white" 
-                        style={isRTL ? { marginLeft: 6 } : { marginRight: 6 }} 
-                      />
-                      <Text style={styles.performanceText}>
-                        {t('performance')}: {child.performance}%
-                      </Text>
-                    </View>
+          {children.map((child) => {
+            const { gradient, border } = getPerformanceColors(child.performance);
+            
+            return (
+              <TouchableOpacity
+                key={child.id}
+                style={styles.childCardWrapper}
+                onPress={() => navigation.navigate("ChildDetailScreen", { child })}
+                activeOpacity={0.8}
+              >
+                {/* Avatar positioned absolutely outside the gradient */}
+                <View style={[
+                  styles.avatarContainer,
+                  isRTL ? { right: -wp(2) } : { left: -wp(2) }
+                ]}>
+                  <View style={[styles.avatarBorder, { borderColor: border }]}>
+                    <Image
+                      source={child.avatar}
+                      style={styles.childAvatar}
+                    />
                   </View>
-                  <Ionicons 
-                    name={isRTL ? "chevron-back-outline" : "chevron-forward-outline"} 
-                    size={26} 
-                    color="white" 
-                  />
                 </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          ))}
-          <View style={{ height: 20 }} />
+
+                <LinearGradient colors={gradient} style={styles.childCard}>
+                  <View style={[styles.childHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+                    {/* Empty space for avatar */}
+                    <View style={styles.avatarSpacer} />
+                    
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.childName, isRTL && { textAlign: 'right' }]} allowFontScaling={false}>
+                        {child.name}
+                      </Text>
+                      <Text style={[styles.childInfo, isRTL && { textAlign: 'right' }]} allowFontScaling={false}>
+                        {t('age')}: {child.age} | {t('grade')}: {child.grade} | {child.presence ? t('present') : t('absent')}
+                      </Text>
+                      <View style={[{ flexDirection: "row", alignItems: "center", marginTop: hp(0.8) }, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <Feather 
+                          name="clipboard" 
+                          size={normalize(16)} 
+                          color="white" 
+                          style={isRTL ? { marginLeft: wp(1.5) } : { marginRight: wp(1.5) }} 
+                        />
+                        <Text style={styles.taskText} allowFontScaling={false}>{t('tasks')}:</Text>
+                        <View style={styles.taskBarBackground}>
+                          <View
+                            style={[
+                              styles.taskBarProgress,
+                              { width: `${(child.completedTasks / child.totalTasks) * 100}%` },
+                            ]}
+                          />
+                        </View>
+                        <Text style={styles.taskNumber} allowFontScaling={false}>{child.completedTasks}/{child.totalTasks}</Text>
+                      </View>
+                      <View style={[{ flexDirection: "row", alignItems: "center", marginTop: hp(0.5) }, isRTL && { flexDirection: 'row-reverse' }]}>
+                        <Feather 
+                          name="bar-chart-2" 
+                          size={normalize(16)} 
+                          color="white" 
+                          style={isRTL ? { marginLeft: wp(1.5) } : { marginRight: wp(1.5) }} 
+                        />
+                        <Text style={styles.performanceText} allowFontScaling={false}>
+                          {t('performance')}: {child.performance}%
+                        </Text>
+                      </View>
+                    </View>
+                    <Ionicons 
+                      name={isRTL ? "chevron-back-outline" : "chevron-forward-outline"} 
+                      size={normalize(26)} 
+                      color="white" 
+                    />
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+            );
+          })}
+          <View style={{ height: hp(2.5) }} />
         </ScrollView>
       </View>
 
@@ -241,27 +260,27 @@ const styles = StyleSheet.create({
     right: 0,
     height: screenHeight * TOP_SECTION_HEIGHT_RATIO,
     zIndex: 1,
-    borderBottomEndRadius: 38,
-    borderBottomStartRadius: 38,
+    borderBottomEndRadius: normalize(38),
+    borderBottomStartRadius: normalize(38),
   },
   safeArea: { 
-    height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight 
+    height: Platform.OS === "ios" ? hp(5.5) : StatusBar.currentHeight 
   },
   
   headerContent: {
     alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingVertical: hp(1),
+    paddingHorizontal: wp(5),
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: normalize(24),
     fontWeight: "700",
     color: "white",
-    marginBottom: 4,
+    marginBottom: hp(0.5),
   },
   gif: {
-    width: 60,
-    height: 60,
+    width: normalize(60),
+    height: normalize(60),
     resizeMode: "contain",
   },
 
@@ -273,85 +292,102 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "#ffffff",
-    borderTopLeftRadius: 38,
-    borderTopRightRadius: 38,
+    borderTopLeftRadius: normalize(38),
+    borderTopRightRadius: normalize(38),
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
+    shadowOffset: { width: 0, height: -hp(0.5) },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: normalize(8),
     elevation: 8,
   },
   scrollContent: { 
-    paddingHorizontal: 20,
-    paddingTop: 25,
-    paddingBottom: 100 
+    paddingHorizontal: wp(5),
+    paddingTop: hp(3),
+    paddingBottom: hp(12)
   },
 
-  // Child Cards
+  // Child Cards with Integrated Avatar
   childCardWrapper: {
-    marginBottom: 15,
+    marginBottom: hp(2),
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: hp(0.4) },
     shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowRadius: normalize(6),
     elevation: 4,
-    borderRadius: 20,
-    overflow: "hidden",
+    borderRadius: normalize(20),
+    overflow: "visible",
+    position: "relative",
+  },
+  avatarContainer: {
+    position: "absolute",
+    top: hp(1.5),
+    zIndex: 2,
+  },
+  avatarBorder: {
+    width: wp(18),
+    height: wp(18),
+    borderRadius: wp(9),
+    borderWidth: normalize(4),
+    padding: normalize(2),
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  childAvatar: {
+    width: "100%",
+    height: "100%",
+    borderRadius: wp(8),
+  },
+  avatarSpacer: {
+    width: wp(17),
+    height: wp(17),
   },
   childCard: {
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: normalize(20),
+    padding: wp(4),
+    overflow: "hidden",
   },
   childHeader: {
     flexDirection: "row",
     alignItems: "flex-start",
   },
-  childAvatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginRight: 15,
-    marginLeft: 8,
-    borderWidth: 3,
-    borderColor: "white",
-  },
   childName: {
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: "700",
-    marginBottom: 4,
+    marginBottom: hp(0.5),
     color: "white",
   },
   childInfo: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "white",
   },
   taskText: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "600",
-    marginRight: 6,
+    marginRight: wp(1.5),
     color: "white",
   },
   taskBarBackground: {
     flex: 1,
-    height: 10,
+    height: hp(1.2),
     backgroundColor: "rgba(255,255,255,0.3)",
-    borderRadius: 5,
+    borderRadius: normalize(5),
     overflow: "hidden",
-    marginRight: 6,
+    marginRight: wp(1.5),
   },
   taskBarProgress: {
     height: "100%",
     backgroundColor: "white",
-    borderRadius: 5,
+    borderRadius: normalize(5),
   },
   taskNumber: {
-    fontSize: 13,
+    fontSize: normalize(13),
     fontWeight: "600",
     color: "white",
   },
   performanceText: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "600",
     color: "white",
   },

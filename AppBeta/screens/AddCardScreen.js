@@ -7,8 +7,12 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useTranslation } from "../context/TranslationContext";
+import { normalize, wp, hp, isSmallDevice } from "../utils/responsive";
 
 // Import logos from assets
 import VisaLogo from "../assets/visa.png";
@@ -43,171 +47,180 @@ export default function AddCardScreen({ visible, onClose, onAddCard }) {
       animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={styles.modalContainer}>
-          {/* Title */}
-          <Text style={[
-            styles.title,
-            isRTL && { textAlign: 'right' }
-          ]}>
-            {t('addNewCard')}
-          </Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.overlay}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.modalContainer}>
+            {/* Title */}
+            <Text style={[
+              styles.title,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('addNewCard')}
+            </Text>
 
-          {/* Card Type Selector */}
-          <Text style={[
-            styles.label,
-            isRTL && { textAlign: 'right' }
-          ]}>
-            {t('cardType')}
-          </Text>
-          <View style={[
-            styles.cardTypeRow,
-            isRTL && { flexDirection: 'row-reverse' }
-          ]}>
-            <TouchableOpacity
+            {/* Card Type Selector */}
+            <Text style={[
+              styles.label,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('cardType')}
+            </Text>
+            <View style={[
+              styles.cardTypeRow,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]}>
+              <TouchableOpacity
+                style={[
+                  styles.radioOption,
+                  isRTL && { flexDirection: 'row-reverse' }
+                ]}
+                onPress={() => setCardType("visa")}
+              >
+                <View style={[
+                  styles.radioCircle,
+                  isRTL && { marginLeft: wp(1.5), marginRight: 0 }
+                ]}>
+                  {cardType === "visa" && <View style={styles.selected} />}
+                </View>
+                <Image source={VisaLogo} style={[
+                  styles.cardLogo,
+                  isRTL && { marginLeft: wp(1.5), marginRight: 0 }
+                ]} />
+                <Text style={styles.radioText}>{t('visa')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.radioOption,
+                  isRTL && { flexDirection: 'row-reverse' }
+                ]}
+                onPress={() => setCardType("mastercard")}
+              >
+                <View style={[
+                  styles.radioCircle,
+                  isRTL && { marginLeft: wp(1.5), marginRight: 0 }
+                ]}>
+                  {cardType === "mastercard" && <View style={styles.selected} />}
+                </View>
+                <Image source={MastercardLogo} style={[
+                  styles.cardLogo,
+                  isRTL && { marginLeft: wp(1.5), marginRight: 0 }
+                ]} />
+                <Text style={styles.radioText}>{t('mastercard')}</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Card Number */}
+            <Text style={[
+              styles.label,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('cardNumber')}
+            </Text>
+            <TextInput
               style={[
-                styles.radioOption,
-                isRTL && { flexDirection: 'row-reverse' }
+                styles.input,
+                isRTL && { textAlign: 'right' }
               ]}
-              onPress={() => setCardType("visa")}
-            >
-              <View style={[
-                styles.radioCircle,
-                isRTL && { marginLeft: 6, marginRight: 0 }
-              ]}>
-                {cardType === "visa" && <View style={styles.selected} />}
+              placeholder={t('enterCardNumber')}
+              value={cardNumber}
+              onChangeText={setCardNumber}
+              keyboardType="numeric"
+            />
+
+            {/* Card Holder Name */}
+            <Text style={[
+              styles.label,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('cardHolderName')}
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                isRTL && { textAlign: 'right' }
+              ]}
+              placeholder={t('enterCardHolderName')}
+              value={cardHolder}
+              onChangeText={setCardHolder}
+            />
+
+            {/* Expire Date & CVV in same row */}
+            <View style={[
+              styles.row,
+              isRTL && { flexDirection: 'row-reverse' }
+            ]}>
+              <View style={{ flex: 0.48 }}>
+                <Text style={[
+                  styles.label,
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  {t('expireDate')}
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  placeholder="MM/YY"
+                  value={expireDate}
+                  onChangeText={setExpireDate}
+                />
               </View>
-              <Image source={VisaLogo} style={[
-                styles.cardLogo,
-                isRTL && { marginLeft: 6, marginRight: 0 }
-              ]} />
-              <Text style={styles.radioText}>{t('visa')}</Text>
+              <View style={{ flex: 0.48 }}>
+                <Text style={[
+                  styles.label,
+                  isRTL && { textAlign: 'right' }
+                ]}>
+                  CVV
+                </Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  placeholder="XXX"
+                  value={cvv}
+                  onChangeText={setCvv}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+
+            {/* Address */}
+            <Text style={[
+              styles.label,
+              isRTL && { textAlign: 'right' }
+            ]}>
+              {t('address')}
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                isRTL && { textAlign: 'right' }
+              ]}
+              placeholder={t('streetCityZip')}
+              value={address}
+              onChangeText={setAddress}
+            />
+
+            {/* Buttons */}
+            <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+              <Text style={styles.buttonText}>{t('add')}</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.radioOption,
-                isRTL && { flexDirection: 'row-reverse' }
-              ]}
-              onPress={() => setCardType("mastercard")}
-            >
-              <View style={[
-                styles.radioCircle,
-                isRTL && { marginLeft: 6, marginRight: 0 }
-              ]}>
-                {cardType === "mastercard" && <View style={styles.selected} />}
-              </View>
-              <Image source={MastercardLogo} style={[
-                styles.cardLogo,
-                isRTL && { marginLeft: 6, marginRight: 0 }
-              ]} />
-              <Text style={styles.radioText}>{t('mastercard')}</Text>
+            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+              <Text style={styles.buttonText}>{t('cancel')}</Text>
             </TouchableOpacity>
           </View>
-
-          {/* Card Number */}
-          <Text style={[
-            styles.label,
-            isRTL && { textAlign: 'right' }
-          ]}>
-            {t('cardNumber')}
-          </Text>
-          <TextInput
-            style={[
-              styles.input,
-              isRTL && { textAlign: 'right' }
-            ]}
-            placeholder={t('enterCardNumber')}
-            value={cardNumber}
-            onChangeText={setCardNumber}
-            keyboardType="numeric"
-          />
-
-          {/* Card Holder Name */}
-          <Text style={[
-            styles.label,
-            isRTL && { textAlign: 'right' }
-          ]}>
-            {t('cardHolderName')}
-          </Text>
-          <TextInput
-            style={[
-              styles.input,
-              isRTL && { textAlign: 'right' }
-            ]}
-            placeholder={t('enterCardHolderName')}
-            value={cardHolder}
-            onChangeText={setCardHolder}
-          />
-
-          {/* Expire Date & CVV in same row */}
-          <View style={[
-            styles.row,
-            isRTL && { flexDirection: 'row-reverse' }
-          ]}>
-            <View style={{ flex: 0.48 }}>
-              <Text style={[
-                styles.label,
-                isRTL && { textAlign: 'right' }
-              ]}>
-                {t('expireDate')}
-              </Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  isRTL && { textAlign: 'right' }
-                ]}
-                placeholder="MM/YY"
-                value={expireDate}
-                onChangeText={setExpireDate}
-              />
-            </View>
-            <View style={{ flex: 0.48 }}>
-              <Text style={[
-                styles.label,
-                isRTL && { textAlign: 'right' }
-              ]}>
-                CVV
-              </Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  isRTL && { textAlign: 'right' }
-                ]}
-                placeholder="XXX"
-                value={cvv}
-                onChangeText={setCvv}
-                keyboardType="numeric"
-              />
-            </View>
-          </View>
-
-          {/* Address */}
-          <Text style={[
-            styles.label,
-            isRTL && { textAlign: 'right' }
-          ]}>
-            {t('address')}
-          </Text>
-          <TextInput
-            style={[
-              styles.input,
-              isRTL && { textAlign: 'right' }
-            ]}
-            placeholder={t('streetCityZip')}
-            value={address}
-            onChangeText={setAddress}
-          />
-
-          {/* Buttons */}
-          <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-            <Text style={styles.buttonText}>{t('add')}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.buttonText}>{t('cancel')}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -216,106 +229,114 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
+  },
+
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingVertical: hp(2),
   },
 
   modalContainer: {
-    width: "90%",
+    width: wp(90),
+    maxWidth: 500,
     backgroundColor: "white",
-    borderRadius: 15,
-    padding: 20,
+    borderRadius: normalize(15),
+    padding: wp(5),
   },
 
   title: {
-    fontSize: 20,
+    fontSize: normalize(isSmallDevice ? 18 : 20),
     fontWeight: "700",
     color: "#6F42C1",
-    marginBottom: 15,
+    marginBottom: hp(2),
     textAlign: "center",
   },
 
   label: { 
-    fontSize: 14, 
+    fontSize: normalize(isSmallDevice ? 12 : 14), 
     fontWeight: "600", 
     color: "#666", 
-    marginBottom: 6 
+    marginBottom: hp(0.8),
   },
 
   cardTypeRow: { 
     flexDirection: "row", 
     justifyContent: "space-between", 
-    marginBottom: 15 
+    marginBottom: hp(2),
   },
 
   radioOption: { 
     flexDirection: "row", 
-    alignItems: "center" 
+    alignItems: "center",
   },
 
   radioCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: normalize(isSmallDevice ? 18 : 20),
+    height: normalize(isSmallDevice ? 18 : 20),
+    borderRadius: normalize(10),
     borderWidth: 2,
     borderColor: "#6F42C1",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 6,
+    marginRight: wp(1.5),
   },
 
   selected: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: normalize(isSmallDevice ? 8 : 10),
+    height: normalize(isSmallDevice ? 8 : 10),
+    borderRadius: normalize(5),
     backgroundColor: "#6F42C1",
   },
 
   cardLogo: { 
-    width: 30, 
-    height: 20, 
+    width: normalize(isSmallDevice ? 26 : 30), 
+    height: normalize(isSmallDevice ? 17 : 20), 
     resizeMode: "contain", 
-    marginRight: 6 
+    marginRight: wp(1.5),
   },
 
   radioText: { 
-    fontSize: 14, 
+    fontSize: normalize(isSmallDevice ? 12 : 14), 
     fontWeight: "600", 
-    color: "#333" 
+    color: "#333",
   },
 
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 12,
-    fontSize: 14,
+    borderRadius: normalize(10),
+    paddingHorizontal: wp(3),
+    paddingVertical: hp(1.4),
+    marginBottom: hp(1.5),
+    fontSize: normalize(isSmallDevice ? 12 : 14),
   },
 
   row: { 
     flexDirection: "row", 
-    justifyContent: "space-between" 
+    justifyContent: "space-between",
   },
 
   addButton: {
     backgroundColor: "#6F42C1",
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: hp(1.8),
+    borderRadius: normalize(12),
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: hp(1.2),
+    marginTop: hp(1),
   },
 
   cancelButton: {
     backgroundColor: "#ccc",
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: hp(1.8),
+    borderRadius: normalize(12),
     alignItems: "center",
   },
 
   buttonText: { 
     color: "white", 
     fontWeight: "700", 
-    fontSize: 16 
+    fontSize: normalize(isSmallDevice ? 14 : 16),
   },
 });

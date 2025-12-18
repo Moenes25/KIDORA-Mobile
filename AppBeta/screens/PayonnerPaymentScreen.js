@@ -17,6 +17,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useTranslation } from "../context/TranslationContext";
 import PayoneerLogo from "../assets/payoneer.png";
+import { normalize, wp, hp } from "../utils/responsive";
 
 // Official-like Payoneer Color Palette
 const COLORS = {
@@ -69,19 +70,22 @@ export default function PayoneerPaymentScreen({
               onPress={onClose} 
               style={[
                 styles.closeButton,
-                isRTL && { marginLeft: 8, marginRight: 0 }
+                isRTL && { marginLeft: wp(2), marginRight: 0 }
               ]}
             >
-              <Feather name="x" size={24} color={COLORS.lightText} />
+              <Feather name="x" size={normalize(24)} color={COLORS.lightText} />
             </TouchableOpacity>
             <Image source={PayoneerLogo} style={styles.logo} resizeMode="contain" />
           </View>
           <View style={styles.secureBadge}>
-            <Feather name="lock" size={14} color={COLORS.success} />
-            <Text style={[
-              styles.secureText,
-              isRTL && { marginRight: 4, marginLeft: 0 }
-            ]}>
+            <Feather name="lock" size={normalize(14)} color={COLORS.success} />
+            <Text 
+              style={[
+                styles.secureText,
+                isRTL && { marginRight: wp(1), marginLeft: 0 }
+              ]}
+              allowFontScaling={false}
+            >
               {t('secure')}
             </Text>
           </View>
@@ -95,28 +99,39 @@ export default function PayoneerPaymentScreen({
             
             {/* Order Summary Card */}
             <View style={styles.orderSummaryContainer}>
-              <Text style={[
-                styles.sectionTitle,
-                isRTL && { textAlign: 'right' }
-              ]}>
+              <Text 
+                style={[
+                  styles.sectionTitle,
+                  isRTL && { textAlign: 'right' }
+                ]}
+                allowFontScaling={false}
+              >
                 {t('orderSummary')}
               </Text>
               <View style={[
                 styles.summaryRow,
                 isRTL && { flexDirection: 'row-reverse' }
               ]}>
-                <Text style={[
-                  styles.summaryLabel,
-                  isRTL && { textAlign: 'right' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.summaryLabel,
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   {t('totalAmount')}
                 </Text>
                 <View style={{ alignItems: isRTL ? 'flex-start' : 'flex-end' }}>
-                  <Text style={styles.summaryAmount}>{paymentAmount} TND</Text>
-                  <Text style={[
-                    styles.summarySubAmount,
-                    isRTL && { textAlign: 'left' }
-                  ]}>
+                  <Text style={styles.summaryAmount} allowFontScaling={false}>
+                    {paymentAmount} TND
+                  </Text>
+                  <Text 
+                    style={[
+                      styles.summarySubAmount,
+                      isRTL && { textAlign: 'left' }
+                    ]}
+                    allowFontScaling={false}
+                  >
                     ≈ ${usdAmount} USD
                   </Text>
                 </View>
@@ -126,16 +141,22 @@ export default function PayoneerPaymentScreen({
                 styles.merchantRow,
                 isRTL && { flexDirection: 'row-reverse' }
               ]}>
-                <Text style={[
-                  styles.merchantLabel,
-                  isRTL && { textAlign: 'right' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.merchantLabel,
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   {t('merchant')}
                 </Text>
-                <Text style={[
-                  styles.merchantName,
-                  isRTL && { textAlign: 'left' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.merchantName,
+                    isRTL && { textAlign: 'left' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   KIDORA Inc.
                 </Text>
               </View>
@@ -143,25 +164,34 @@ export default function PayoneerPaymentScreen({
 
             {/* Login / Payment Form */}
             <View style={styles.formCard}>
-              <Text style={[
-                styles.formTitle,
-                isRTL && { textAlign: 'right' }
-              ]}>
+              <Text 
+                style={[
+                  styles.formTitle,
+                  isRTL && { textAlign: 'right' }
+                ]}
+                allowFontScaling={false}
+              >
                 {t('payWithPayoneer')}
               </Text>
-              <Text style={[
-                styles.formSubtitle,
-                isRTL && { textAlign: 'right' }
-              ]}>
+              <Text 
+                style={[
+                  styles.formSubtitle,
+                  isRTL && { textAlign: 'right' }
+                ]}
+                allowFontScaling={false}
+              >
                 {t('enterAccountDetails')}
               </Text>
 
               {/* Email Input */}
               <View style={styles.inputGroup}>
-                <Text style={[
-                  styles.inputLabel,
-                  isRTL && { textAlign: 'right' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.inputLabel,
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   {t('payoneerUsernameOrEmail')}
                 </Text>
                 <View style={[
@@ -182,6 +212,7 @@ export default function PayoneerPaymentScreen({
                     onFocus={() => setFocusedField('email')}
                     onBlur={() => setFocusedField(null)}
                     editable={!loading}
+                    allowFontScaling={false}
                   />
                 </View>
               </View>
@@ -191,11 +222,14 @@ export default function PayoneerPaymentScreen({
                 styles.infoBox,
                 isRTL && { flexDirection: 'row-reverse' }
               ]}>
-                <Feather name="info" size={16} color={COLORS.lightText} />
-                <Text style={[
-                  styles.infoText,
-                  isRTL && { marginRight: 10, marginLeft: 0, textAlign: 'right' }
-                ]}>
+                <Feather name="info" size={normalize(16)} color={COLORS.lightText} />
+                <Text 
+                  style={[
+                    styles.infoText,
+                    isRTL && { marginRight: wp(2.5), marginLeft: 0, textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   {t('redirectInfo')}
                 </Text>
               </View>
@@ -209,7 +243,9 @@ export default function PayoneerPaymentScreen({
                 {loading ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text style={styles.payButtonText}>{t('payNow')}</Text>
+                  <Text style={styles.payButtonText} allowFontScaling={false}>
+                    {t('payNow')}
+                  </Text>
                 )}
               </TouchableOpacity>
 
@@ -219,7 +255,7 @@ export default function PayoneerPaymentScreen({
                 style={styles.cancelLink} 
                 disabled={loading}
               >
-                <Text style={styles.cancelLinkText}>
+                <Text style={styles.cancelLinkText} allowFontScaling={false}>
                   {t('cancelReturnToMerchant')}
                 </Text>
               </TouchableOpacity>
@@ -229,19 +265,26 @@ export default function PayoneerPaymentScreen({
 
           {/* Footer (Gateway Standard) */}
           <View style={styles.footer}>
-            <Text style={[
-              styles.footerText,
-              isRTL && { textAlign: 'right' }
-            ]}>
+            <Text 
+              style={[
+                styles.footerText,
+                isRTL && { textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {t('allRightsReserved')}
             </Text>
             <View style={[
               styles.footerLinks,
               isRTL && { flexDirection: 'row-reverse' }
             ]}>
-              <Text style={styles.footerLink}>{t('privacy')}</Text>
-              <Text style={styles.footerDivider}>|</Text>
-              <Text style={styles.footerLink}>{t('terms')}</Text>
+              <Text style={styles.footerLink} allowFontScaling={false}>
+                {t('privacy')}
+              </Text>
+              <Text style={styles.footerDivider} allowFontScaling={false}>|</Text>
+              <Text style={styles.footerLink} allowFontScaling={false}>
+                {t('terms')}
+              </Text>
             </View>
           </View>
         </KeyboardAvoidingView>
@@ -260,10 +303,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(1.5),
     backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
+    borderBottomWidth: normalize(1),
     borderBottomColor: '#E5E7EB',
   },
   headerLeft: {
@@ -271,92 +314,92 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeButton: {
-    padding: 8,
-    marginRight: 8,
+    padding: wp(2),
+    marginRight: wp(2),
   },
   logo: {
-    width: 100,
-    height: 30,
+    width: wp(25),
+    height: hp(3.7),
   },
   secureBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#E8F5E9',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    paddingHorizontal: wp(2),
+    paddingVertical: hp(0.5),
+    borderRadius: normalize(4),
   },
   secureText: {
-    fontSize: 10,
+    fontSize: normalize(10),
     fontWeight: '700',
     color: COLORS.success,
-    marginLeft: 4,
+    marginLeft: wp(1),
   },
 
   /* Scroll Content */
   scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
+    padding: wp(4),
+    paddingBottom: hp(5),
   },
 
   /* Order Summary */
   orderSummaryContainer: {
     backgroundColor: COLORS.white,
-    padding: 20,
-    borderRadius: 8,
-    marginBottom: 20,
-    borderWidth: 1,
+    padding: wp(5),
+    borderRadius: normalize(8),
+    marginBottom: hp(2.5),
+    borderWidth: normalize(1),
     borderColor: '#E5E7EB',
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: hp(0.12) },
     shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowRadius: normalize(2),
     elevation: 2,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: '700',
     color: COLORS.lightText,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 12,
+    marginBottom: hp(1.5),
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: hp(1.5),
   },
   summaryLabel: {
-    fontSize: 16,
+    fontSize: normalize(16),
     color: COLORS.darkText,
     fontWeight: '500',
   },
   summaryAmount: {
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: '700',
     color: COLORS.orange,
   },
   summarySubAmount: {
-    fontSize: 13,
+    fontSize: normalize(13),
     color: COLORS.lightText,
     textAlign: 'right',
   },
   divider: {
-    height: 1,
+    height: normalize(1),
     backgroundColor: '#F3F4F6',
-    marginVertical: 12,
+    marginVertical: hp(1.5),
   },
   merchantRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   merchantLabel: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: COLORS.lightText,
   },
   merchantName: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: '600',
     color: COLORS.darkText,
   },
@@ -364,66 +407,66 @@ const styles = StyleSheet.create({
   /* Form Card */
   formCard: {
     backgroundColor: COLORS.white,
-    padding: 24,
-    borderRadius: 8,
-    borderWidth: 1,
+    padding: wp(6),
+    borderRadius: normalize(8),
+    borderWidth: normalize(1),
     borderColor: '#E5E7EB',
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
     elevation: 3,
   },
   formTitle: {
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: '700',
     color: COLORS.darkText,
-    marginBottom: 6,
+    marginBottom: hp(0.7),
   },
   formSubtitle: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: COLORS.lightText,
-    marginBottom: 24,
+    marginBottom: hp(3),
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: hp(2.5),
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: '600',
     color: COLORS.darkText,
-    marginBottom: 8,
+    marginBottom: hp(1),
   },
   inputWrapper: {
-    borderWidth: 1,
+    borderWidth: normalize(1),
     borderColor: COLORS.border,
-    borderRadius: 4,
+    borderRadius: normalize(4),
     backgroundColor: '#FAFAFA',
-    paddingHorizontal: 12,
-    height: 48,
+    paddingHorizontal: wp(3),
+    height: hp(6),
     justifyContent: 'center',
   },
   inputWrapperFocused: {
     borderColor: COLORS.orange,
     backgroundColor: COLORS.white,
-    borderWidth: 1.5,
+    borderWidth: normalize(1.5),
   },
   textInput: {
-    fontSize: 16,
+    fontSize: normalize(16),
     color: COLORS.darkText,
   },
   
   infoBox: {
     flexDirection: 'row',
     backgroundColor: '#F8F9FA',
-    padding: 12,
-    borderRadius: 4,
-    marginBottom: 24,
+    padding: wp(3),
+    borderRadius: normalize(4),
+    marginBottom: hp(3),
     alignItems: 'center',
   },
   infoText: {
-    marginLeft: 10,
-    fontSize: 12,
+    marginLeft: wp(2.5),
+    fontSize: normalize(12),
     color: COLORS.lightText,
     flex: 1,
   },
@@ -431,15 +474,15 @@ const styles = StyleSheet.create({
   /* Buttons */
   payButton: {
     backgroundColor: COLORS.orange,
-    borderRadius: 4,
-    height: 50,
+    borderRadius: normalize(4),
+    height: hp(6.2),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: hp(2),
     shadowColor: COLORS.orange,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
     elevation: 2,
   },
   payButtonDisabled: {
@@ -447,43 +490,43 @@ const styles = StyleSheet.create({
   },
   payButtonText: {
     color: COLORS.white,
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   cancelLink: {
     alignItems: 'center',
-    padding: 8,
+    padding: wp(2),
   },
   cancelLinkText: {
     color: '#0070BA',
-    fontSize: 14,
+    fontSize: normalize(14),
   },
 
   /* Footer */
   footer: {
-    padding: 20,
+    padding: wp(5),
     alignItems: 'center',
-    borderTopWidth: 1,
+    borderTopWidth: normalize(1),
     borderTopColor: '#E5E7EB',
   },
   footerText: {
-    fontSize: 11,
+    fontSize: normalize(11),
     color: '#9CA3AF',
-    marginBottom: 8,
+    marginBottom: hp(1),
   },
   footerLinks: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   footerLink: {
-    fontSize: 11,
+    fontSize: normalize(11),
     color: '#6B7280',
     fontWeight: '500',
   },
   footerDivider: {
-    marginHorizontal: 8,
-    fontSize: 10,
+    marginHorizontal: wp(2),
+    fontSize: normalize(10),
     color: '#D1D5DB',
   }
 });

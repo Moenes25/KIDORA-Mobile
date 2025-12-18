@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../context/ThemeContext";
+import { normalize, wp, hp } from "../utils/responsive";
 
 export default function ChangePwdScreen({ onClose }) {
   const { colors, theme } = useTheme();
@@ -85,9 +86,9 @@ export default function ChangePwdScreen({ onClose }) {
                 <TouchableOpacity onPress={() => toggleShowPassword(item.key)}>
                   <Ionicons
                     name={showPassword[item.key] ? "eye-off" : "eye"}
-                    size={22}
+                    size={normalize(22)}
                     color={isDark ? "#B794F4" : "#6F42C1"}
-                    style={{ marginLeft: 10 }}
+                    style={{ marginLeft: wp(2.5) }}
                   />
                 </TouchableOpacity>
               </View>
@@ -99,7 +100,7 @@ export default function ChangePwdScreen({ onClose }) {
               style={[styles.btn, { backgroundColor: isDark ? "#7c3aed" : "#6F42C1" }]} 
               onPress={handleSave}
             >
-              <Ionicons name="checkmark-outline" size={20} color="white" />
+              <Ionicons name="checkmark-outline" size={normalize(20)} color="white" />
               <Text style={styles.btnText}> Save</Text>
             </TouchableOpacity>
 
@@ -107,7 +108,7 @@ export default function ChangePwdScreen({ onClose }) {
               style={[styles.btn, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "#ccc" }]} 
               onPress={onClose}
             >
-              <Ionicons name="close-outline" size={20} color={isDark ? "#ffffff" : "#333"} />
+              <Ionicons name="close-outline" size={normalize(20)} color={isDark ? "#ffffff" : "#333"} />
               <Text style={[styles.btnText, { color: isDark ? "#ffffff" : "#333" }]}> Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -125,55 +126,69 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalCard: {
-    width: "90%",
-    maxHeight: "80%",
+    width: wp(90),
+    maxHeight: hp(80),
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: normalize(20),
     overflow: "hidden",
   },
   header: {
     width: "100%",
-    paddingVertical: 15,
+    paddingVertical: hp(1.8),
     alignItems: "center",
     justifyContent: "center",
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
+    borderBottomLeftRadius: normalize(15),
+    borderBottomRightRadius: normalize(15),
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "700",
     color: "white",
   },
   content: {
-    padding: 20,
+    padding: wp(5),
   },
-  inputContainer: { marginBottom: 15 },
-  inputLabel: { fontSize: 16, fontWeight: "600", marginBottom: 5 },
+  inputContainer: { 
+    marginBottom: hp(1.8) 
+  },
+  inputLabel: { 
+    fontSize: normalize(16), 
+    fontWeight: "600", 
+    marginBottom: hp(0.6) 
+  },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 10,
-    paddingHorizontal: 12,
+    borderRadius: normalize(10),
+    paddingHorizontal: wp(3),
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
   },
-  input: { flex: 1, height: 45, fontSize: 16 },
+  input: { 
+    flex: 1, 
+    height: hp(5.5), 
+    fontSize: normalize(16) 
+  },
   buttonsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 20,
+    marginTop: hp(2.5),
   },
   btn: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    marginHorizontal: 5,
+    paddingVertical: hp(1.5),
+    borderRadius: normalize(12),
+    marginHorizontal: wp(1.2),
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
   },
-  btnText: { color: "white", fontWeight: "600", fontSize: 16 },
+  btnText: { 
+    color: "white", 
+    fontWeight: "600", 
+    fontSize: normalize(16) 
+  },
 });

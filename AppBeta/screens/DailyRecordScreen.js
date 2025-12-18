@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import axios from "axios";
+import { normalize, wp, hp } from "../utils/responsive";
 
 const SERVER_URL = "http://192.168.0.222:5000"; // <-- change to your server
 
@@ -78,28 +79,28 @@ export default function DailyRecordScreen() {
       <Text style={styles.title}>Daily Records</Text>
 
       <View style={styles.form}>
-        <Text>Date (YYYY-MM-DD)</Text>
+        <Text style={styles.label}>Date (YYYY-MM-DD)</Text>
         <TextInput value={form.date} onChangeText={(v) => setForm(s => ({...s, date: v}))} style={styles.input} />
 
-        <Text>Steps</Text>
+        <Text style={styles.label}>Steps</Text>
         <TextInput keyboardType="numeric" value={form.steps} onChangeText={(v) => setForm(s => ({...s, steps: v}))} style={styles.input} />
 
-        <Text>Distance</Text>
+        <Text style={styles.label}>Distance</Text>
         <TextInput keyboardType="numeric" value={form.distance} onChangeText={(v) => setForm(s => ({...s, distance: v}))} style={styles.input} />
 
-        <Text>Calories</Text>
+        <Text style={styles.label}>Calories</Text>
         <TextInput keyboardType="numeric" value={form.calories} onChangeText={(v) => setForm(s => ({...s, calories: v}))} style={styles.input} />
 
-        <Text>Streak status</Text>
+        <Text style={styles.label}>Streak status</Text>
         <TextInput value={form.streak_status} onChangeText={(v) => setForm(s => ({...s, streak_status: v}))} style={styles.input} />
 
-        <View style={{ flexDirection: "row", gap: 10 }}>
+        <View style={styles.buttonRow}>
           <Button title={form.id ? "Update" : "Add"} onPress={saveRecord} />
           <Button title="Reset" onPress={resetForm} />
         </View>
       </View>
 
-      <Text style={{ marginTop: 12, marginBottom: 6 }}>Records</Text>
+      <Text style={styles.recordsTitle}>Records</Text>
       <FlatList
         data={records}
         keyExtractor={(item) => item._id}
@@ -108,8 +109,8 @@ export default function DailyRecordScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.row} onPress={() => editRecord(item)}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontWeight: "600" }}>{new Date(item.date).toLocaleDateString()}</Text>
-              <Text>Steps: {item.steps} • Distance: {item.distance} • Calories: {item.calories}</Text>
+              <Text style={styles.recordDate}>{new Date(item.date).toLocaleDateString()}</Text>
+              <Text style={styles.recordDetails}>Steps: {item.steps} • Distance: {item.distance} • Calories: {item.calories}</Text>
             </View>
             <View style={{ justifyContent: "center" }}>
               <Button title="Delete" color="#c00" onPress={() => deleteRecord(item._id)} />
@@ -122,9 +123,66 @@ export default function DailyRecordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
-  title: { fontSize: 22, fontWeight: "700", marginBottom: 8 },
-  form: { backgroundColor: "#fafafa", padding: 10, borderRadius: 8 },
-  input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 6, paddingHorizontal: 8, height: 40, marginBottom: 8 },
-  row: { padding: 10, borderBottomWidth: 1, borderColor: "#eee", flexDirection: "row", alignItems: "center" }
+  container: { 
+    flex: 1, 
+    padding: wp(3) 
+  },
+  title: { 
+    fontSize: normalize(22), 
+    fontWeight: "700", 
+    marginBottom: hp(1) 
+  },
+  form: { 
+    backgroundColor: "#fafafa", 
+    padding: wp(2.5), 
+    borderRadius: normalize(8),
+    marginBottom: hp(1.5)
+  },
+  label: {
+    fontSize: normalize(14),
+    fontWeight: "600",
+    marginBottom: hp(0.5),
+    marginTop: hp(0.8),
+    color: "#333"
+  },
+  input: { 
+    borderWidth: normalize(1), 
+    borderColor: "#ddd", 
+    borderRadius: normalize(6), 
+    paddingHorizontal: wp(2), 
+    height: hp(5), 
+    marginBottom: hp(1),
+    fontSize: normalize(15),
+    color: "#000"
+  },
+  buttonRow: {
+    flexDirection: "row", 
+    gap: wp(2.5),
+    marginTop: hp(1)
+  },
+  recordsTitle: {
+    fontSize: normalize(16),
+    fontWeight: "600",
+    marginTop: hp(1.5),
+    marginBottom: hp(0.8),
+    color: "#333"
+  },
+  row: { 
+    padding: wp(2.5), 
+    borderBottomWidth: normalize(1), 
+    borderColor: "#eee", 
+    flexDirection: "row", 
+    alignItems: "center",
+    minHeight: hp(8)
+  },
+  recordDate: {
+    fontSize: normalize(16),
+    fontWeight: "600",
+    marginBottom: hp(0.5),
+    color: "#000"
+  },
+  recordDetails: {
+    fontSize: normalize(13),
+    color: "#666"
+  }
 });

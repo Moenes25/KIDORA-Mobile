@@ -13,9 +13,10 @@ import { Feather } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from '../context/TranslationContext';
+import { normalize, wp, hp } from '../utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const EMOJI_PICKER_HEIGHT = 200;
+const EMOJI_PICKER_HEIGHT = hp(25);
 
 export default function ConversationScreen({ navigation, route }) {
   const { colors } = useTheme();
@@ -116,7 +117,7 @@ export default function ConversationScreen({ navigation, route }) {
             ref={flatListRef}
             data={messages}
             keyExtractor={i => i.id}
-            contentContainerStyle={{ padding: 12, paddingBottom: 20 }}
+            contentContainerStyle={{ padding: wp(3), paddingBottom: hp(2.5) }}
             style={styles.messagesList}
             renderItem={({ item }) => (
               <ChatBubble 
@@ -133,12 +134,17 @@ export default function ConversationScreen({ navigation, route }) {
           {showEmoji && !isKeyboardVisible && (
             <View style={styles.emojiContainer}>
               <View style={[styles.emojiHeader, isRTL && { flexDirection: 'row-reverse' }]}>
-                <Text style={[styles.emojiTitle, isRTL && { textAlign: 'right' }]}>{t('emojis')}</Text>
+                <Text 
+                  style={[styles.emojiTitle, isRTL && { textAlign: 'right' }]}
+                  allowFontScaling={false}
+                >
+                  {t('emojis')}
+                </Text>
                 <TouchableOpacity onPress={() => setShowEmoji(false)}>
-                  <Feather name="x" size={20} color="#666" />
+                  <Feather name="x" size={normalize(20)} color="#666" />
                 </TouchableOpacity>
               </View>
-              <ScrollView style={{ maxHeight: 150 }} nestedScrollEnabled={true}>
+              <ScrollView style={{ maxHeight: hp(18) }} nestedScrollEnabled={true}>
                 <View style={[styles.emojiGrid, isRTL && { flexDirection: 'row-reverse' }]}>
                   {commonEmojis.map((emoji, i) => (
                     <TouchableOpacity 
@@ -146,7 +152,9 @@ export default function ConversationScreen({ navigation, route }) {
                       onPress={() => setText(prev => prev + emoji)}
                       style={styles.emojiButton}
                     >
-                      <Text style={styles.emojiText}>{emoji}</Text>
+                      <Text style={styles.emojiText} allowFontScaling={false}>
+                        {emoji}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -176,10 +184,10 @@ export default function ConversationScreen({ navigation, route }) {
                   }
                 }}
               >
-                <Feather name="smile" size={24} color="#6f42c1" />
+                <Feather name="smile" size={normalize(24)} color="#6f42c1" />
               </TouchableOpacity>
               
-              <View style={[styles.inputWrapper, isRTL && { marginHorizontal: 8 }]}>
+              <View style={[styles.inputWrapper, isRTL && { marginHorizontal: wp(2) }]}>
                 <TextInput
                   style={[styles.input, isRTL && { textAlign: 'right' }]}
                   placeholder={t('typeMessage')}
@@ -189,11 +197,12 @@ export default function ConversationScreen({ navigation, route }) {
                   onFocus={() => setShowEmoji(false)}
                   multiline
                   maxLength={500}
+                  allowFontScaling={false}
                 />
               </View>
               
               <TouchableOpacity style={styles.iconButtonSmall} onPress={uploadFile}>
-                <Feather name="paperclip" size={24} color="#6f42c1" />
+                <Feather name="paperclip" size={normalize(24)} color="#6f42c1" />
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -207,7 +216,7 @@ export default function ConversationScreen({ navigation, route }) {
                 >
                   <Feather 
                     name={isRTL ? "arrow-left" : "send"}
-                    size={18} 
+                    size={normalize(18)} 
                     color="#ffffff" 
                     style={isRTL && { transform: [{ rotate: '180deg' }] }}
                   />
@@ -238,57 +247,57 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#ffffff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: -hp(0.25) },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: normalize(8),
     elevation: 8,
-    borderTopWidth: 1,
+    borderTopWidth: normalize(1),
     borderTopColor: '#f0f0f0',
   },
   composer: { 
     flexDirection: 'row', 
-    padding: 12, 
+    padding: wp(3), 
     alignItems: 'flex-end',
     backgroundColor: '#ffffff',
-    minHeight: 60,
+    minHeight: hp(7.5),
   },
   iconButtonSmall: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: wp(10),
+    height: wp(10),
+    borderRadius: wp(5),
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(111, 66, 193, 0.1)',
-    marginBottom: 4,
+    marginBottom: hp(0.5),
   },
   inputWrapper: {
     flex: 1,
-    marginHorizontal: 8,
+    marginHorizontal: wp(2),
     backgroundColor: '#f7f7f7',
-    borderRadius: 24,
-    borderWidth: 1,
+    borderRadius: normalize(24),
+    borderWidth: normalize(1),
     borderColor: 'rgba(111, 66, 193, 0.2)',
   },
   input: { 
-    minHeight: 40, 
-    maxHeight: 120, 
-    paddingHorizontal: 16, 
-    paddingVertical: 10,
-    fontSize: 15,
-    lineHeight: 20,
+    minHeight: hp(5), 
+    maxHeight: hp(15), 
+    paddingHorizontal: wp(4), 
+    paddingVertical: hp(1.2),
+    fontSize: normalize(15),
+    lineHeight: normalize(20),
     color: '#333',
   },
   sendBtn: { 
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: wp(11),
+    height: wp(11),
+    borderRadius: wp(5.5),
     overflow: 'hidden',
     shadowColor: '#6f42c1',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
     elevation: 4,
-    marginBottom: 2,
+    marginBottom: hp(0.25),
   },
   sendGradient: {
     width: '100%',
@@ -299,7 +308,7 @@ const styles = StyleSheet.create({
   emojiContainer: {
     width: '100%',
     backgroundColor: '#ffffff',
-    borderTopWidth: 1,
+    borderTopWidth: normalize(1),
     borderColor: 'rgba(111, 66, 193, 0.1)',
     height: EMOJI_PICKER_HEIGHT,
   },
@@ -307,13 +316,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
+    paddingHorizontal: wp(4),
+    paddingVertical: hp(1),
+    borderBottomWidth: normalize(1),
     borderColor: '#f0f0f0',
   },
   emojiTitle: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: '700',
     color: '#6f42c1',
   },
@@ -321,21 +330,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-start',
-    paddingHorizontal: 8,
-    paddingTop: 8,
+    paddingHorizontal: wp(2),
+    paddingTop: hp(1),
   },
   emojiButton: {
-    padding: 8,
-    margin: 4,
+    padding: wp(2),
+    margin: wp(1),
     backgroundColor: '#f7f7f7',
-    borderRadius: 12,
-    minWidth: 45,
+    borderRadius: normalize(12),
+    minWidth: wp(11),
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: normalize(1),
     borderColor: 'rgba(111, 66, 193, 0.1)',
   },
   emojiText: {
-    fontSize: 24,
+    fontSize: normalize(24),
   },
 });

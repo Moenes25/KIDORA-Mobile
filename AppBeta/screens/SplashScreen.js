@@ -6,14 +6,12 @@ import {
   Image,
   StyleSheet,
   Animated,
-  Dimensions,
   ActivityIndicator,
   StatusBar,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Feather, Ionicons } from "@expo/vector-icons";
-
-const { width, height } = Dimensions.get("window");
+import { Feather } from "@expo/vector-icons";
+import { normalize, wp, hp, screenWidth } from "../utils/responsive";
 
 export default function SplashScreen({ navigation }) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -40,10 +38,9 @@ export default function SplashScreen({ navigation }) {
         }),
       ]).start();
 
-      // Wait for animation to complete (at least 1.5 seconds for splash effect)
+      // Wait for animation to complete
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // For now, always show the splash screen (no auth check)
       setIsCheckingAuth(false);
     } catch (error) {
       console.error("Error in splash:", error);
@@ -80,29 +77,29 @@ export default function SplashScreen({ navigation }) {
       
       {/* Logo Text at Top Left */}
       <View style={styles.topLogoContainer}>
-        <Text style={styles.topLogoText}>
+        <Text style={styles.topLogoText} allowFontScaling={false}>
           <Text style={styles.topKidoraText}>Kidora</Text>
           <Text style={styles.topAiText}>Ai</Text>
         </Text>
-        <Text style={styles.topAppText}> App</Text>
+        <Text style={styles.topAppText} allowFontScaling={false}> App</Text>
       </View>
 
       {/* Floating Circle Images - Kid-Friendly Themed */}
       <View style={styles.imagesContainer}>
-        {/* Top Left - Playground (half visible) */}
+        {/* Top Left - Playground */}
         <View style={[styles.circleImage, styles.topLeft]}>
           <Image
             source={require("../assets/kid4.jpeg")}
-            resizeMode="contain"
+            resizeMode="cover"
             style={styles.image}
           />
         </View>
 
-        {/* Far Top Right - Kids Playing (mostly cut off) */}
+        {/* Far Top Right - Kids Playing */}
         <View style={[styles.circleImage, styles.farTopRight]}>
           <Image
             source={require("../assets/father image.jpg")}
-            resizeMode="contain"
+            resizeMode="cover"
             style={styles.image}
           />
         </View>
@@ -111,7 +108,7 @@ export default function SplashScreen({ navigation }) {
         <View style={[styles.circleImage, styles.topCenter]}>
           <Image
             source={require("../assets/robot image.jpg")}
-            resizeMode="contain"
+            resizeMode="cover"
             style={styles.image}
           />
         </View>
@@ -120,25 +117,25 @@ export default function SplashScreen({ navigation }) {
         <View style={[styles.circleImage, styles.centerLeft]}>
           <Image
             source={require("../assets/mother.jpg")}
-            resizeMode="contain"
+            resizeMode="cover"
             style={styles.image}
           />
         </View>
 
-        {/* Center Right Large - Child Playing (main focus) */}
+        {/* Center Right Large - Child Playing */}
         <View style={[styles.circleImage, styles.centerRightLarge]}>
           <Image
             source={require("../assets/kid6.jpeg")}
-            resizeMode="contain"
+            resizeMode="cover"
             style={styles.image}
           />
         </View>
 
-        {/* Bottom Center - Happy Child (above text) */}
+        {/* Bottom Center - Happy Child (positioned higher to avoid text overlap) */}
         <View style={[styles.circleImage, styles.bottomCenter]}>
           <Image
             source={require("../assets/kid5.jpeg")}
-            resizeMode="contain"
+            resizeMode="cover"
             style={styles.image}
           />
         </View>
@@ -156,11 +153,13 @@ export default function SplashScreen({ navigation }) {
       >
         {/* Title */}
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>
+          <Text style={styles.title} allowFontScaling={false}>
             <Text style={styles.titlePurple}>Safe Play</Text>
           </Text>
-          <Text style={styles.title}>for Every Child</Text>
-          <Text style={styles.subtitle}>
+          <Text style={styles.title} allowFontScaling={false}>
+            for Every Child
+          </Text>
+          <Text style={styles.subtitle} allowFontScaling={false}>
             Track activities, discover play areas,{"\n"}and keep your children safe
           </Text>
         </View>
@@ -168,14 +167,16 @@ export default function SplashScreen({ navigation }) {
         {/* Get Started Button with Arrow */}
         <TouchableOpacity style={styles.getStartedBtn} onPress={handleGetStarted}>
           <View style={styles.arrowCircle}>
-            <Feather name="arrow-up-right" size={24} color="#6F42C1" />
+            <Feather name="arrow-up-right" size={normalize(20)} color="#6F42C1" />
           </View>
-          <Text style={styles.getStartedText}>Get Started</Text>
+          <Text style={styles.getStartedText} allowFontScaling={false}>
+            Get Started
+          </Text>
         </TouchableOpacity>
 
         {/* Sign In Link */}
         <TouchableOpacity onPress={handleSignIn} style={styles.signInContainer}>
-          <Text style={styles.signInText}>
+          <Text style={styles.signInText} allowFontScaling={false}>
             Already have an account?{" "}
             <Text style={styles.signInLink}>Sign in</Text>
           </Text>
@@ -197,23 +198,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingLogo: {
-    width: 120,
-    height: 120,
-    marginBottom: 30,
+    width: wp(30),
+    height: wp(30),
+    marginBottom: hp(3),
   },
   loader: {
-    marginTop: 20,
+    marginTop: hp(2),
   },
   topLogoContainer: {
     position: "absolute",
-    top: 50,
-    left: 20,
+    top: hp(6),
+    left: wp(5),
     zIndex: 10,
     flexDirection: "row",
     alignItems: "center",
   },
   topLogoText: {
-    fontSize: 24,
+    fontSize: normalize(20),
     fontWeight: "700",
   },
   topKidoraText: {
@@ -223,14 +224,14 @@ const styles = StyleSheet.create({
     color: "#6F42C1",
   },
   topAppText: {
-    fontSize: 24,
+    fontSize: normalize(20),
     fontWeight: "400",
     color: "#1a1a1a",
   },
   imagesContainer: {
     position: "absolute",
-    width: width,
-    height: height * 0.55,
+    width: screenWidth,
+    height: hp(50),
     top: 0,
   },
   circleImage: {
@@ -248,111 +249,108 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  // Repositioned images with spacing between them
+  // Responsive image positions using percentages
   topLeft: {
-    width: 140,
-    height: 140,
-    top: 90,
-    left: -40,
+    width: wp(35),
+    height: wp(35),
+    top: hp(11),
+    left: -wp(10),
   },
   farTopRight: {
-    width: 150,
-    height: 150,
-    top: 60,
-    right: -50,
+    width: wp(38),
+    height: wp(38),
+    top: hp(7),
+    right: -wp(12),
   },
   topCenter: {
-    width: 160,
-    height: 160,
-    top: 140,
-    left: width / 2 - 65,
+    width: wp(40),
+    height: wp(40),
+    top: hp(17),
+    left: wp(50) - wp(20),
   },
   centerLeft: {
-    width: 160,
-    height: 160,
-    top: 260,
-    left: -20,
+    width: wp(40),
+    height: wp(40),
+    top: hp(31),
+    left: -wp(5),
   },
   centerRightLarge: {
-    width: 140,
-    height: 140,
-    top: 240,
-    right: -30,
+    width: wp(35),
+    height: wp(35),
+    top: hp(29),
+    right: -wp(7),
   },
   bottomCenter: {
-    width: 130,
-    height: 130,
-    top: 360,
-    left: width / 2 - 65,
+    width: wp(32),
+    height: wp(32),
+    top: hp(38), // Moved higher to prevent text overlap
+    left: wp(50) - wp(16),
   },
   content: {
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
-    paddingHorizontal: 30,
-    paddingBottom: 60,
+    paddingHorizontal: wp(8),
+    paddingBottom: hp(7),
   },
   titleContainer: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: hp(4),
+    marginTop: hp(20),
   },
   title: {
-    fontSize: 38,
+    fontSize: normalize(32),
     fontWeight: "bold",
     color: "#1a1a1a",
     textAlign: "center",
-    lineHeight: 46,
+    lineHeight: normalize(40),
   },
   titlePurple: {
     color: "#6F42C1",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: normalize(13),
     color: "#666",
     textAlign: "center",
-    lineHeight: 24,
-    marginTop: 12,
+    lineHeight: normalize(20),
+    marginTop: hp(1.5),
+    paddingHorizontal: wp(5),
   },
   getStartedBtn: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#6F42C1",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    paddingLeft: 12,
+    paddingVertical: hp(1.8),
+    paddingHorizontal: wp(5),
+    paddingLeft: wp(3),
     borderRadius: 30,
-    marginBottom: 20,
-    width: "70%",
-    maxWidth: 250,
+    marginBottom: hp(2),
+    width: wp(65),
+    maxWidth: 280,
   },
   arrowCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 16,
+    width: wp(9),
+    height: wp(9),
+    borderRadius: wp(4.5),
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
-  },
-  arrowText: {
-    color: "#6F42C1",
-    fontSize: 20,
-    fontWeight: "bold",
+    marginRight: wp(3),
   },
   getStartedText: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: normalize(16),
     fontWeight: "600",
     flex: 1,
     textAlign: "center",
-    marginRight: 32,
+    marginRight: wp(8),
   },
   signInContainer: {
-    marginTop: 10,
+    marginTop: hp(1),
   },
   signInText: {
     color: "#666",
-    fontSize: 14,
+    fontSize: normalize(12),
   },
   signInLink: {
     color: "#6F42C1",

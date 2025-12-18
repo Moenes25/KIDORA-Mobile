@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../api/api";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { normalize, wp, hp } from "../utils/responsive";
 
 // ──────────────────────────────────────────────────────────────
 // Static test credentials (for demo/offline APK)
@@ -167,7 +168,7 @@ export default function LoginSc({ navigation }) {
             {/* Email Input Label */}
             <Text style={styles.inputLabel}>Email</Text>
             <View style={styles.inputContainer}>
-              <Feather name="mail" size={20} color="#6F42C1" style={styles.inputIcon} />
+              <Feather name="mail" size={normalize(20)} color="#6F42C1" style={styles.inputIcon} />
               <TextInput
                 placeholder="Enter your email"
                 placeholderTextColor="#999"
@@ -183,7 +184,7 @@ export default function LoginSc({ navigation }) {
             {/* Password Input Label */}
             <Text style={styles.inputLabel}>Password</Text>
             <View style={styles.inputContainer}>
-              <Feather name="lock" size={20} color="#6F42C1" style={styles.inputIcon} />
+              <Feather name="lock" size={normalize(20)} color="#6F42C1" style={styles.inputIcon} />
               <TextInput
                 placeholder="Enter your password"
                 placeholderTextColor="#999"
@@ -196,7 +197,7 @@ export default function LoginSc({ navigation }) {
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Ionicons
                   name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={22}
+                  size={normalize(22)}
                   color="#6F42C1"
                 />
               </TouchableOpacity>
@@ -228,15 +229,15 @@ export default function LoginSc({ navigation }) {
             {/* Social Buttons */}
             <View style={styles.socialContainer}>
               <TouchableOpacity style={styles.socialBtn}>
-                <Ionicons name="logo-google" size={35} color="#DB4437" />
+                <Ionicons name="logo-google" size={normalize(35)} color="#DB4437" />
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialBtn}>
-                <Ionicons name="logo-apple" size={35} color="#000" />
+                <Ionicons name="logo-apple" size={normalize(35)} color="#000" />
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.socialBtn}>
-                <Ionicons name="logo-facebook" size={37} color="#4267B2" />
+                <Ionicons name="logo-facebook" size={normalize(37)} color="#4267B2" />
               </TouchableOpacity>
             </View>
 
@@ -262,98 +263,97 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingVertical: 40,
+    paddingVertical: hp(5),
   },
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 30,
+    paddingHorizontal: wp(7.5),
   },
-
 
   heartContainer: {
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginBottom: 20,
+    paddingHorizontal: wp(5),
+    marginBottom: hp(2.5),
   },
   heartLeft: {
-    fontSize: 24,
+    fontSize: normalize(24),
     color: "#6F42C1",
   },
   heartRight: {
-    fontSize: 24,
+    fontSize: normalize(24),
     color: "#6F42C1",
   },
   title: {
-    fontSize: 28,
+    fontSize: normalize(28),
     fontWeight: "bold",
     color: "#1a1a1a",
-    marginBottom: 8,
+    marginBottom: hp(1),
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: normalize(14),
     color: "#666",
-    marginBottom: 40,
+    marginBottom: hp(5),
     textAlign: "center",
   },
   formContainer: {
     width: "100%",
-    maxWidth: 400,
+    maxWidth: wp(100),
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "600",
     color: "#1a1a1a",
-    marginBottom: 8,
-    marginLeft: 2,
+    marginBottom: hp(1),
+    marginLeft: wp(0.5),
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 4,
-    marginBottom: 20,
-    borderWidth: 1,
+    borderRadius: normalize(12),
+    paddingHorizontal: wp(3.75),
+    paddingVertical: hp(0.5),
+    marginBottom: hp(2.5),
+    borderWidth: normalize(1),
     borderColor: "#e0e0e0",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: hp(0.12) },
     shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowRadius: normalize(2),
     elevation: 1,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: wp(2.5),
     color: "#6F42C1",
   },
   input: {
     flex: 1,
     color: "#1a1a1a",
-    fontSize: 16,
-    paddingVertical: 12,
+    fontSize: normalize(16),
+    paddingVertical: hp(1.5),
   },
   passwordStrength: {
-    fontSize: 12,
+    fontSize: normalize(12),
     color: "#4CAF50",
     fontWeight: "600",
-    marginLeft: 8,
+    marginLeft: wp(2),
   },
   loginBtn: {
     backgroundColor: "#6F42C1",
-    paddingVertical: 16,
-    borderRadius: 25,
+    paddingVertical: hp(2),
+    borderRadius: normalize(25),
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: hp(1.2),
+    marginBottom: hp(2.5),
     shadowColor: "#6F42C1",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: hp(0.5) },
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: normalize(8),
     elevation: 4,
   },
   disabledBtn: {
@@ -362,52 +362,52 @@ const styles = StyleSheet.create({
   },
   loginBtnText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "700",
   },
   divider: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 20,
+    marginVertical: hp(2.5),
   },
   dividerLine: {
     flex: 1,
-    height: 1,
+    height: normalize(1),
     backgroundColor: "#e0e0e0",
   },
   dividerText: {
     color: "#999",
-    paddingHorizontal: 15,
-    fontSize: 12,
+    paddingHorizontal: wp(3.75),
+    fontSize: normalize(12),
   },
   socialContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 20,
-    marginBottom: 30,
+    gap: wp(5),
+    marginBottom: hp(3.75),
   },
   socialBtn: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: wp(15),
+    height: wp(15),
+    borderRadius: wp(7.5),
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
+    borderWidth: normalize(1),
     borderColor: "#e0e0e0",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: hp(0.25) },
     shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowRadius: normalize(4),
     elevation: 2,
   },
   signupContainer: {
-    marginTop: 10,
+    marginTop: hp(1.2),
     alignItems: "center",
   },
   signupText: {
     color: "#666",
-    fontSize: 14,
+    fontSize: normalize(14),
   },
   signupLink: {
     color: "#6F42C1",

@@ -9,7 +9,6 @@ import { TranslationProvider } from './context/TranslationContext';
 import SplashScreen from './screens/SplashScreen';
 import Login from './screens/LoginSc';
 import Registerv1 from './screens/Registerv1';
-import ProfileEdit from './screens/ProfileEdit';
 import HomeScreen from './screens/HomeScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
@@ -33,6 +32,15 @@ import VideoCall from './screens/VideoCallScreen';
 import FeedbackScreen from './components/FeedBackScreenComponent';
 import { NotificationProvider } from './context/NotificationContext';
 
+import { Text, TextInput } from 'react-native';
+
+// Add these lines RIGHT AFTER your imports, BEFORE your App component
+//Text.defaultProps = Text.defaultProps || {};
+//Text.defaultProps.allowFontScaling = false;
+
+//TextInput.defaultProps = TextInput.defaultProps || {};
+//TextInput.defaultProps.allowFontScaling = false;
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -52,7 +60,6 @@ export default function App() {
               <Stack.Screen name="SplashScreen" component={SplashScreen} />
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="Registerv1" component={Registerv1} />
-              <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
               <Stack.Screen name="HomeScreen" component={HomeScreen} />
               <Stack.Screen name="Calendar" component={CalendarScreen} />
               <Stack.Screen name="MapScreen" component={MapScreen} />

@@ -9,7 +9,6 @@ import {
   Modal,
   TextInput,
   Alert,
-  Dimensions,
   Platform,
   StatusBar,
 } from "react-native";
@@ -28,9 +27,10 @@ import FeedbackScreen from "../components/FeedBackScreenComponent";
 import { useNotifications } from "../context/NotificationContext";
 import NotificationPanel from "../components/NotificationPanel";
 
-const screenHeight = Dimensions.get("window").height;
+// ✅ IMPORT RESPONSIVE UTILITIES
+import { normalize, wp, hp, screenHeight } from "../utils/responsive";
 
-// ... (MenuItem component remains unchanged) ...
+// MenuItem component
 const MenuItem = ({ icon, label, subtitle, color = "#6F42C1", onPress, isRTL }) => {
   const [pressed, setPressed] = useState(false);
   return (
@@ -49,30 +49,36 @@ const MenuItem = ({ icon, label, subtitle, color = "#6F42C1", onPress, isRTL }) 
       onPress={onPress}
     >
       <View style={[styles.iconCircle, { backgroundColor: color + '15' }]}>
-        <Ionicons name={icon} size={24} color={color} />
+        <Ionicons name={icon} size={normalize(24)} color={color} />
       </View>
       <View style={[
         styles.menuContent,
-        isRTL ? { marginRight: 16 } : { marginLeft: 16 }
+        isRTL ? { marginRight: wp(4) } : { marginLeft: wp(4) }
       ]}>
-        <Text style={[
-          styles.menuLabel,
-          isRTL && { textAlign: 'right' }
-        ]}>
+        <Text 
+          style={[
+            styles.menuLabel,
+            isRTL && { textAlign: 'right' }
+          ]}
+          allowFontScaling={false}
+        >
           {label}
         </Text>
         {subtitle && (
-          <Text style={[
-            styles.menuSubtitle,
-            isRTL && { textAlign: 'right' }
-          ]}>
+          <Text 
+            style={[
+              styles.menuSubtitle,
+              isRTL && { textAlign: 'right' }
+            ]}
+            allowFontScaling={false}
+          >
             {subtitle}
           </Text>
         )}
       </View>
       <Ionicons 
         name={isRTL ? "chevron-back" : "chevron-forward"} 
-        size={22} 
+        size={normalize(22)} 
         color="#999999" 
       />
     </TouchableOpacity>
@@ -118,12 +124,11 @@ export default function ProfileScreen({ navigation, route }) {
     );
   };
 
-  //const TOP_SECTION_HEIGHT = screenHeight * 0.3;
-    const getTopSectionHeight = () => {
-    const baseHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 24;
-    const topBarHeight = 60;
-    const avatarSection = 160; // Avatar + greeting
-    const padding = 30;
+  const getTopSectionHeight = () => {
+    const baseHeight = Platform.OS === 'ios' ? hp(5.5) : (StatusBar.currentHeight || hp(3));
+    const topBarHeight = hp(7.5);
+    const avatarSection = hp(20); // Avatar + greeting
+    const padding = hp(3.7);
     
     return baseHeight + topBarHeight + avatarSection + padding;
   };
@@ -170,13 +175,16 @@ export default function ProfileScreen({ navigation, route }) {
                 style={styles.cameraBtn}
                 onPress={() => navigation.navigate("EditProfileScreen", { user })}
               >
-                <Ionicons name="camera" size={18} color="#6F42C1" />
+                <Ionicons name="camera" size={normalize(18)} color="#6F42C1" />
               </TouchableOpacity>
             </View>
-            <Text style={[
-              styles.greeting,
-              isRTL && { textAlign: 'right', flexDirection: 'row-reverse' }
-            ]}>
+            <Text 
+              style={[
+                styles.greeting,
+                isRTL && { textAlign: 'right', flexDirection: 'row-reverse' }
+              ]}
+              allowFontScaling={false}
+            >
               {t('greeting')}, <Text style={styles.userName}>{fullName}</Text>
             </Text>
           </View>
@@ -188,10 +196,13 @@ export default function ProfileScreen({ navigation, route }) {
         <ScrollView contentContainerStyle={styles.bottomScroll} showsVerticalScrollIndicator={false}>
           {/* Account */}
           <View style={styles.section}>
-            <Text style={[
-              styles.sectionHeader,
-              isRTL && { textAlign: 'right' }
-            ]}>
+            <Text 
+              style={[
+                styles.sectionHeader,
+                isRTL && { textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {t('account')}
             </Text>
             <MenuItem 
@@ -219,10 +230,13 @@ export default function ProfileScreen({ navigation, route }) {
 
           {/* Support */}
           <View style={styles.section}>
-            <Text style={[
-              styles.sectionHeader,
-              isRTL && { textAlign: 'right' }
-            ]}>
+            <Text 
+              style={[
+                styles.sectionHeader,
+                isRTL && { textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {t('support')}
             </Text>
             <MenuItem 
@@ -249,19 +263,25 @@ export default function ProfileScreen({ navigation, route }) {
             ]} 
             onPress={handleLogout}
           >
-            <Ionicons name="log-out-outline" size={22} color="white" />
-            <Text style={[
-              styles.logoutText,
-              isRTL ? { marginRight: 10 } : { marginLeft: 10 }
-            ]}>
+            <Ionicons name="log-out-outline" size={normalize(22)} color="white" />
+            <Text 
+              style={[
+                styles.logoutText,
+                isRTL ? { marginRight: wp(2.5) } : { marginLeft: wp(2.5) }
+              ]}
+              allowFontScaling={false}
+            >
               {t('logout')}
             </Text>
           </TouchableOpacity>
 
-          <Text style={[
-            styles.version,
-            isRTL && { textAlign: 'right' }
-          ]}>
+          <Text 
+            style={[
+              styles.version,
+              isRTL && { textAlign: 'right' }
+            ]}
+            allowFontScaling={false}
+          >
             {t('version')} 1.2.4
           </Text>
         </ScrollView>
@@ -271,10 +291,13 @@ export default function ProfileScreen({ navigation, route }) {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={[
-              styles.modalTitle,
-              isRTL && { textAlign: 'right' }
-            ]}>
+            <Text 
+              style={[
+                styles.modalTitle,
+                isRTL && { textAlign: 'right' }
+              ]}
+              allowFontScaling={false}
+            >
               {t('changePasswordTitle')}
             </Text>
             <TextInput 
@@ -286,7 +309,8 @@ export default function ProfileScreen({ navigation, route }) {
               placeholderTextColor="#999999"
               secureTextEntry 
               value={currentPwd} 
-              onChangeText={setCurrentPwd} 
+              onChangeText={setCurrentPwd}
+              allowFontScaling={false}
             />
             <TextInput 
               style={[
@@ -297,7 +321,8 @@ export default function ProfileScreen({ navigation, route }) {
               placeholderTextColor="#999999"
               secureTextEntry 
               value={newPwd} 
-              onChangeText={setNewPwd} 
+              onChangeText={setNewPwd}
+              allowFontScaling={false}
             />
             <TextInput 
               style={[
@@ -308,7 +333,8 @@ export default function ProfileScreen({ navigation, route }) {
               placeholderTextColor="#999999"
               secureTextEntry 
               value={confirmPwd} 
-              onChangeText={setConfirmPwd} 
+              onChangeText={setConfirmPwd}
+              allowFontScaling={false}
             />
             <View style={[
               styles.modalButtons,
@@ -318,10 +344,14 @@ export default function ProfileScreen({ navigation, route }) {
                 style={styles.cancelBtn} 
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.cancelText}>{t('cancel')}</Text>
+                <Text style={styles.cancelText} allowFontScaling={false}>
+                  {t('cancel')}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.confirmBtn}>
-                <Text style={styles.confirmText}>{t('confirm')}</Text>
+                <Text style={styles.confirmText} allowFontScaling={false}>
+                  {t('confirm')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -336,7 +366,10 @@ export default function ProfileScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  container: { 
+    flex: 1, 
+    backgroundColor: "#f5f5f5" 
+  },
   fixedTopSection: {
     position: "absolute",
     top: 0,
@@ -344,43 +377,45 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
     overflow: "hidden",
-    borderBottomEndRadius: 38,
-    borderBottomStartRadius: 38,
+    borderBottomEndRadius: normalize(38),
+    borderBottomStartRadius: normalize(38),
   },
-  safeArea: { height: Platform.OS === "ios" ? 44 : StatusBar.currentHeight },
+  safeArea: { 
+    height: Platform.OS === "ios" ? hp(5.5) : StatusBar.currentHeight 
+  },
   
   profileSection: {
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 5,
-    paddingBottom: 20,
+    paddingHorizontal: wp(5),
+    paddingTop: hp(0.6),
+    paddingBottom: hp(2.5),
   },
   avatarWrapper: { 
     position: "relative", 
-    marginBottom: 8,
+    marginBottom: hp(1),
   },
   avatar: { 
-    width: 80, 
-    height: 80, 
-    borderRadius: 40, 
-    borderWidth: 3, 
+    width: wp(20), 
+    height: wp(20), 
+    borderRadius: wp(10), 
+    borderWidth: normalize(3), 
     borderColor: "white",
   },
   cameraBtn: { 
     position: "absolute", 
-    right: -2, 
+    right: wp(-0.5), 
     bottom: 0, 
-    width: 28, 
-    height: 28, 
-    borderRadius: 14, 
+    width: wp(7), 
+    height: wp(7), 
+    borderRadius: wp(3.5), 
     backgroundColor: "white", 
     justifyContent: "center", 
     alignItems: "center", 
-    borderWidth: 2, 
+    borderWidth: normalize(2), 
     borderColor: "#6F42C1",
   },
   greeting: {
-    fontSize: 20,
+    fontSize: normalize(20),
     color: "#FFFFFF",
     textAlign: "center",
   },
@@ -395,70 +430,156 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "#ffffff",
-    borderTopLeftRadius: 38,
-    borderTopRightRadius: 38,
+    borderTopLeftRadius: normalize(38),
+    borderTopRightRadius: normalize(38),
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -8 },
+    shadowOffset: { width: 0, height: hp(-1) },
     shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowRadius: normalize(12),
     elevation: 12,
   },
-  bottomScroll: { paddingHorizontal: 16, paddingTop: 32, paddingBottom: 100 },
-  section: { marginTop: 24 },
+  bottomScroll: { 
+    paddingHorizontal: wp(4), 
+    paddingTop: hp(4), 
+    paddingBottom: hp(12.5) 
+  },
+  section: { 
+    marginTop: hp(3) 
+  },
   sectionHeader: { 
-    fontSize: 13, 
+    fontSize: normalize(13), 
     fontWeight: "700", 
     color: "#999999", 
     textTransform: "uppercase", 
     letterSpacing: 1, 
-    marginBottom: 12 
+    marginBottom: hp(1.5) 
   },
   menuItem: { 
     flexDirection: "row", 
     alignItems: "center", 
-    paddingVertical: 16, 
-    paddingHorizontal: 16,
-    marginVertical: 6,
+    paddingVertical: hp(2), 
+    paddingHorizontal: wp(4),
+    marginVertical: hp(0.7),
     backgroundColor: "#ffffff",
-    borderRadius: 16,
+    borderRadius: normalize(16),
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: hp(0.5) },
+    shadowRadius: normalize(8),
   },
   iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+    width: wp(12),
+    height: wp(12),
+    borderRadius: normalize(12),
     justifyContent: "center",
     alignItems: "center",
   },
-  menuContent: { flex: 1 },
-  menuLabel: { fontSize: 16, fontWeight: "600", color: "#1a1a2e" },
-  menuSubtitle: { fontSize: 14, marginTop: 2, fontWeight: "500", color: "#666666" },
+  menuContent: { 
+    flex: 1 
+  },
+  menuLabel: { 
+    fontSize: normalize(16), 
+    fontWeight: "600", 
+    color: "#1a1a2e" 
+  },
+  menuSubtitle: { 
+    fontSize: normalize(14), 
+    marginTop: hp(0.25), 
+    fontWeight: "500", 
+    color: "#666666" 
+  },
 
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 16,
+    paddingVertical: hp(2),
     backgroundColor: "#E53935",
-    borderRadius: 16,
-    marginTop: 20,
+    borderRadius: normalize(16),
+    marginTop: hp(2.5),
   },
-  logoutText: { fontSize: 16, fontWeight: "600", color: "white" },
+  logoutText: { 
+    fontSize: normalize(16), 
+    fontWeight: "600", 
+    color: "white" 
+  },
 
-  version: { textAlign: "center", fontSize: 14, color: "#999999", marginVertical: 40 },
+  version: { 
+    textAlign: "center", 
+    fontSize: normalize(14), 
+    color: "#999999", 
+    marginVertical: hp(5) 
+  },
 
-  bottomNavContainer: { position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 10, backgroundColor: "#ffffff" },
+  bottomNavContainer: { 
+    position: "absolute", 
+    bottom: 0, 
+    left: 0, 
+    right: 0, 
+    zIndex: 10, 
+    backgroundColor: "#ffffff" 
+  },
 
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "center", alignItems: "center" },
-  modalContent: { width: "90%", backgroundColor: "#ffffff", borderRadius: 20, padding: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 12, elevation: 10 },
-  modalTitle: { fontSize: 20, fontWeight: "700", color: "#6F42C1", textAlign: "center", marginBottom: 20 },
-  input: { borderWidth: 1, borderColor: "#e0e0e0", backgroundColor: "#f5f5f5", borderRadius: 12, padding: 14, marginBottom: 14, fontSize: 16, color: "#1a1a2e" },
-  modalButtons: { flexDirection: "row", marginTop: 10 },
-  cancelBtn: { flex: 1, paddingVertical: 14, backgroundColor: "#f1f1f1", borderRadius: 12, marginHorizontal: 6 },
-  confirmBtn: { flex: 1, paddingVertical: 14, backgroundColor: "#6F42C1", borderRadius: 12, marginHorizontal: 6 },
-  cancelText: { textAlign: "center", fontWeight: "600", color: "#1a1a2e" },
-  confirmText: { textAlign: "center", color: "#fff", fontWeight: "600" },
+  modalOverlay: { 
+    flex: 1, 
+    backgroundColor: "rgba(0,0,0,0.7)", 
+    justifyContent: "center", 
+    alignItems: "center" 
+  },
+  modalContent: { 
+    width: wp(90), 
+    backgroundColor: "#ffffff", 
+    borderRadius: normalize(20), 
+    padding: wp(6), 
+    shadowColor: "#000", 
+    shadowOffset: { width: 0, height: hp(1) }, 
+    shadowOpacity: 0.3, 
+    shadowRadius: normalize(12), 
+    elevation: 10 
+  },
+  modalTitle: { 
+    fontSize: normalize(20), 
+    fontWeight: "700", 
+    color: "#6F42C1", 
+    textAlign: "center", 
+    marginBottom: hp(2.5) 
+  },
+  input: { 
+    borderWidth: normalize(1), 
+    borderColor: "#e0e0e0", 
+    backgroundColor: "#f5f5f5", 
+    borderRadius: normalize(12), 
+    padding: wp(3.5), 
+    marginBottom: hp(1.7), 
+    fontSize: normalize(16), 
+    color: "#1a1a2e" 
+  },
+  modalButtons: { 
+    flexDirection: "row", 
+    marginTop: hp(1.2) 
+  },
+  cancelBtn: { 
+    flex: 1, 
+    paddingVertical: hp(1.7), 
+    backgroundColor: "#f1f1f1", 
+    borderRadius: normalize(12), 
+    marginHorizontal: wp(1.5) 
+  },
+  confirmBtn: { 
+    flex: 1, 
+    paddingVertical: hp(1.7), 
+    backgroundColor: "#6F42C1", 
+    borderRadius: normalize(12), 
+    marginHorizontal: wp(1.5) 
+  },
+  cancelText: { 
+    textAlign: "center", 
+    fontWeight: "600", 
+    color: "#1a1a2e" 
+  },
+  confirmText: { 
+    textAlign: "center", 
+    color: "#fff", 
+    fontWeight: "600" 
+  },
 });

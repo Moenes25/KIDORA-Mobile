@@ -25,7 +25,7 @@ import D17PaymentScreen from "./D17PaymentScreen";
 import FlouciPaymentScreen from "./FlouciPaymentScreen";
 import PayoneerPaymentScreen from "./PayonnerPaymentScreen";
 
-export default function PayMethodScreen({ visible, onClose, amount }) {
+export default function PayMethodScreen({ visible, onClose, amount, navigation }) {
   const { colors, theme } = useTheme();
   const { t, isRTL } = useTranslation();
   const isDark = theme === "dark";
@@ -36,8 +36,6 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
   const [showFlouci, setShowFlouci] = useState(false);
   const [showPayoneer, setShowPayoneer] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState(null);
-
-  if (!visible) return null;
 
   // Example primary card
   const primaryCard = {
@@ -73,8 +71,8 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
 
   return (
     <>
-      {/* Main Payment Method Selector */}
-      <Modal transparent animationType="slide">
+      {/* Main Payment Method Selector - FIXED: Added visible prop */}
+      <Modal transparent animationType="slide" visible={visible}>
         <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
           <TouchableOpacity
             style={[styles.sheet, { backgroundColor: colors.card }]}
@@ -257,41 +255,56 @@ export default function PayMethodScreen({ visible, onClose, amount }) {
         </TouchableOpacity>
       </Modal>
 
-      {/* Modals */}
-      <AddCardScreen
-        visible={showAddCard}
-        onClose={() => setShowAddCard(false)}
-        onAddCard={(card) => console.log("New card added:", card)}
-      />
+      {/* CRITICAL FIX: Conditional rendering for all child modals */}
+      {showAddCard && (
+        <AddCardScreen
+          visible={showAddCard}
+          onClose={() => setShowAddCard(false)}
+          onAddCard={(card) => console.log("New card added:", card)}
+          navigation={navigation}
+        />
+      )}
 
-      <PaymentConfirmationScreen
-        visible={showConfirm}
-        method={selectedMethod}
-        amount={amount}
-        onClose={() => setShowConfirm(false)}
-        onPaymentSuccess={handlePaymentSuccess}
-      />
+      {showConfirm && (
+        <PaymentConfirmationScreen
+          visible={showConfirm}
+          method={selectedMethod}
+          amount={amount}
+          onClose={() => setShowConfirm(false)}
+          onPaymentSuccess={handlePaymentSuccess}
+          navigation={navigation}
+        />
+      )}
 
-      <D17PaymentScreen
-        visible={showD17}
-        onClose={() => setShowD17(false)}
-        paymentAmount={amount}
-        onPaymentSuccess={handlePaymentSuccess}
-      />
+      {showD17 && (
+        <D17PaymentScreen
+          visible={showD17}
+          onClose={() => setShowD17(false)}
+          paymentAmount={amount}
+          onPaymentSuccess={handlePaymentSuccess}
+          navigation={navigation}
+        />
+      )}
 
-      <FlouciPaymentScreen
-        visible={showFlouci}
-        onClose={() => setShowFlouci(false)}
-        paymentAmount={amount}
-        onPaymentSuccess={handlePaymentSuccess}
-      />
+      {showFlouci && (
+        <FlouciPaymentScreen
+          visible={showFlouci}
+          onClose={() => setShowFlouci(false)}
+          paymentAmount={amount}
+          onPaymentSuccess={handlePaymentSuccess}
+          navigation={navigation}
+        />
+      )}
 
-      <PayoneerPaymentScreen
-        visible={showPayoneer}
-        onClose={() => setShowPayoneer(false)}
-        paymentAmount={amount}
-        onPaymentSuccess={handlePaymentSuccess}
-      />
+      {showPayoneer && (
+        <PayoneerPaymentScreen
+          visible={showPayoneer}
+          onClose={() => setShowPayoneer(false)}
+          paymentAmount={amount}
+          onPaymentSuccess={handlePaymentSuccess}
+          navigation={navigation}
+        />
+      )}
     </>
   );
 }
