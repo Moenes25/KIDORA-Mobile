@@ -16,15 +16,76 @@ import { useTranslation } from "../context/TranslationContext";
 import { normalize, wp, hp, screenHeight } from "../utils/responsive";
 import BottomNav from "../components/BottomNav";
 
+// 1. Dynamic Data Import helper
+import { getReportByChildId } from "../data/MockDailyReports";
+
 const TOP_SECTION_HEIGHT = screenHeight * 0.35;
 
 export default function ChildDetailScreen({ route, navigation }) {
   const { colors, theme } = useTheme();
   const { t, isRTL } = useTranslation();
   const isDark = theme === "dark";
-  const child = route.params?.child || {};
+  const childParams = route.params?.child || {};
 
-  // Mock Data
+  // 2. Integration: Fetch the specific child's full report data
+  const fullReport = getReportByChildId(childParams.id) || {};
+
+  // Helper to determine status colors dynamically based on presence and mood
+  const getStatusStyle = (type, value) => {
+    const lowerValue = value?.toLowerCase();
+    
+    // Attendance Colors (Green if present, Red if anything else)
+    if (type === 'attendance') {
+      const isPresent = lowerValue === "present";
+      return {
+        bg: isPresent ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)',
+        border: isPresent ? 'rgba(16, 185, 129, 0.6)' : 'rgba(239, 68, 68, 0.6)',
+        icon: isPresent ? "check" : "x",
+        iconColor: isPresent ? "#10b981" : "#ef4444" // Specific icon color
+      };
+    }
+
+    // Mood Colors (Green if happy/excited, Red if sad, Orange if neutral/tired)
+    if (type === 'mood') {
+      switch (lowerValue) {
+        case "happy":
+        case "excited":
+          return { 
+            bg: 'rgba(16, 185, 129, 0.35)', 
+            border: 'rgba(16, 185, 129, 0.6)', 
+            icon: "happy-outline",
+            iconColor: "#10b981" 
+          };
+        case "sad":
+          return { 
+            bg: 'rgba(239, 68, 68, 0.35)', 
+            border: 'rgba(239, 68, 68, 0.6)', 
+            icon: "sad-outline",
+            iconColor: "#ef4444" 
+          };
+        case "neutral":
+        case "tired":
+          return { 
+            bg: 'rgba(245, 158, 11, 0.35)', 
+            border: 'rgba(245, 158, 11, 0.6)', 
+            icon: "meh-outline",
+            iconColor: "#f59e0b" 
+          };
+        default:
+          return { 
+            bg: 'rgba(107, 114, 128, 0.35)', 
+            border: 'rgba(107, 114, 128, 0.6)', 
+            icon: "help-circle-outline",
+            iconColor: "#6b7280" 
+          };
+      }
+    }
+  };
+
+  const moodStyle = getStatusStyle('mood', fullReport.mood);
+  const attendanceStyle = getStatusStyle('attendance', fullReport.attendance);
+
+  // Remaining Mock Data
   const weekAttendance = 5;
   const healthInfo = { allergies: "Peanuts", medicalNotes: "Asthma, needs inhaler" };
   const skills = { language: 40, motor: 70, cognition: 60, social: 90 };
@@ -33,7 +94,6 @@ export default function ChildDetailScreen({ route, navigation }) {
     lunch: "Grilled chicken, rice, veggies",
     snacks: "Yogurt, apple slices",
   };
-  const comments = "Charlie is progressing well in language and social skills. Needs more support in motor activities.";
 
   const activities = [
     { id: 1, icon: "book-open", title: "Reading Time", time: "09:00 - 09:30", description: "Story reading session" },
@@ -58,11 +118,24 @@ export default function ChildDetailScreen({ route, navigation }) {
     return "check-circle";
   };
 
+  const getCategoryColor = (category) => {
+    const catColors = {
+      mood: "#10b981",
+      meal: "#f59e0b",
+      suggestion: "#6366f1",
+      activity: "#8b5cf6",
+      social: "#ec4899",
+      achievement: "#10b981",
+      hygiene: "#06b6d4",
+      rest: "#a855f7",
+    };
+    return catColors[category] || "#6b7280";
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#0f0a1f" : "#f5f5f5" }]}>
       <StatusBar barStyle="light-content" backgroundColor={isDark ? "#0f0a1f" : "#6f42c1"} />
 
-      {/* FIXED TOP SECTION - Purple Gradient */}
       <View style={[styles.fixedTopSection, { height: TOP_SECTION_HEIGHT }]}>
         <LinearGradient
           colors={isDark ? colors.bgGradient : ["#6F42C1", "#8e44ad"]}
@@ -71,60 +144,55 @@ export default function ChildDetailScreen({ route, navigation }) {
           {isDark && (
             <View style={{ ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0, 0, 0, 0.3)' }} />
           )}
-         
           <View style={styles.safeArea} />
 
-          {/* Header Row */}
           <View style={[styles.header, isRTL && { flexDirection: 'row-reverse' }]}>
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
               <Feather name={isRTL ? "chevron-right" : "chevron-left"} size={normalize(24)} color="#fff" />
             </TouchableOpacity>
            
             <Image
-              source={child.avatar || require("../assets/child1.png")}
+              source={childParams.avatar || require("../assets/child1.png")}
               style={[styles.childAvatar, isRTL && { marginRight: wp(2), marginLeft: 0 }]}
             />
            
             <View style={[styles.childInfoHeader, isRTL && { alignItems: 'flex-end' }]}>
               <Text style={[styles.childName, isRTL && { textAlign: 'right' }]} allowFontScaling={false}>
-                {child.name || "Child Name"}
+                {childParams.name || "Child Name"}
               </Text>
               <Text style={[styles.childInfoText, isRTL && { textAlign: 'right' }]} allowFontScaling={false}>
-                {t('age')}: {child.age || 6} | {t('grade')}: {child.grade || "1st"}
+                {t('age')}: {childParams.age || 6} | {t('grade')}: {childParams.grade || "1st"}
               </Text>
               <Text style={[styles.childInfoText, isRTL && { textAlign: 'right' }]} allowFontScaling={false}>
-                {t('educator')}: {child.educator || t('notAssigned')}
+                {t('educator')}: {childParams.educator || t('notAssigned')}
               </Text>
             </View>
           </View>
 
-          {/* Status Bubbles */}
+          {/* Status Bubbles with Dynamic Presence and Mood Styling */}
           <View style={[styles.statusContainer, isRTL && { flexDirection: 'row-reverse' }]}>
-            {/* Sad Status */}
             <View style={styles.statusItem}>
-              <View style={styles.statusCircleRed}>
-                <Ionicons name="sad-outline" size={normalize(22)} color="#fff" />
+              <View style={[styles.statusCircleBase, { backgroundColor: moodStyle.bg, borderColor: moodStyle.border }]}>
+                <Ionicons name={moodStyle.icon} size={normalize(22)} color={moodStyle.iconColor} />
               </View>
-              <Text style={styles.statusLabel} allowFontScaling={false}>{t('sad')}</Text>
+              <Text style={[styles.statusLabel, { color: moodStyle.iconColor }]} allowFontScaling={false}>
+                {t(fullReport.mood?.toLowerCase() || 'neutral')}
+              </Text>
             </View>
 
-            {/* Absent Status */}
             <View style={styles.statusItem}>
-              <View style={styles.statusCircleRed}>
-                <Feather name="calendar" size={normalize(20)} color="#fff" />
-                <View style={styles.absentBadge}>
-                   <Feather name="x" size={normalize(8)} color="#c0392b" />
-                </View>
+              <View style={[styles.statusCircleBase, { backgroundColor: attendanceStyle.bg, borderColor: attendanceStyle.border }]}>
+                <Feather name={attendanceStyle.icon} size={normalize(20)} color={attendanceStyle.iconColor} />
               </View>
-              <Text style={styles.statusLabel} allowFontScaling={false}>{t('absent')}</Text>
+              <Text style={[styles.statusLabel, { color: attendanceStyle.iconColor }]} allowFontScaling={false}>
+                {fullReport.attendance?.toLowerCase() === "present" ? t('present') : t('absent')}
+              </Text>
             </View>
           </View>
-         
           <View style={{ height: hp(1) }} />
         </LinearGradient>
       </View>
 
-      {/* WHITE/DARK BOTTOM SECTION */}
       <View style={[
         styles.whiteSection,
         {
@@ -134,7 +202,6 @@ export default function ChildDetailScreen({ route, navigation }) {
       ]}>
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
          
-          {/* Attendance Card */}
           <View style={[styles.card, styles.shadowProp(isDark)]}>
             <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
               {t('dailyAttendance')}
@@ -143,11 +210,10 @@ export default function ChildDetailScreen({ route, navigation }) {
               {t('thisWeek')}: {weekAttendance} {t('outOf')} 5 {t('days')}
             </Text>
             <View style={{ height: hp(0.8), backgroundColor: isDark ? '#333' : '#eee', borderRadius: normalize(3), marginTop: hp(1.2) }}>
-              <View style={{ width: '100%', height: '100%', backgroundColor: '#e74c3c', borderRadius: normalize(3) }} />
+              <View style={{ width: '100%', height: '100%', backgroundColor: '#10b981', borderRadius: normalize(3) }} />
             </View>
           </View>
 
-          {/* Today's Activities */}
           <View style={[styles.card, styles.shadowProp(isDark)]}>
             <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
               {t('todaysActivities')}
@@ -172,33 +238,87 @@ export default function ChildDetailScreen({ route, navigation }) {
             ))}
           </View>
 
-          {/* Today's Tasks */}
-          {todaysTasks.length > 0 && (
-            <View style={[styles.card, styles.shadowProp(isDark)]}>
-              <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
-                {t('todaysTasks')}
-              </Text>
-              {todaysTasks.map((task) => (
-                <View key={task.id} style={[
-                  styles.taskItem,
-                  { borderBottomColor: isDark ? "#333" : "#f0f0f0" },
-                  isRTL && { flexDirection: 'row-reverse' }
+          <View style={[styles.card, styles.shadowProp(isDark), styles.reportCard]}>
+            <View style={[styles.reportHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+              <View style={[styles.reportIconContainer, isRTL && { marginRight: 0, marginLeft: wp(3) }]}>
+                <Feather name="file-text" size={normalize(20)} color="#fff" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.cardTitle, { marginBottom: 0, color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
+                  {t('dailyReportSummary')}
+                </Text>
+                <Text style={[styles.reportDate, { color: isDark ? "#B794F4" : "#6f42c1", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
+                  {fullReport.date}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.reportEntries}>
+              {fullReport.reportLines?.map((entry, index) => (
+                <View key={index} style={[
+                  styles.reportEntry,
+                  { borderLeftColor: getCategoryColor(entry.category) },
+                  isRTL && { 
+                    flexDirection: 'row-reverse', 
+                    borderLeftWidth: 0, 
+                    borderRightWidth: normalize(3), 
+                    borderRightColor: getCategoryColor(entry.category) 
+                  }
                 ]}>
-                  <Feather name={getTaskIcon(task.title)} size={normalize(18)} color={isDark ? "#B794F4" : "#6f42c1"} />
-                  <View style={[{ marginLeft: wp(3.5), flex: 1 }, isRTL && { marginLeft: 0, marginRight: wp(3.5) }]}>
-                    <Text style={[styles.taskTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
-                      {task.title}
-                    </Text>
-                    <Text style={[styles.taskDesc, { color: isDark ? "#aaaaaa" : "#666", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
-                      {task.description}
-                    </Text>
-                  </View>
+                  <Text style={[styles.reportEmoji, isRTL && { marginLeft: wp(3), marginRight: 0 }]}>{entry.emoji}</Text>
+                  <Text style={[styles.reportText, { color: isDark ? "#cccccc" : "#374151", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
+                    {entry.tKey ? t(entry.tKey) : entry.text}
+                  </Text>
                 </View>
               ))}
             </View>
-          )}
 
-          {/* Skills Development */}
+            {fullReport.educatorNote && (
+              <View style={[
+                styles.educatorNoteBox,
+                { backgroundColor: isDark ? "rgba(99, 102, 241, 0.15)" : "#eff6ff" }
+              ]}>
+                <View style={[styles.noteHeader, isRTL && { flexDirection: 'row-reverse' }]}>
+                  <Feather 
+                    name="message-circle" 
+                    size={normalize(16)} 
+                    color={isDark ? "#B794F4" : "#6366f1"} 
+                    style={isRTL ? { marginLeft: wp(2) } : { marginRight: wp(2) }}
+                  />
+                  <Text style={[styles.noteHeaderText, { color: isDark ? "#B794F4" : "#6366f1", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
+                    {t('educatorNoteTitle')}
+                  </Text>
+                </View>
+                <Text style={[styles.educatorNoteText, { color: isDark ? "#cccccc" : "#475569", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
+                  {fullReport.educatorNote}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={[styles.card, styles.shadowProp(isDark)]}>
+            <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
+              {t('todaysTasks')}
+            </Text>
+            {todaysTasks.map((task) => (
+              <View key={task.id} style={[
+                styles.taskItem,
+                { borderBottomColor: isDark ? "#333" : "#f0f0f0" },
+                isRTL && { flexDirection: 'row-reverse' }
+              ]}>
+                <Feather name={getTaskIcon(task.title)} size={normalize(18)} color={isDark ? "#B794F4" : "#6f42c1"} />
+                <View style={[{ marginLeft: wp(3.5), flex: 1 }, isRTL && { marginLeft: 0, marginRight: wp(3.5) }]}>
+                  <Text style={[styles.taskTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
+                    {task.title}
+                  </Text>
+                  <Text style={[styles.taskDesc, { color: isDark ? "#aaaaaa" : "#666", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
+                    {task.description}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
           <View style={[styles.card, styles.shadowProp(isDark)]}>
             <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
               {t('skillsDevelopment')}
@@ -222,7 +342,7 @@ export default function ChildDetailScreen({ route, navigation }) {
 
             <TouchableOpacity
               style={[styles.improveButton, isRTL && { flexDirection: 'row-reverse' }]}
-              onPress={() => navigation.navigate("ImprovementsScreen", { child })}
+              onPress={() => navigation.navigate("ImprovementsScreen", { child: childParams })}
             >
               <Feather 
                 name="bar-chart-2" 
@@ -236,7 +356,6 @@ export default function ChildDetailScreen({ route, navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* Meals Today */}
           <View style={[styles.card, styles.shadowProp(isDark)]}>
             <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
               {t('mealsToday')}
@@ -256,7 +375,6 @@ export default function ChildDetailScreen({ route, navigation }) {
             ))}
           </View>
 
-          {/* Health Information */}
           <View style={[styles.card, styles.shadowProp(isDark)]}>
             <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
               {t('healthInformation')}
@@ -266,16 +384,6 @@ export default function ChildDetailScreen({ route, navigation }) {
             </Text>
             <Text style={[styles.cardText, { color: isDark ? "#cccccc" : "#555", marginTop: hp(1), textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
               {t('medicalNotes')}: {healthInfo.medicalNotes}
-            </Text>
-          </View>
-
-          {/* Educator's Comment */}
-          <View style={[styles.card, styles.shadowProp(isDark)]}>
-            <Text style={[styles.cardTitle, { color: isDark ? "#ffffff" : "#1a1a2e", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
-              {t('educatorsComment')}
-            </Text>
-            <Text style={[styles.comment, { color: isDark ? "#cccccc" : "#555", textAlign: isRTL ? 'right' : 'left' }]} allowFontScaling={false}>
-              {comments}
             </Text>
           </View>
 
@@ -292,7 +400,6 @@ export default function ChildDetailScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-
   fixedTopSection: {
     position: "absolute",
     top: 0,
@@ -312,9 +419,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(4),
     paddingTop: hp(1.5),
   },
-  backButton: { 
-    padding: wp(2),
-  },
+  backButton: { padding: wp(2) },
   childAvatar: {
     width: wp(20),
     height: wp(20),
@@ -323,59 +428,26 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.3)",
     marginLeft: wp(2),
   },
-  childInfoHeader: { 
-    marginLeft: wp(4), 
-    marginRight: wp(4), 
-    flex: 1 
-  },
-  childName: { 
-    fontSize: normalize(18), 
-    fontWeight: "700", 
-    color: "#fff" 
-  },
-  childInfoText: { 
-    fontSize: normalize(12), 
-    color: "rgba(255,255,255,0.9)", 
-    marginTop: hp(0.3) 
-  },
-
+  childInfoHeader: { marginLeft: wp(4), marginRight: wp(4), flex: 1 },
+  childName: { fontSize: normalize(18), fontWeight: "700", color: "#fff" },
+  childInfoText: { fontSize: normalize(12), color: "rgba(255,255,255,0.9)", marginTop: hp(0.3) },
   statusContainer: {
     flexDirection: "row",
     justifyContent: "space-evenly",
     marginTop: hp(3),
     paddingBottom: hp(1),
   },
-  statusItem: {
-    alignItems: "center",
-  },
-  statusCircleRed: {
+  statusItem: { alignItems: "center" },
+  statusCircleBase: {
     width: wp(14),
     height: wp(14),
     borderRadius: wp(7),
-    backgroundColor: 'rgba(231, 76, 60, 0.35)',
     borderWidth: normalize(1),
-    borderColor: 'rgba(231, 76, 60, 0.6)',
     justifyContent: "center",
     alignItems: "center",
     marginBottom: hp(0.8),
   },
-  statusLabel: {
-    color: "#fff",
-    fontSize: normalize(12),
-    fontWeight: "600",
-  },
-  absentBadge: {
-    position: 'absolute',
-    bottom: -wp(0.5),
-    right: -wp(0.5),
-    backgroundColor: '#fff',
-    borderRadius: wp(2),
-    width: wp(4),
-    height: wp(4),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
+  statusLabel: { fontSize: normalize(12), fontWeight: "600" }, // Color dynamically set in view
   whiteSection: {
     position: "absolute",
     left: 0,
@@ -390,16 +462,8 @@ const styles = StyleSheet.create({
     shadowRadius: normalize(12),
     elevation: 12,
   },
-  scrollContent: {
-    paddingTop: hp(4),
-    paddingHorizontal: wp(5),
-    paddingBottom: hp(2.5),
-  },
-  card: {
-    borderRadius: normalize(24),
-    padding: wp(5.5),
-    marginBottom: hp(2.2),
-  },
+  scrollContent: { paddingTop: hp(4), paddingHorizontal: wp(5), paddingBottom: hp(2.5) },
+  card: { borderRadius: normalize(24), padding: wp(5.5), marginBottom: hp(2.2) },
   shadowProp: (isDark) => ({
     backgroundColor: isDark ? "#1a1a2e" : "#ffffff",
     shadowColor: isDark ? "#2d1b69" : "#000",
@@ -408,67 +472,47 @@ const styles = StyleSheet.create({
     shadowRadius: normalize(16),
     elevation: 6,
   }),
-  cardTitle: { 
-    fontSize: normalize(16), 
-    fontWeight: "700", 
-    marginBottom: hp(2) 
-  },
-  cardText: { 
-    fontSize: normalize(13), 
-    lineHeight: normalize(20) 
-  },
-
-  activityRow: { 
-    flexDirection: "row", 
-    alignItems: "center", 
-    marginVertical: hp(1.2) 
-  },
-  iconCircle: {
-    width: wp(12),
-    height: wp(12),
-    borderRadius: wp(6),
+  cardTitle: { fontSize: normalize(16), fontWeight: "700", marginBottom: hp(2) },
+  cardText: { fontSize: normalize(13), lineHeight: normalize(20) },
+  reportCard: { borderLeftWidth: normalize(4), borderLeftColor: "#6f42c1" },
+  reportHeader: { flexDirection: "row", alignItems: "center", marginBottom: hp(2) },
+  reportIconContainer: {
+    width: wp(10),
+    height: wp(10),
+    borderRadius: wp(5),
+    backgroundColor: "#6f42c1",
     justifyContent: "center",
     alignItems: "center",
+    marginRight: wp(3),
   },
-  activityTitle: { 
-    fontSize: normalize(14), 
-    fontWeight: "600" 
-  },
-  activityTime: { 
-    fontSize: normalize(12), 
-    marginTop: hp(0.5) 
-  },
-
-  taskItem: {
+  reportDate: { fontSize: normalize(12), marginTop: hp(0.5), fontWeight: "500" },
+  reportEntries: { marginTop: hp(1) },
+  reportEntry: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: hp(2),
-    borderBottomWidth: normalize(1),
+    alignItems: "flex-start",
+    paddingVertical: hp(1.2),
+    paddingLeft: wp(3),
+    marginBottom: hp(1),
+    borderLeftWidth: normalize(3),
+    backgroundColor: "rgba(241, 245, 249, 0.5)",
+    borderRadius: normalize(8),
   },
-  taskTitle: { 
-    fontSize: normalize(14), 
-    fontWeight: "600" 
-  },
-  taskDesc: { 
-    fontSize: normalize(12), 
-    marginTop: hp(0.5) 
-  },
-
-  skillLabel: { 
-    fontSize: normalize(13), 
-    fontWeight: "600" 
-  },
-  progressBg: { 
-    height: hp(1.2), 
-    borderRadius: normalize(5), 
-    overflow: "hidden", 
-    marginTop: hp(1) 
-  },
-  progressFill: { 
-    height: "100%", 
-    borderRadius: normalize(5) 
-  },
-
+  reportEmoji: { fontSize: normalize(18), marginRight: wp(3), marginTop: hp(0.2) },
+  reportText: { flex: 1, fontSize: normalize(13), lineHeight: normalize(20) },
+  educatorNoteBox: { marginTop: hp(2), padding: wp(4), borderRadius: normalize(12), borderLeftWidth: normalize(3), borderLeftColor: "#6366f1" },
+  noteHeader: { flexDirection: "row", alignItems: "center", marginBottom: hp(1) },
+  noteHeaderText: { fontSize: normalize(13), fontWeight: "700" },
+  educatorNoteText: { fontSize: normalize(13), lineHeight: normalize(20), fontStyle: "italic" },
+  activityRow: { flexDirection: "row", alignItems: "center", marginVertical: hp(1.2) },
+  iconCircle: { width: wp(12), height: wp(12), borderRadius: wp(6), justifyContent: "center", alignItems: "center" },
+  activityTitle: { fontSize: normalize(14), fontWeight: "600" },
+  activityTime: { fontSize: normalize(12), marginTop: hp(0.5) },
+  taskItem: { flexDirection: "row", alignItems: "center", paddingVertical: hp(2), borderBottomWidth: normalize(1) },
+  taskTitle: { fontSize: normalize(14), fontWeight: "600" },
+  taskDesc: { fontSize: normalize(12), marginTop: hp(0.5) },
+  skillLabel: { fontSize: normalize(13), fontWeight: "600" },
+  progressBg: { height: hp(1.2), borderRadius: normalize(5), overflow: "hidden", marginTop: hp(1) },
+  progressFill: { height: "100%", borderRadius: normalize(5) },
   improveButton: {
     marginTop: hp(2.2),
     paddingVertical: hp(1.4),
@@ -479,36 +523,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  improveButtonText: {
-    color: "#fff",
-    fontSize: normalize(13),
-    fontWeight: "600",
-  },
-
-  mealItem: { 
-    paddingVertical: hp(1.7), 
-    borderBottomWidth: normalize(1) 
-  },
-  mealType: { 
-    fontSize: normalize(14), 
-    fontWeight: "600" 
-  },
-  mealDesc: { 
-    fontSize: normalize(12), 
-    marginTop: hp(0.5) 
-  },
-
-  comment: { 
-    fontSize: normalize(13), 
-    lineHeight: normalize(22), 
-    fontStyle: "italic" 
-  },
-
-  bottomNav: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
+  improveButtonText: { color: "#fff", fontSize: normalize(13), fontWeight: "600" },
+  mealItem: { paddingVertical: hp(1.7), borderBottomWidth: normalize(1) },
+  mealType: { fontSize: normalize(14), fontWeight: "600" },
+  mealDesc: { fontSize: normalize(12), marginTop: hp(0.5) },
+  bottomNav: { position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 10 },
 });

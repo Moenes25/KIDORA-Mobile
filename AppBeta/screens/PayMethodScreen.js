@@ -10,6 +10,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "../context/TranslationContext";
+import { normalize, wp, hp } from "../utils/responsive";
 
 // Logos
 import MastercardLogo from "../assets/mastercard.png";
@@ -71,7 +72,7 @@ export default function PayMethodScreen({ visible, onClose, amount, navigation }
 
   return (
     <>
-      {/* Main Payment Method Selector - FIXED: Added visible prop */}
+      {/* Main Payment Method Selector */}
       <Modal transparent animationType="slide" visible={visible}>
         <TouchableOpacity style={styles.overlay} onPress={onClose} activeOpacity={1}>
           <TouchableOpacity
@@ -81,21 +82,27 @@ export default function PayMethodScreen({ visible, onClose, amount, navigation }
           >
             {/* Header */}
             <View style={[styles.titleRow, isRTL && { flexDirection: 'row-reverse' }]}>
-              <Text style={[styles.title, { color: colors.primary }]}>
+              <Text 
+                style={[styles.title, { color: colors.primary }]}
+                allowFontScaling={false}
+              >
                 {t('choosePaymentMethod')}
               </Text>
               <TouchableOpacity onPress={onClose}>
-                <Feather name="x" size={24} color={colors.primary} />
+                <Feather name="x" size={normalize(24)} color={colors.primary} />
               </TouchableOpacity>
             </View>
 
             {/* Credit & Debit Cards */}
             <View style={styles.sectionHeader}>
-              <Text style={[
-                styles.sectionLabel, 
-                { color: colors.primary },
-                isRTL && { textAlign: 'right' }
-              ]}>
+              <Text 
+                style={[
+                  styles.sectionLabel, 
+                  { color: colors.primary },
+                  isRTL && { textAlign: 'right' }
+                ]}
+                allowFontScaling={false}
+              >
                 {t('creditDebitCard')}
               </Text>
             </View>
@@ -117,25 +124,33 @@ export default function PayMethodScreen({ visible, onClose, amount, navigation }
               <Image source={cardLogo} style={styles.cardLogo} resizeMode="contain" />
               <View style={[
                 { flex: 1 },
-                isRTL ? { marginRight: 12 } : { marginLeft: 12 }
+                isRTL ? { marginRight: wp(3) } : { marginLeft: wp(3) }
               ]}>
-                <Text style={[
-                  styles.cardTitle, 
-                  { color: colors.text },
-                  isRTL && { textAlign: 'right' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.cardTitle, 
+                    { color: colors.text },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   {primaryCard.name}
                 </Text>
-                <Text style={[
-                  styles.cardSubtitle, 
-                  { color: colors.textSecondary },
-                  isRTL && { textAlign: 'right' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.cardSubtitle, 
+                    { color: colors.textSecondary },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   •••• {primaryCard.number}
                 </Text>
               </View>
               <View style={[styles.primaryTag, { backgroundColor: colors.primary }]}>
-                <Text style={styles.primaryText}>{t('primary')}</Text>
+                <Text style={styles.primaryText} allowFontScaling={false}>
+                  {t('primary')}
+                </Text>
               </View>
             </TouchableOpacity>
 
@@ -148,22 +163,28 @@ export default function PayMethodScreen({ visible, onClose, amount, navigation }
               ]}
               onPress={() => setShowAddCard(true)}
             >
-              <Feather name="plus" size={20} color="white" />
-              <Text style={[
-                styles.addBtnText,
-                isRTL ? { marginRight: 6 } : { marginLeft: 6 }
-              ]}>
+              <Feather name="plus" size={normalize(20)} color="white" />
+              <Text 
+                style={[
+                  styles.addBtnText,
+                  isRTL ? { marginRight: wp(1.5) } : { marginLeft: wp(1.5) }
+                ]}
+                allowFontScaling={false}
+              >
                 {t('addNewCard')}
               </Text>
             </TouchableOpacity>
 
             {/* Alternative Methods */}
             <View style={styles.sectionHeader}>
-              <Text style={[
-                styles.sectionLabel, 
-                { color: colors.primary },
-                isRTL && { textAlign: 'right' }
-              ]}>
+              <Text 
+                style={[
+                  styles.sectionLabel, 
+                  { color: colors.primary },
+                  isRTL && { textAlign: 'right' }
+                ]}
+                allowFontScaling={false}
+              >
                 {t('orPayWith')}
               </Text>
             </View>
@@ -178,19 +199,25 @@ export default function PayMethodScreen({ visible, onClose, amount, navigation }
               onPress={() => handleSelectMethod({ type: "d17" })}
             >
               <Image source={D17Logo} style={styles.altLogo} resizeMode="contain" />
-              <View style={[isRTL ? { marginRight: 12 } : { marginLeft: 12 }]}>
-                <Text style={[
-                  styles.altTitle, 
-                  { color: colors.text },
-                  isRTL && { textAlign: 'right' }
-                ]}>
+              <View style={[isRTL ? { marginRight: wp(3) } : { marginLeft: wp(3) }]}>
+                <Text 
+                  style={[
+                    styles.altTitle, 
+                    { color: colors.text },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   D17
                 </Text>
-                <Text style={[
-                  styles.altDesc, 
-                  { color: colors.textSecondary },
-                  isRTL && { textAlign: 'right' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.altDesc, 
+                    { color: colors.textSecondary },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   {t('d17Description')}
                 </Text>
               </View>
@@ -206,19 +233,25 @@ export default function PayMethodScreen({ visible, onClose, amount, navigation }
               onPress={() => handleSelectMethod({ type: "flouci" })}
             >
               <Image source={FlouciLogo} style={styles.altLogo} resizeMode="contain" />
-              <View style={[isRTL ? { marginRight: 12 } : { marginLeft: 12 }]}>
-                <Text style={[
-                  styles.altTitle, 
-                  { color: colors.text },
-                  isRTL && { textAlign: 'right' }
-                ]}>
+              <View style={[isRTL ? { marginRight: wp(3) } : { marginLeft: wp(3) }]}>
+                <Text 
+                  style={[
+                    styles.altTitle, 
+                    { color: colors.text },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   Flouci
                 </Text>
-                <Text style={[
-                  styles.altDesc, 
-                  { color: colors.textSecondary },
-                  isRTL && { textAlign: 'right' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.altDesc, 
+                    { color: colors.textSecondary },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   {t('flouciDescription')}
                 </Text>
               </View>
@@ -234,19 +267,25 @@ export default function PayMethodScreen({ visible, onClose, amount, navigation }
               onPress={() => handleSelectMethod({ type: "payoneer" })}
             >
               <Image source={PayoneerLogo} style={styles.altLogo} resizeMode="contain" />
-              <View style={[isRTL ? { marginRight: 12 } : { marginLeft: 12 }]}>
-                <Text style={[
-                  styles.altTitle, 
-                  { color: colors.text },
-                  isRTL && { textAlign: 'right' }
-                ]}>
+              <View style={[isRTL ? { marginRight: wp(3) } : { marginLeft: wp(3) }]}>
+                <Text 
+                  style={[
+                    styles.altTitle, 
+                    { color: colors.text },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   Payoneer
                 </Text>
-                <Text style={[
-                  styles.altDesc, 
-                  { color: colors.textSecondary },
-                  isRTL && { textAlign: 'right' }
-                ]}>
+                <Text 
+                  style={[
+                    styles.altDesc, 
+                    { color: colors.textSecondary },
+                    isRTL && { textAlign: 'right' }
+                  ]}
+                  allowFontScaling={false}
+                >
                   {t('payoneerDescription')}
                 </Text>
               </View>
@@ -255,7 +294,7 @@ export default function PayMethodScreen({ visible, onClose, amount, navigation }
         </TouchableOpacity>
       </Modal>
 
-      {/* CRITICAL FIX: Conditional rendering for all child modals */}
+      {/* Child modals */}
       {showAddCard && (
         <AddCardScreen
           visible={showAddCard}
@@ -316,89 +355,89 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   sheet: {
-    padding: 20,
-    borderTopLeftRadius: 22,
-    borderTopRightRadius: 22,
+    padding: wp(5),
+    borderTopLeftRadius: normalize(22),
+    borderTopRightRadius: normalize(22),
     minHeight: "50%",
   },
   titleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: hp(2.2),
   },
   title: {
-    fontSize: 20,
+    fontSize: normalize(20),
     fontWeight: "700",
   },
   sectionHeader: {
-    marginBottom: 10,
+    marginBottom: hp(1.2),
   },
   sectionLabel: {
-    fontSize: 17,
+    fontSize: normalize(17),
     fontWeight: "700",
   },
   cardItem: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 14,
-    borderRadius: 12,
-    marginTop: 10,
+    padding: wp(3.5),
+    borderRadius: normalize(12),
+    marginTop: hp(1.2),
   },
   cardLogo: {
-    width: 50,
-    height: 30,
+    width: wp(12.5),
+    height: hp(3.7),
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "700",
   },
   cardSubtitle: {
-    fontSize: 13,
-    marginTop: 4,
+    fontSize: normalize(13),
+    marginTop: hp(0.5),
   },
   primaryTag: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingVertical: hp(0.5),
+    paddingHorizontal: wp(2.5),
+    borderRadius: normalize(8),
   },
   primaryText: {
     color: "white",
-    fontSize: 12,
+    fontSize: normalize(12),
     fontWeight: "600",
   },
   addBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 10,
-    borderRadius: 12,
-    marginTop: 12,
-    marginBottom: 20,
+    paddingVertical: hp(1.2),
+    borderRadius: normalize(12),
+    marginTop: hp(1.5),
+    marginBottom: hp(2.5),
   },
   addBtnText: {
     color: "white",
-    fontSize: 15,
+    fontSize: normalize(15),
     fontWeight: "600",
   },
   altMethod: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 14,
-    borderRadius: 12,
-    marginTop: 12,
+    padding: wp(3.5),
+    borderRadius: normalize(12),
+    marginTop: hp(1.5),
   },
   altLogo: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
+    width: wp(12.5),
+    height: wp(12.5),
+    borderRadius: normalize(8),
   },
   altTitle: {
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "700",
   },
   altDesc: {
-    fontSize: 13,
-    marginTop: 2,
+    fontSize: normalize(13),
+    marginTop: hp(0.25),
   },
 });

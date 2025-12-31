@@ -276,6 +276,40 @@ const translations = {
     emojis: 'Emojis',
     now: 'Now',
 
+
+
+    //daily report 
+    dailyReportSummary: 'Daily Report Summary',
+    educatorNoteTitle: "Educator's Note",
+    
+    // Moods
+    rep_happy: "Today, your child was joyful, with a normal energy level",
+    rep_neutral: "Today, your child had a calm day with moderate energy",
+    rep_sad: "Today, your child seemed a bit down and had low energy",
+    rep_excited: "Liam had an excellent day full of enthusiasm and high energy!",
+    
+    // Meals
+    rep_no_snack: "He didn't take his afternoon snack",
+    rep_skipped_breakfast: "She ate her lunch but skipped breakfast",
+    rep_half_lunch: "She missed snack time and only ate half of her lunch",
+    rep_seconds: "He finished all his meals and asked for seconds at lunch",
+    
+    // Suggestions
+    rep_ritual: "It would be good to prepare a small ritual for the meal",
+    rep_group_enc: "Needs encouragement in group activities",
+    rep_extra_comfort: "She needed extra comfort and reassurance today",
+    rep_leadership: "Keep encouraging his leadership skills",
+    
+    // Activities/Achievements
+    rep_active_part: "He actively participated in activities and concentration time",
+    rep_reading: "Participated well in reading activities",
+    rep_art: "She enjoyed art activities and created a beautiful drawing",
+    rep_soccer: "He excelled in physical activities and scored two goals in soccer",
+    rep_pronunciation: "His pronunciation went well, he was autonomous",
+    rep_hygiene: "He respected hygiene rules correctly",
+    rep_social: "He was in solidarity with other children",
+    rep_math: "Completed his math homework ahead of schedule",
+
   },
   
   fr: {
@@ -544,7 +578,33 @@ const translations = {
     offline: 'Hors ligne',
     emojis: 'Émojis',
     now: 'Maintenant',
-
+    //daily report
+    dailyReportSummary: 'Rapport Journalier',
+    educatorNoteTitle: "Note de l'Éducateur",
+    
+    rep_happy: "Aujourd'hui, votre enfant était joyeux, avec un niveau d'énergie normal",
+    rep_neutral: "Aujourd'hui, votre enfant a passé une journée calme avec une énergie modérée",
+    rep_sad: "Aujourd'hui, votre enfant semblait un peu triste et avait peu d'énergie",
+    rep_excited: "Liam a passé une excellente journée, pleine d'enthousiasme !",
+    
+    rep_no_snack: "Il n'a pas pris son goûter de l'après-midi",
+    rep_skipped_breakfast: "Elle a mangé son déjeuner mais a sauté le petit-déjeuner",
+    rep_half_lunch: "Elle a raté le goûter et n'a mangé que la moitié de son déjeuner",
+    rep_seconds: "Il a fini tous ses repas et a demandé du rab au déjeuner",
+    
+    rep_ritual: "Il serait bien de préparer un petit rituel pour le repas",
+    rep_group_enc: "A besoin d'encouragement dans les activités de groupe",
+    rep_extra_comfort: "Elle a eu besoin de plus de réconfort et de rassurance aujourd'hui",
+    rep_leadership: "Continuez à encourager ses capacités de leadership",
+    
+    rep_active_part: "Il a participé activement aux activités et au temps de concentration",
+    rep_reading: "A bien participé aux activités de lecture",
+    rep_art: "Elle a aimé les activités artistiques et a fait un beau dessin",
+    rep_soccer: "Il a excellé en sport et a marqué deux buts au football",
+    rep_pronunciation: "Sa prononciation s'est bien passée, il était autonome",
+    rep_hygiene: "Il a respecté correctement les règles d'hygiène",
+    rep_social: "Il a été solidaire avec les autres enfants",
+    rep_math: "A terminé ses devoirs de mathématiques en avance",
     
   },
   
@@ -814,6 +874,33 @@ const translations = {
     offline: 'غير متصل',
     emojis: 'الإيموجي',
     now: 'الآن',
+    //daily report
+    dailyReportSummary: 'ملخص التقرير اليومي',
+    educatorNoteTitle: 'ملاحظة المعلم',
+    
+    rep_happy: "اليوم، كان طفلك سعيداً، بمستوى طاقة طبيعي",
+    rep_neutral: "اليوم، قضى طفلك يوماً هادئاً بمستوى طاقة متوسط",
+    rep_sad: "اليوم، بدا طفلك حزيناً بعض الشيء وكان مستوى طاقته منخفضاً",
+    rep_excited: "لقد قضى ليام يوماً ممتازاً مليئاً بالحماس والطاقة العالية!",
+    
+    rep_no_snack: "لم يتناول وجبته الخفيفة في المساء",
+    rep_skipped_breakfast: "تناولت غداءها لكنها فوتت وجبة الإفطار",
+    rep_half_lunch: "فوتت وقت الوجبة الخفيفة وأكلت نصف غدائها فقط",
+    rep_seconds: "أنهى جميع وجباته وطلب المزيد في الغداء",
+    
+    rep_ritual: "سيكون من الجيد تحضير طقوس صغيرة لوقت الوجبة",
+    rep_group_enc: "تحتاج إلى تشجيع في الأنشطة الجماعية",
+    rep_extra_comfort: "لقد احتاجت إلى مزيد من الراحة والاطمئنان اليوم",
+    rep_leadership: "استمر في تشجيع مهاراته القيادية",
+    
+    rep_active_part: "شارك بنشاط في الأنشطة ووقت التركيز",
+    rep_reading: "شاركت بشكل جيد في أنشطة القراءة",
+    rep_art: "استمتعت بالأنشطة الفنية ورسمت لوحة جميلة",
+    rep_soccer: "برع في الأنشطة البدنية وسجل هدفين في كرة القدم",
+    rep_pronunciation: "كان نطق الكلمات جيداً، وكان مستقلاً في معظم الأنشطة",
+    rep_hygiene: "احترم قواعد النظافة بشكل صحيح",
+    rep_social: "كان متعاوناً مع الأطفال الآخرين",
+    rep_math: "أكمل واجبات الرياضيات قبل الموعد المحدد",
 
   },
 };
